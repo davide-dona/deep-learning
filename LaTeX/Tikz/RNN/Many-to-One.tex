@@ -1,0 +1,22 @@
+\begin{tikzpicture}[
+    item/.style={rectangle, draw, fill=orange!60, minimum size=6mm},
+    >=Stealth
+]
+    % Nodes
+    \foreach \i in {1,2,3,4} {
+        \node[item] (h\i) at (\i*1.2, 0) {};
+    }
+
+    % Horizontal arrows
+    \draw[->] (h1) -- (h2);
+    \draw[->] (h2) -- (h3);
+    \draw[->] (h3) -- (h4);
+
+    % Inputs
+    \foreach \i in {1,2,3} {
+        \draw[<-] (h\i.south) -- ++(0,-0.5);
+    }
+
+    % Output (only at the last step)
+    \draw[->] (h4.north) -- ++(0,0.5);
+\end{tikzpicture}

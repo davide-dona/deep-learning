@@ -1,0 +1,53 @@
+\begin{tikzpicture}[
+    >=stealth, 
+    node distance=2cm, 
+    box/.style={
+        rectangle,
+        draw,
+        fill=orange!70, 
+        minimum width=4.5cm, 
+        minimum height=1.2cm,
+        rounded corners=0.2cm,
+        inner sep=0pt, 
+        text centered,
+        thick, 
+        font=\large\bfseries 
+    }
+]
+
+% --- NODES ---
+\node (origin) at (0,0) {};
+
+% 2. Input layer node (text-only)
+\node[below=2cm of origin] (input) {$x_t$};
+
+% 3. Hidden layer box
+\node[box, below=0.5cm of origin] (hidden_layer) {Hidden layer};
+
+% 4. Classifier box
+\node[box, above=0.5cm of origin] (classifier) {Classifier};
+
+% 5. Output layer node (text-only)
+\node[above=2cm of origin] (output) {$y_t$};
+
+% --- LEFT LABELS (Descriptions) ---
+% Positioned relative to the main column nodes
+
+\node[left=3.5cm of output] (label_output) {Output at time $t$};
+\node[left=3.5cm of hidden_layer.center, align=center] (label_hidden) {Hidden\\representation\\at time $t$};
+\node[left=3.5cm of input] (label_input) {Input at time $t$};
+
+% --- EDGES / ARROWS ---
+
+% 1. Vertical connections
+\draw[->] (input) -- (hidden_layer);
+\draw[->] (hidden_layer) -- node[right=1pt] {$h_t$} (classifier);
+\draw[->] (classifier) -- (output);
+
+% 2. Recurrent loop
+\path (hidden_layer.north) coordinate (loop_start);
+% Draw the loop
+\draw[->] (loop_start)
+    to[out=30, in=-30, distance=4cm] % Control points
+    (hidden_layer.south); 
+\end{tikzpicture}

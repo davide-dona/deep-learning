@@ -1,0 +1,64 @@
+\section{Expanding CNN Beyond Classification}
+In the previous chapter, we have seen how Convolutional Neural Networks (CNNs) can be used for image classification tasks. 
+However, CNNs can be applied to a wide range of other tasks beyond classification, such as \textbf{object detection}, 
+\textbf{semantic segmentation}, and \textbf{captioning}, among others.
+In this chapter, we will explore some of these applications and how CNNs can be adapted to solve them.
+
+\subsection{Object Detection}
+Object detection is the task of identifying and localizing objects within an image. It can be seen as a combination of
+classification (what object is present) and regression (where is the object located).
+The task input would be an image, and the output would be a set of bounding boxes around the detected objects, along with their corresponding class labels.
+
+This task is more complex than image classification, as it requires the model to not only recognize the presence of objects but also to accurately localize them within the image.
+This makes also the training process more challenging, as several issues can arise, such as:
+\begin{itemize}
+    \item \textbf{Data scarcity}: Object detection datasets are often smaller than classification datasets. Also,
+    being the task more complex, it requires more data to train a model that can generalize well.
+    \item \textbf{Poor localization}: the deep CNN proposed for classification may not be able to localize the objects accurately, 
+    because of their large receptive field and the pooling layers that reduce the spatial resolution of the feature maps.
+\end{itemize}
+
+To address these issues, several architectures have been proposed, such as \textbf{R-CNN}, \textbf{Fast R-CNN}, and \textbf{YOLO} (You Only Look Once), among others.
+
+\subsubsection{Before CNNs: DPM}
+Before AlexNet and the rise of CNNs, one of the most popular approaches for object detection was the Deformable Part Model (DPM).
+DPM is a method that models objects as a collection of parts, where each part can be described by a set of features. 
+The model learns to detect these parts and their spatial relationships to identify the presence of an object in an image.
+
+This approach was quite effective for its time, but reached a plateau in performance already in 2010, before the advent of deep learning.
+
+\subsubsection{Selective Search}
+One of the key challenges in object detection is to efficiently search for objects in an image.
+Selective Search is a method that generates a set of candidate regions (also called proposals) in an image
+that are likely to contain objects. 
+Given the proposals, the process of object detection can be simplified to a classification task, where the model only needs to classify the proposals as containing an object or not,
+which is much easier than searching for objects in the entire image.
+
+To detect objects at any scale, Selective Search uses a hierarchical grouping of superpixels, which are small regions of an image that 
+have similar features (such as color, texture, or intensity).
+The algorithm starts by generating all the possible candidate objects. Similar regions
+are then merged together based on their similarity. 
+Once the merging process is complete, the algorithm uses the resulting regions as proposals for object detection.
+
+\subsubsection{R-CNN}
+R-CNN (Region-based Convolutional Neural Networks) is one of the first architectures that successfully applied CNNs to object detection. 
+The R-CNN architecture consists of three main steps:
+\begin{itemize}
+    \item \textbf{Region Proposal}: The first step is to generate a set of candidate regions (proposals) in the image using Selective Search.
+    \item \textbf{Feature Extraction}: The second step is to extract features from each proposal using a CNN.
+    \item \textbf{Classification}: The final step is to classify each proposal as containing an object or not, and to assign a class label to the detected objects.
+    This was typically done using a Support Vector Machine (SVM) classifier, which was trained on the features extracted from the proposals.
+\end{itemize}
+
+This approach was a significant improvement over previous methods, but had a few limitations, such as:
+\begin{itemize}
+    \item \textbf{NOT an end-to-end architecture}: The R-CNN architecture is not an end-to-end architecture, as it requires separate training for the region proposal, feature extraction, and classification steps.
+    Deep learning models are known to perform better when trained end-to-end, as they can learn to optimize the entire process jointly.
+    \item \textbf{Image resizing}: Each proposal must be resized to a fixed size (e.g., 224x224) before being fed into the CNN for feature extraction.
+    This can lead to a loss of information, especially for small objects, and can also introduce distortions in the aspect ratio of the proposals.
+    \item \textbf{Computationally expensive}: The R-CNN architecture is computationally expensive, as it requires running the CNN for each proposal, 
+    which can be in the order of thousands per image (takes around 47 seconds per image on a GPU).
+\end{itemize}
+
+\subsubsection{Fast R-CNN}
+\subsection{Semantic Segmentation}

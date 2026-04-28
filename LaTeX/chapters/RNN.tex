@@ -1,0 +1,151 @@
+\section{Recurrent Neural Networks}
+Unlike the architectures previously discussed, which only process data represented as fixed-size vectors for both input and output, 
+\textbf{Recurrent Neural Networks} (RNNs) are designed to handle sequential data. 
+Standard feed-forward models face significant limitations with real-world data types—such as text, audio, and video—which are inherently sequential 
+and vary in length.
+
+\textbf{Recurrent Neural Networks} (RNNs) were the first architectures specifically designed to handle
+this kind of data, enabling solutions to a wide range of tasks, such as:
+\begin{itemize}
+    \item \textbf{Document classification}: Given a document, classify it into one of several categories (e.g., spam vs. non-spam).
+    We know that the document size cannot be fixed a priori, as it can vary significantly from one document to another.
+    \item \textbf{Sentiment analysis}: similar to document classification, but the goal is to classify the sentiment of a text.
+    \item \textbf{Image captioning}: Given an image, generate a caption that describes the content of the image.
+    This is a more complex task, as it requires the model to generate a sequence of words that describe the image, which can have variable length.
+    \item \textbf{Dynamical Systems}: dynamical systems are systems that evolve over time, based on the current state, some external input,
+    and a predetermined set of rules that define how the system transitions from one state to another.
+    RNNs can be used to learn a non-fixed transition function that captures the underlying dynamics of the system, allowing for accurate predictions of future states based on past observations.
+\end{itemize}
+
+\subsection{RNN Architecture types}
+While classical Feed-Forward Neural Networks (FFNNs) are categorized as \textbf{one-to-one} (or single-to-single) 
+architectures—taking one input and producing one output—RNNs are classified based on how they map input sequences to output sequences.
+The primary types include:
+\begin{itemize}
+    \item \textbf{Many-to-One}: This type of RNN takes a sequence of inputs and produces a single output.
+    This is the case of document classification, where the input is a sequence of words and the output is a single class label.
+    \begin{figure}[H]
+        \centering
+        \input{LaTeX/Tikz/RNN/Many-to-One.tex}
+        \caption{Many-to-One RNN architecture.}
+    \end{figure}
+
+    \item \textbf{One-to-Many}: This type of RNN takes a single input and produces a sequence of outputs.
+    This is the case of image captioning, where the input is an image and the output is a sequence of words that describe the image.
+    \begin{figure}[H]
+        \centering
+        \input{LaTeX/Tikz/RNN/One-to-Many.tex}
+        \caption{One-to-Many RNN architecture.}
+    \end{figure}
+    \item \textbf{Many-to-Many}: This type of RNN takes a sequence of inputs and produces a sequence of outputs.
+    We can have 2 subtypes of this architecture:
+    \begin{itemize}
+        \item \textbf{Synchronized}: The input and output sequences have the same length, and an output is generated for every input 
+        (e.g., Frame-level video classification or Part-of-Speech tagging).
+        \item \textbf{Encoder-Decoder}: The model first processes the entire input sequence (encoding) before generating an output sequence of a potentially different length (decoding), 
+        as seen in Machine Translation.
+    \end{itemize}
+    \begin{figure}[H]
+        \centering
+        \begin{minipage}{0.45\textwidth}
+            \centering
+            \input{LaTeX/Tikz/RNN/Many-to-Many-Synchronized.tex}
+            \caption{Many-to-Many Synchronized RNN architecture.}
+        \end{minipage}
+        \hfill
+        \begin{minipage}{0.45\textwidth}
+            \centering
+            \input{LaTeX/Tikz/RNN/Many-to-Many-E-D.tex}
+            \caption{Many-to-Many Encoder-Decoder RNN architecture.}
+        \end{minipage}
+    \end{figure}
+\end{itemize}
+
+\subsection{Vanilla RNNs}
+The simplest form of RNN is the \textbf{Vanilla RNN}, which consists of a single layer of recurrent units.
+\begin{figure}[H]
+    \centering
+    \input{LaTeX/Tikz/RNN/Vanilla-RNN.tex}
+    \caption{Vanilla RNN architecture.}
+\end{figure}
+
+At time step $t$, the model takes an input $x_t$, passes it through a hidden layer to produce a hidden representation $h_t$, 
+which is then fed into a classifier to produce the output $y_t$.
+
+At the next time step $t+1$, the model takes the next input $x_{t+1}$ and also receives the hidden representation from the previous time step $h_t$ as part of its input,
+allowing it to maintain a form of memory across time steps.
+This recurrent connection is what enables the model to capture temporal dependencies in the data, making it suitable for sequential tasks.
+
+The hidden representation $h_t$ can be computed as:
+\begin{equation}
+    h_t = \sigma_{W}(x_t, h_{t-1})
+\end{equation}
+Where $\sigma_{W}$ is a non-linear activation function (e.g., ReLU, Tanh) applied to a linear transformation of the current input $x_t$ and the previous hidden state $h_{t-1}$,
+with $W$ representing the learnable parameters of the model.
+
+Usually, the choosen activation function is the hyperbolic tangent (tanh), which gives us:
+\begin{equation*}
+    h_t = \tanh W \begin{bmatrix}
+        x_t \\
+        h_{t-1}
+    \end{bmatrix}
+    = \tanh (W_x x_t + W_h h_{t-1})
+\end{equation*}
+
+The RNN can also be unrolled in time, which means that we can represent the RNN as a feed-forward network where each layer corresponds to a time step in the sequence.
+\begin{figure}
+    \centering
+    \scalebox{0.8}{
+        \input{LaTeX/Tikz/RNN/Unrolled.tex}
+    }
+    \caption{Unrolled RNN architecture.}
+\end{figure}
+\subsubsection{Backpropagation Through Time}
+To train RNNs, we use a variant of backpropagation called \textbf{Backpropagation Through Time} (BPTT), 
+which follows the same principles as standard backpropagation.
+
+The unfolded RNN is treated as a deep feed-forward network, where each layer corresponds to a time step in the sequence.
+The weights are shared across all time steps, and the error is backpropagated through the entire sequence, allowing the model to learn from the temporal dependencies in the data.
+
+Let's see a simple example of how BPTT works in a Vanilla RNN:
+\begin{itemize}
+    \item \textbf{Forward Pass}: The input sequence $(x_1, x_2, x_3)$ is fed into the RNN, producing hidden states $(h_1, h_2, h_3)$ and outputs $(y_1, y_2, y_3)$.
+    \item \textbf{Loss Calculation}: The loss is computed based on the outputs and the true labels for each time step.
+    The error is expressed as the sum of the losses at each time step:
+    \begin{equation}
+        L = \sum_{t=1}^{T} L_t(y_t, \hat{y}_t)
+    \end{equation}
+    In our example, with $T=3$, we have:
+    \begin{equation}
+        L = L_1(y_1, \hat{y}_1) + L_2(y_2, \hat{y}_2) + L_3(y_3, \hat{y}_3) = L_1 + L_2 + L_3
+    \end{equation}
+    \item \textbf{Backward Pass}: considering the weights associated with the hidden layer $W_h$, 
+    the gradient of the loss with respect to these weights is computed by summing the contributions from all time steps:
+    \begin{equation}
+        \frac{\partial L}{\partial W_h} = \sum_{t=1}^{T} \frac{\partial L_t}{\partial W_h}
+    \end{equation}
+    Where each term $\frac{\partial L_t}{\partial W_h}$ is computed as:
+    \begin{equation}
+        \frac{\partial L_t}{\partial W_h} = \frac{\partial L_t}{\partial y_t} \cdot \frac{\partial y_t}{\partial h_t} \cdot \frac{\partial h_t}{\partial W_h}
+    \end{equation}
+    For example, computing the gradient of the error with respect to $h_1$ (how the hidden state at time step 1 contributes to the loss) we have to consider:
+    \begin{itemize}
+        \item How $h_1$ contributes to $h_2$;
+        \item How $h_2$ effects $h_3$;
+        \item How $h_3$ contributes to the error at time step 3.
+    \end{itemize}
+    This gives us:
+    \begin{equation}
+        \frac{\partial L}{\partial h_1} = \frac{\partial L}{\partial h_3} \cdot \frac{\partial h_3}{\partial h_2} \cdot \frac{\partial h_2}{\partial h_1}
+    \end{equation}
+\end{itemize}
+\subsubsection{BPTT issues}
+While BPTT allows RNNs to learn from sequential data, it suffers from the \textbf{vanishing gradient} problem.
+In fact, early time steps in the sequence receive gradients through a long chain of multiplications, 
+which can lead to very small gradients that effectively prevent the model from learning long-term dependencies in the data.
+
+This issue is particularly problematic for tasks that require understanding of long-range dependencies, such as language modeling or machine translation, 
+where the model needs to capture relationships between words that are far apart in the input sequence.
+\subsubsection{Truncated BPTT}
+
+\subsection{Long Short-Term Memory}
