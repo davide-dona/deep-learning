@@ -146,6 +146,151 @@ which can lead to very small gradients that effectively prevent the model from l
 
 This issue is particularly problematic for tasks that require understanding of long-range dependencies, such as language modeling or machine translation, 
 where the model needs to capture relationships between words that are far apart in the input sequence.
-\subsubsection{Truncated BPTT}
 
-\subsection{Long Short-Term Memory}
+\subsubsection{Truncated BPTT}
+A common practical solution to the vanishing gradient problem and the high 
+computational cost of standard BPTT is \textbf{Truncated Backpropagation Through Time} (TBPTT). 
+The core idea is to process the sequence in smaller chunks rather than the entire history at once.
+
+The algorithm can be characterized by two parameters:
+\begin{itemize}
+    \item $k_1$: The number of time steps between gradient updates (the forward pass length).
+    \item $k_2$: The maximum number of time steps backpropagated (the truncation window).
+\end{itemize}
+This approach allows the model to learn from recent history while mitigating the vanishing gradient problem, as we only backpropagate through a limited number of time steps, 
+thus. It also reduces the computational cost, allowing for more efficient training of RNNs on long sequences.
+
+This approach is particularly effective for tasks where long-term dependencies are less critical, as in fact
+it fails to capture dependencies that span more than $k_2$ time steps, but it can still be useful for many applications where recent context is more relevant.
+
+\subsection{Long Short-Term Memory (LSTM)}
+To address the limitations of Vanilla RNNs—specifically the \textbf{vanishing gradient problem}—\textbf{Long Short-Term Memory} (LSTM) 
+networks were introduced. LSTMs utilize a gated architecture designed to maintain a persistent state over long sequences, 
+allowing the model to learn when to forget old information and when to update with new inputs.
+
+\subsubsection{The Memory Cell and Cell State}
+The core innovation of the LSTM is the \textbf{cell state} (denoted as $C_t$), which acts as a long-term memory conveyor belt. 
+Unlike the hidden state $h_t$, which undergoes multiple non-linear transformations at every time step, the cell state $C_t$ 
+interacts with the rest of the network primarly through linear operations.
+
+This linear path allows gradients to flow through many time steps with minimal decay, 
+effectively creating a "highway" for gradients during backpropagation, which is crucial for learning long-term dependencies in sequential data.
+
+\subsubsection{Gating Mechanisms}
+LSTMs regulate the cell state using three specialized "gates." 
+Each gate consists of a sigmoid layer ($\sigma$) and an element-wise multiplication operation ($\odot$). 
+These gates are learned parameters that determine the flow of information.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{.8\textwidth}{!}{
+        \input{LaTeX/Tikz/RNN/LSTM.tex}
+    }
+    \caption{Internal gated architecture of an LSTM cell.}
+\end{figure}
+
+\paragraph{Input Gate ($i_t$):}
+The input gate decides which values in the cell state will be updated. 
+Simultaneously, a \textit{candidate} cell state $\tilde{C}_t$ is created using a $\tanh$ layer to represent new information that could be added to the state.
+\begin{equation}
+    i_t = \sigma\left(W_i \cdot [h_{t-1}, x_t] + b_i\right)
+\end{equation}
+The input gate takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+and outputs a value between 0 and 1 for each element in the cell state, where 0 means "do not update" and 1 means "update".
+
+On the other hand, the candidate cell state $\tilde{C}_t$, similarly to the hidden state in a Vanilla RNN, 
+is computed as a non-linear transformation of the current input and the previous hidden state:
+\begin{equation}
+    \tilde{C}_t = \tanh\left(W_C \cdot [h_{t-1}, x_t] + b_C\right)
+\end{equation}
+
+\paragraph{Forget Gate ($f_t$):}
+This gate decides what information from the previous cell state $C_{t-1}$ is no longer useful and should be discarded.
+\begin{equation}
+    f_t = \sigma\left(W_f \cdot [h_{t-1}, x_t] + b_f\right)
+\end{equation}
+It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+and outputs a value between 0 and 1 for each element in the cell state. 
+The output can be interpreted as a soft mask, where $0$ means "completely forget," while $1$ means "completely retain."
+
+\paragraph{Output Gate ($o_t$):} 
+This gate decides what information to output from the cell state. 
+\begin{equation}
+    o_t = \sigma\left(W_o \cdot [h_{t-1}, x_t] + b_o\right)
+\end{equation}
+It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+and outputs a value between 0 and 1 for each element in the hidden state. 
+The output can be interpreted as a soft mask, where $0$ means "completely forget," while $1$ means "completely retain."
+
+\subsubsection{Memory Cell Update}
+The new cell state $C_t$ is updated by combining the gated previous state and the gated candidate state. 
+This is the "update" step where the network actually forgets and learns:
+\begin{equation}
+    C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t
+\end{equation}
+By using the forget gate $f_t$, the network can reset the memory of a specific unit if it is no longer relevant, preventing the internal state from growing indefinitely.
+
+Using the input gate $i_t$ and the candidate cell state $\tilde{C}_t$, the network can add new information to the cell state, allowing it to learn from new inputs while retaining important past information.
+
+\subsubsection{Hidden State Generation}
+Finally, the hidden state $h_t$ is updated. 
+We pass the cell state through a $\tanh$ (to push the values between $-1$ and $1$) and multiply it by the output gate $o_t$:
+\begin{equation}
+    h_t = o_t \odot \tanh(C_t)
+\end{equation}
+While $C_t$ stores long-term information, $h_t$ serves as the "working memory" used for the immediate prediction and as an input for the next time step.
+
+\subsubsection{Gradients and Backpropagation}
+The architectural beauty of the LSTM lies in its additive update rule for $C_t$.
+Even tough some non-linearities are present in the gates, the cell state $C_t$ itself is updated through a combination of linear operations (multiplication and addition),
+which allows gradients to flow more easily during backpropagation.
+This effectively bypasses the vanishing gradient problem inherent in the multiplicative chain of standard RNNs.
+
+\subsection{Gated Recurrent Unit (GRU)}
+Gated Recurrent Units (GRUs) are a simplified version of LSTMs that combine the forget and input gates into a single "update gate" and merge the cell state and hidden state into a single state.
+This results in a more streamlined architecture that is computationally more efficient while still capturing long-term dependencies effectively.
+
+\subsubsection{GRU Cell Architecture}
+In a GRU cell, we have only two gates: the \textbf{update gate} ($z_t$) and the \textbf{reset gate} ($r_t$).
+
+\begin{figure}[H]
+    \centering
+    \resizebox{.8\textwidth}{!}{
+        \input{LaTeX/Tikz/RNN/GRU.tex}
+    }
+    \caption{Internal gated architecture of a GRU cell.}
+\end{figure}
+
+\paragraph{Reset Gate ($r_t$):}
+The reset gate determines how much of the previous hidden state $h_{t-1}$ should be used when computing the candidate hidden state $\tilde{h}_t$.
+\begin{equation}
+    r_t = \sigma\left(W_r \cdot [h_{t-1}, x_t] + b_r\right)
+\end{equation}
+It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+and outputs a value between 0 and 1 for each element in the hidden state, where 0 means "completely reset" and 1 means "completely retain."
+
+\paragraph{Candidate Hidden State ($\tilde{h}_t$):}
+The candidate hidden state is computed based on the reset gate and the previous hidden state.
+\begin{equation}
+    \tilde{h}_t = \tanh\left(W_h \cdot [r_t \odot h_{t-1}, x_t] + b_h\right)
+\end{equation}
+The reset gate $r_t$ controls how much of the previous hidden state $h_{t-1}$ is used in the computation of the candidate hidden state $\tilde{h}_t$.
+If $r_t$ is close to 0, the previous hidden state is effectively ignored, allowing the model to reset its memory when necessary.
+
+\paragraph{Update Gate ($z_t$):}
+The update gate determines how much of the previous hidden state $h_{t-1}$ and the candidate hidden state $\tilde{h}_t$ should be 
+combined to form the new hidden state $h_t$.
+\begin{equation}
+    z_t = \sigma\left(W_z \cdot [h_{t-1}, x_t] + b_z\right)
+\end{equation}
+It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+and outputs a value between 0 and 1 for each element in the hidden state, where 0 means "completely update" and 1 means "completely retain."
+
+The new hidden state $h_t$ is then computed as a linear interpolation between the previous hidden state $h_{t-1}$ and the candidate hidden state $\tilde{h}_t$,
+weighted by the update gate $z_t$:
+\begin{equation}
+    h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
+\end{equation}
+This allows the GRU to adaptively capture long-term dependencies while maintaining a simpler architecture compared to LSTMs. 
+
+
