@@ -1,0 +1,92 @@
+\section{Sequence Models}
+After the RNN breakthrough, it became clear that all the proposed architectures were 
+unable to effectively capture long-term dependencies.
+
+To address these issues, the concept of \textit{attention} was introduced in sequence models, 
+even before the emergence of the Transformer architecture. 
+The attention mechanism allows the model to focus on specific parts of the input sequence when making predictions, 
+enabling it to capture long-term dependencies more effectively.
+
+In this section, we will explore how the introduction of attention shaped developments 
+in the fields of Image Captioning and Machine Translation.
+
+\subsection{Image Captioning}
+Image captioning is the task of generating a textual description for a given image.
+This task combines \textbf{computer vision} for the image understanding and \textbf{natural language processing} for generating the caption.
+The main challenge in image captioning is to effectively capture the relevant features of the image and generate a coherent and contextually appropriate caption.
+
+
+The usual approach to image captioning involves using a convolutional neural network (CNN) to extract features from the image,
+and then using a recurrent neural network (RNN) to generate the caption based on those features.
+
+\subsubsection{No Attention - Show and Tell}
+Show and Tell is one of the early models for image captioning. Following the encoder-decoder architecture proposed
+for machine translation, Show and Tell uses a CNN as the encoder to extract features from the image and an RNN as the decoder to generate the caption.
+
+The architecture of Show and Tell consists of two main components:
+\begin{itemize}
+    \item \textbf{Encoder}: A CNN (such as Inception or ResNet) is used to extract a fixed-length feature vector from the input image. 
+    This feature vector captures the high-level visual information of the image.
+    \item \textbf{Decoder}: An RNN (such as LSTM) is used to generate the caption word by word. 
+    The RNN takes the feature vector from the encoder as input and generates the caption sequentially, predicting one word at a time until it generates an end token.
+\end{itemize}
+
+At the first time step, the RNN receives as input the \textbf{feature vector} from the encoder and a special start token.
+At each subsequent time step $t$, the RNN receives as input the word generated at time step $t-1$ and the hidden state from the previous time step.
+The RNN continues to generate words until it produces an end token, indicating the end of the caption.
+
+\paragraph{Inference}
+At inference time, two different strategies can be used to generate captions:
+\begin{itemize}
+    \item \textbf{Sampling}: At each time step, the model samples a word from the predicted probability distribution.
+    While this can lead to more diverse and creative captions, it also increases the risk of generating grammatically incorrect or nonsensical sequences.
+    \item \textbf{Beam Search}: Instead of sampling, beam search keeps track of the top $k$ most likely sequences at each time step, 
+    where $k$ is the beam width. At each step, the model expands each of the $k$ sequences by one word and keeps only the top $k$ resulting sequences based on their cumulative probabilities.
+    Beam search is more computationally expensive than sampling but often results in more coherent and higher-quality captions.
+\end{itemize}
+
+\paragraph{Evaluation Metrics}
+In order to evaluate the performance of image captioning models, we must be able to compare the generated captions with
+human-generated reference captions. To address this, the BLUE (Bilingual Evaluation Understudy) metric was introduced.
+
+BLUE is a precision-based metric that measures the overlap between the generated caption and one or more reference captions.
+It calculates the \textbf{n-gram precision}, which is the proportion of n-grams (contiguous sequences of n words)
+in the generated caption that are also present in the reference captions.
+
+\paragraph{Limitations}
+Despite its success, this model faced several inherent limitations:
+\begin{itemize}
+    \item \textbf{Information Bottleneck}: The fixed-length feature vector may not capture all relevant details, especially in complex images with multiple interacting objects.
+    \item \textbf{Vanishing Visual Context}: Because the RNN only "sees" the image at the first time step, the visual influence can weaken as the sentence grows, leading the model to rely more on language probability than the actual image.
+    \item \textbf{Static Features}: The feature vector is global and static; the model cannot "shift its gaze" to different parts of the image as it describes different objects.
+\end{itemize}
+
+\subsubsection{Attention - Show, Attend and Tell}
+To overcome the limitations of the Show and Tell model, the Show, Attend and Tell model was proposed, introducing an attention mechanism 
+to allow the model to focus on different parts of the image while generating the caption.
+
+The architecture of Show, Attend and Tell consists of three main components:
+\begin{itemize}
+    \item \textbf{Encoder}: Similar to Show and Tell, a CNN is used to extract features from the image. 
+    However, instead of producing a single fixed-length feature vector, the encoder produces a set of feature vectors corresponding to different regions of the image,
+    maintaining spatial information about the image. This is done by extracting features from the last convolutional layer of the CNN,
+    avoiding the fully connected layers that would otherwise collapse the spatial dimensions.
+    \item \textbf{Attention Mechanism}: The attention mechanism allows the model to dynamically focus on different parts of the image while generating the caption.
+    The dynamic attention weights are computed at each time step, as a function of the \textbf{previous hidden state} and the \textbf{image features}.
+    They are then used to compute a weighted sum of the image features, which serves as the context vector for the decoder at that time step.
+    \item \textbf{Decoder}: The decoder is responsible for generating the caption word by word, using the attended features and the previous hidden state.
+\end{itemize}
+
+\paragraph{Attention Types}
+Two types of attention mechanisms are commonly used in image captioning:
+\begin{itemize}
+    \item \textbf{Soft Attention}: This is a differentiable attention mechanism that computes a weighted average of the image features based on the attention weights. 
+    The model can be trained end-to-end using backpropagation, as the attention weights are differentiable with respect to the model parameters.
+    \item \textbf{Hard Attention}: This is a non-differentiable attention mechanism that selects a single region of the image to focus on at each time step.
+    Since the selection process is non-differentiable, reinforcement learning techniques (such as REINFORCE) are used to train the model, treating the attention selection as a stochastic policy.
+\end{itemize}
+
+\subsubsection{Machine Translation}
+
+
+
