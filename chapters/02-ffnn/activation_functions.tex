@@ -8,7 +8,7 @@ used during the backpropagation process to update the weights of the network.
 Maps the input to a value between 0 and 1, which can be interpreted as a probability. It is defined as:
 \begin{figure}[H]
     \centering
-    \input{LaTeX/Tikz/FFNN/activation_functions/sigmoid.tex}
+    \input{chapters/02-ffnn/tikz/activation_functions/sigmoid.tex}
 \end{figure}
 This function is smooth and differentiable, but it saturates (approaches 0) across most of its domain,
 which can lead to the problem of vanishing gradients during training.
@@ -17,7 +17,7 @@ which can lead to the problem of vanishing gradients during training.
 Similar to sigmoid but maps the input to a value between -1 and 1. It is defined as:
 \begin{figure}[H]
     \centering
-    \input{LaTeX/Tikz/FFNN/activation_functions/hyperbolic_tangent.tex}
+    \input{chapters/02-ffnn/tikz/activation_functions/hyperbolic_tangent.tex}
 \end{figure}
 This is better than the sigmoid function as it is zero-centered, which can help with convergence during training,
 but it still suffers from the saturation problem for large positive and negative values.
@@ -26,7 +26,7 @@ but it still suffers from the saturation problem for large positive and negative
 The most commonly used activation function in hidden layers. It is defined as:
 \begin{figure}[H]
     \centering
-    \input{LaTeX/Tikz/FFNN/activation_functions/relu.tex}
+    \input{chapters/02-ffnn/tikz/activation_functions/relu.tex}
 \end{figure}
 Born to solve the saturation problem of sigmoid and tanh, the ReLU function is in fact non-saturating for positive values (derivative is 1) which allows for faster convergence during training.
 
@@ -52,7 +52,7 @@ Different solutions have been proposed to solve the dying ReLU problem, such as:
         \item \textbf{Leaky ReLU}: a variant of ReLU that allows a small, non-zero gradient for negative values. It is defined as:
         \begin{figure}[H]
             \centering
-            \input{LaTeX/Tikz/FFNN/activation_functions/leaky_relu.tex}
+            \input{chapters/02-ffnn/tikz/activation_functions/leaky_relu.tex}
         \end{figure}
         \item \textbf{Parametric ReLU (PReLU)}: where $\alpha$ is a learnable parameter that is updated during training;
         \item \textbf{Randomized ReLU (RReLU)}: where $\alpha$ is randomly sampled from a uniform distribution during training, and fixed to a value during testing;

@@ -68,13 +68,23 @@ to allow the model to focus on different parts of the image while generating the
 The architecture of Show, Attend and Tell consists of three main components:
 \begin{itemize}
     \item \textbf{Encoder}: Similar to Show and Tell, a CNN is used to extract features from the image. 
-    However, instead of producing a single fixed-length feature vector, the encoder produces a set of feature vectors corresponding to different regions of the image,
-    maintaining spatial information about the image. This is done by extracting features from the last convolutional layer of the CNN,
+    However, instead of producing a single fixed-length feature vector using a fully connected layer, 
+    the encoder produces a set of feature vectors corresponding to different regions of the image, maintaining spatial information about the image. 
+    This is done by extracting features from the last convolutional layer of the CNN,
     avoiding the fully connected layers that would otherwise collapse the spatial dimensions.
-    \item \textbf{Attention Mechanism}: The attention mechanism allows the model to dynamically focus on different parts of the image while generating the caption.
-    The dynamic attention weights are computed at each time step, as a function of the \textbf{previous hidden state} and the \textbf{image features}.
-    They are then used to compute a weighted sum of the image features, which serves as the context vector for the decoder at that time step.
-    \item \textbf{Decoder}: The decoder is responsible for generating the caption word by word, using the attended features and the previous hidden state.
+    
+    In particular, the encoder produces a set of feature vectors $\{a_1, a_2, ..., a_L\}$, where $L$ is the number of regions in the image (e.g., 14x14 = 196 regions) 
+    and each $a_i$ is a feature vector corresponding to a specific region of the image.
+    
+    \item \textbf{Attention Mechanism}: The attention mechanism $f_{att}$ allows the model to dynamically focus on different parts of the image while generating the caption.
+    The dynamic attention weights are computed at each time step, as a function of the \textbf{previous hidden state}.
+    
+    Once the attention weights are computed, they are used to compute a weighted sum of the feature vectors from the encoder,
+    resulting in a \textbf{context vector} that captures the relevant visual information for generating the next word in the caption.
+    
+    \item \textbf{Decoder}: The LSTM decoder is responsible for generating the caption word by word. It takes as input the context vector $z_t$ computed
+    from the attention mechanism, the previous hidden state $h_{t-1}$, and the previously generated word $y_{t-1}$.
+    The decoder generates the next word in the caption based on this information, allowing it to produce more accurate and contextually relevant captions by focusing on different parts of the image at each time step.
 \end{itemize}
 
 \paragraph{Attention Types}

@@ -1,9 +1,14 @@
 \section{Machine Learning Recap}
-Machine Learning is a subset of AI, born in contrast to the programming paradigm, which is based on the idea of writing explicit rules to solve a problem.
+\textbf{Artificial Intelligence} (AI) is the discipline that aims to create machines that mimic human intelligence.
+\textbf{Machine Learning} (ML) is a subset of AI that enables machines to learn from experience (i.e., data) to improve their performance on a specific task.
+\textbf{Deep Learning} is in turn a subfield of ML that focuses on \textbf{Artificial Neural Networks} (ANNs); the term `deep' refers to the use of multiple layers,
+which allows the network to learn complex representations of data with multiple levels of abstraction.
+
+Machine Learning was born in contrast to the programming paradigm, which is based on the idea of writing explicit rules to solve a problem.
 \begin{figure}[H]
     \centering
     \scalebox{0.8}{
-        \input{LaTeX/Tikz/ml_recap/MLvsProgramming.tex}
+        \input{chapters/01-ml-recap/tikz/MLvsProgramming.tex}
     }
     \caption{Programming paradigm vs Machine Learning paradigm.}
     \label{fig:programming_paradigm}
@@ -91,7 +96,7 @@ and we want to learn the underlying structure of the data. Some examples of unsu
     using backpropagation. This process is repeated iteratively until convergence;
     \begin{figure}[H]
         \centering
-        \includegraphics[width=\textwidth]{media/ml_recap/deep_clustering.png}
+        \includegraphics[width=\textwidth]{chapters/01-ml-recap/media/deep_clustering.png}
         \caption{Deep clustering.}
     \end{figure}
     \item \textbf{Generative Models}: models learn the underlying distribution of the data,
@@ -100,7 +105,7 @@ and we want to learn the underlying structure of the data. Some examples of unsu
     which is similar to the distribution of $X$.
     \begin{figure}[H]
         \centering
-        \includegraphics[width=0.5\textwidth]{media/ml_recap/deep_generative_models.png}
+        \includegraphics[width=0.5\textwidth]{chapters/01-ml-recap/media/deep_generative_models.png}
         \caption{Deep generative models.}
     \end{figure}
 

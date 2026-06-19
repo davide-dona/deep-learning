@@ -61,7 +61,7 @@ The process can be extended to deeper layers. In those cases, we need to conside
 to the output of the network, computing the gradients along the way using the chain rule of calculus.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{media/FFNN/dependencies.pdf}
+    \includegraphics[width=\textwidth]{chapters/02-ffnn/media/dependencies.pdf}
     \caption{Dependency chain for a parameter in a deep network.}
 \end{figure}
 Taking in consideration the architecture shown in the figure above, we can express the derivative of the loss function with respect to a parameter $w^{(l-1)}$ in a deeper layer as follows:
@@ -89,7 +89,7 @@ When we consider the output layer neurons, the chain of dependencies remains the
 For the hidden layer neurons, we instead need to consider all the possible paths from the parameter we want to update to the output layer, and compute the gradients accordingly.
 \begin{figure}[H]
     \centering
-    \scalebox{0.5}{\input{LaTeX/Tikz/FFNN/back-prop-focus.tex}}
+    \scalebox{0.5}{\input{chapters/02-ffnn/tikz/back-prop-focus.tex}}
     \caption{Dependency chain for a parameter feeding into $h_2$.}
     \label{fig:backpropagation_output}
 \end{figure}

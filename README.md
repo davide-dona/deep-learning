@@ -2,11 +2,11 @@
 A detailed collection of LaTeX-based lecture notes for the Deep Learning course at the University of Trento, academic year 2025/2026, instructed by Prof. Elisa Ricci.
 
 <div align="center">
-    <a href="DeepLearningNotes.pdf">
-        <img src="media/report-preview.png" alt="Notes Preview" width="300px">
+    <a href="main.pdf">
+        <img src="assets/report-preview.png" alt="Notes Preview" width="300px">
     </a>
     <br>
-    <a href="DeepLearningNotes.pdf" style="display: block; margin-top: 10px; font-size: 15px; font-weight: bold; color: #007acc;">
+    <a href="main.pdf" style="display: block; margin-top: 10px; font-size: 15px; font-weight: bold; color: #007acc;">
     Download the PDF notes</a>
 </div>
 
@@ -16,6 +16,15 @@ A detailed collection of LaTeX-based lecture notes for the Deep Learning course 
 
 | Section | Description |
 |---|---|
+| Machine Learning Recap | Learning paradigms, generalization, over/underfitting |
+| Feedforward Neural Networks | Perceptron lineage, cost/output/activation functions, architecture, optimization, backpropagation, regularization |
+| Convolutional Neural Networks | Convolution, classic architectures (LeNet, AlexNet, GoogLeNet) |
+| Expanding CNNs | Beyond classification |
+| Recurrent Neural Networks | Vanilla RNN, LSTM, GRU, sequence configurations |
+| Sequence Models | Sequence modelling |
+| CLIP | Contrastive language–image pretraining |
+
+The notes are organized under `chapters/<nn-topic>/`, each folder holding its `index.tex`, its TikZ sources (`tikz/`), and its images (`media/`).
 
 ---
 
@@ -30,7 +39,7 @@ Contributions are welcome! Here's how you can help:
 ###  Pull Requests
 1. **Fork** this repository.
 2. Create a new branch: `git checkout -b fix/your-description`.
-3. Make your changes (edit the `.tex` files under `sections/`).
+3. Make your changes (edit the `.tex` files under `chapters/`).
 4. Make sure the project **compiles without errors**: `latexmk -pdf main.tex`.
 5. **Commit** with a descriptive message and **push** your branch.
 6. Open a **Pull Request** against `main`.

@@ -16,14 +16,14 @@ Each component of the gradient vector $\frac{\partial \mathcal{L}}{\partial w_i}
 with respect to each parameter.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{media/FFNN/partial_derivatives.pdf}
+    \includegraphics[width=\textwidth]{chapters/02-ffnn/media/partial_derivatives.pdf}
     \caption{Visualization of derivatives and gradients.}
 \end{figure}
 If we move on the opposite side of the gradients, we will be moving in the direction of the \textbf{steepest descent} of the loss function.
 This way, these algorithms can iteratively explore the parameter space to find the optimal parameters that minimize the loss function.
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{media/FFNN/gradient-descent.pdf}
+    \includegraphics[width=\textwidth]{chapters/02-ffnn/media/gradient-descent.pdf}
     \caption{Visualization of Gradient Descent.}
 \end{figure}
 
@@ -144,7 +144,7 @@ The update rule for the parameters can then be expressed as follows:
 
 \begin{figure}[H]
     \centering
-    \scalebox{0.3}{\input{LaTeX/Tikz/FFNN/optimization/BGD-SGD-Momentum.tex}}
+    \scalebox{0.3}{\input{chapters/02-ffnn/tikz/optimization/BGD-SGD-Momentum.tex}}
     \caption{Different optimization algorithms.}
 \end{figure}
 
@@ -158,7 +158,7 @@ overshooting or oscillations. The look-ahead mechanism of Nesterov Momentum allo
 to the momentum update on the same step.
 \begin{figure}[H]
     \centering
-    \scalebox{0.7}{\input{LaTeX/Tikz/FFNN/optimization/momentum-methods.tex}}
+    \scalebox{0.7}{\input{chapters/02-ffnn/tikz/optimization/momentum-methods.tex}}
     \caption{Different optimization algorithms.}
 \end{figure}
 
