@@ -31,16 +31,16 @@ The equation \ref{MLE} can also be extended to the case of conditional probabili
 \begin{equation*}
     \boldsymbol{\theta}^* = \arg\max_{\boldsymbol{\theta}} p_{\text{model}}(y|\boldsymbol{x}, \boldsymbol{\theta})
 \end{equation*}
-This is the basis for most supervised learning algorithms, including Linear Regression and Logistic Regression, which simply assume different forms for the conditional probability distribution.
-For example, in Logistic Regression, we assume that the conditional probability distribution is given by the logistic function:
+
+\subsubsection{Example: Logistic Regression}
+One of the simplest examples of MLE is \textbf{Logistic Regression}, which is a linear model used for binary classification tasks. 
+In Logistic Regression, we assume that the conditional probability distribution of the target variable $y$ given the input variable $\boldsymbol{x}$ follows a logistic function:
 \begin{equation}
     \label{Logistic Regression}
     p_{\text{model}}(y=1|\boldsymbol{x}, \boldsymbol{\theta}) = \sigma(\boldsymbol{\theta}^T \boldsymbol{x}) = \frac{1}{1 + e^{-\boldsymbol{\theta}^T \boldsymbol{x}}}
 \end{equation}
-
-\subsubsection{Logistic Regression}
-Logistic Regression is a linear model used for binary classification tasks.
-\begin{comment}
-    #TODO: extend here??
-\end{comment}
-Given the equation \ref{Logistic Regression}, we can observe that the can be seen as a simple Neural Network with a single layer and a sigmoid activation function.
+We can clearly see that the logistic function $\sigma(z)$ can be interpreted as a \textbf{neuron}:
+\begin{itemize}
+    \item The input to the neuron is the linear combination of the input features $\boldsymbol{x}$ and the parameters $\boldsymbol{\theta}$.
+    \item The sigmoid activation function $\sigma(z)$ is a non-linear function that maps the input to a probability value between 0 and 1.
+\end{itemize}

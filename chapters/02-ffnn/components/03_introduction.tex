@@ -1,6 +1,6 @@
 \subsection{Feedforward Neural Networks}
-A Feedforward Neural Network (FFNN) is a type of artificial neural network that define a mapping from the input space
-to an output space. The learned mapping $f(\boldsymbol{x})$ is defined as a composition of several functions, each representing a layer of the network.
+A Feedforward Neural Network (FFNN) is a type of artificial neural network that define a mapping from the input space to an output space. 
+The learned mapping $f(\boldsymbol{x})$ is defined as a composition of several functions, each representing a layer of the network.
 \begin{figure}[H]
     \centering
     \scalebox{0.8}{
@@ -30,18 +30,20 @@ The term "feedforward" comes from the fact that the data flows in one direction,
 Linear models are generally very easy to optimize (e.g., closed-form solutions or convex optimization), but they are limited in their expressiveness and cannot capture interactions between features or non-linear relationships in the data.
 FFNNs allow to overcome the limitations of linear models by introducing non-linear activation functions and multiple layers of computation.
 
-\subsubsection{How can we improve Linear Models?}
+\paragraph{How can we improve Linear Models?}
 FFNNs are not the only way to improve linear models, but they are one of the most powerful and widely used approaches.
-Generally, to boost the performance of linear models, we can apply a non-linear transformation to the input data $\boldsymbol{x} \rightarrow \phi(\boldsymbol{x})$, where $\phi$ is a non-linear function.
-We can then apply a linear model to the transformed data $\phi(\boldsymbol{x})$. 
+
+In general, to boost the performance of linear models, we can apply a non-linear transformation to the input data 
+$\boldsymbol{x} \rightarrow \phi(\boldsymbol{x})$, where $\phi$ is a non-linear function.
+We can then apply the same linear model as before to the transformed data $\phi(\boldsymbol{x})$. 
 The transformation $\phi$ can be implemented in various ways, such as:
 \begin{itemize}
     \item \textbf{Kernel Methods}: map the input data into a high-dimensional feature space (possibly infinite-dimensional) where linear models can be applied.
     This has enough capacity to capture complex relationships in the data, but achieves poor generalization performance for highly variable target functions.
     \item \textbf{Feature Engineering}: manually design and select features that capture relevant information from the input data.
     This was the traditional approach before the rise of deep learning, in particular for computer vision tasks, but it is time-consuming and requires domain expertise.
-    \item \textbf{Neural Networks}: learn the transformation $\phi$ from the data itself. This shifts the engineering effort from designing features to designing the architecture of the network,
-    but throwhs away the convexity and interpretability. 
+    \item \textbf{Neural Networks}: learn the transformation $\phi$ from the data itself. 
+    This shifts the engineering effort from designing features to designing the architecture of the network, but throwhs away the convexity and interpretability. 
 \end{itemize}
 
 \subsubsection{Training a FFNN}
@@ -53,9 +55,6 @@ We need to define a loss function $\mathcal{L}(f(\boldsymbol{x}; \boldsymbol{\th
 
 The largest difference with respect to linear models comes from the fact that most loss functions are non-convex, which removes the guarantee of finding a global minimum and makes the optimization process more challenging.
 
-\begin{comment}
-    #TODO: complete the points below
-\end{comment}
 \subsubsection{Modelling Choices}
 When designing a FFNN, we need to make several modelling choices, such as:
 \begin{itemize}
@@ -64,7 +63,8 @@ When designing a FFNN, we need to make several modelling choices, such as:
     \item \textbf{Form of Output}: the function applied in the output layer. Similarly to the cost function, the choice of the output units depends on the type of problem we are trying to solve;
     \item \textbf{Activation Function}: the non-linear function applied in the hidden layers. It's independent from the type of problem we are trying to solve, but it can significantly impact the
     performance of the model and the convergence during training.
-    \item \textbf{Architecture}: 
-    \item \textbf{Optimizer}:
-    \item \textbf{Regularizer}:
+    \item \textbf{Architecture}: the number of hidden layers, the number of neurons in each hidden layer, etc. 
+    The architecture of the network can significantly impact the performance of the model and the convergence during training.
+    \item \textbf{Optimizer}: how we update the parameters of the network during training.
+    \item \textbf{Regularizer}: how we prevent the model from overfitting the training data and improve generalization performance. 
 \end{itemize}

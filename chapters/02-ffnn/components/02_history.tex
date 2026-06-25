@@ -1,8 +1,8 @@
 \subsection{From the Perceptron to Deep Networks}
 Before introducing the architecture of a feedforward neural network, it is useful to recall the
-building block from which it originated: the artificial neuron.
+building block from which it originated: the artificial neuron, also known as the \textbf{perceptron}.
 
-\paragraph{Electronic Brain}
+\subsubsection{Electronic Brain}
 In the first perceptron model, the inputs form a vector of \textbf{binary features} that are simply summed together and passed through a \textbf{threshold function},
 without any \textbf{weights} involved.
 \begin{figure}[H]
@@ -15,7 +15,7 @@ without any \textbf{weights} involved.
 \end{figure}
 It can be shown that this model is capable of classifying linearly separable data, such as the AND, OR, and NOT functions, but it fails to classify non-linearly separable data, such as the XOR function.
 
-\paragraph{The Perceptron}
+\subsubsection{The Perceptron}
 The \textbf{Perceptron} is an extension of the electronic brain model.
 The key difference is the introduction of \textbf{weights} for each input, which allows the model to learn from data and adjust its parameters accordingly.
 \begin{figure}[H]
@@ -67,7 +67,7 @@ and a learning rate $\eta$, the weights are updated as follows:
 \end{enumerate}
 Note that we are assuming that the training data is linearly separable, otherwise we would have to introduce a stopping criterion to prevent the algorithm from running indefinitely.
 
-\paragraph{MLP}
+\subsubsection{MLP}
 A single perceptron cannot learn non-linearly separable data, such as the XOR function. This limitation motivated the
 \textbf{Multilayer Perceptron} (MLP), which stacks several layers of neurons.
 \begin{figure}[H]

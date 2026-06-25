@@ -1,6 +1,12 @@
 \section{Machine Learning Recap}
+In this section we will briefly introduce the definition of \textbf{Machine Learning} and \textbf{Deep Learning},
+introducing the main types of learning that we will encounter in these notes.
+
+\subsection{Definitions}
 \textbf{Artificial Intelligence} (AI) is the discipline that aims to create machines that mimic human intelligence.
+
 \textbf{Machine Learning} (ML) is a subset of AI that enables machines to learn from experience (i.e., data) to improve their performance on a specific task.
+
 \textbf{Deep Learning} is in turn a subfield of ML that focuses on \textbf{Artificial Neural Networks} (ANNs); the term `deep' refers to the use of multiple layers,
 which allows the network to learn complex representations of data with multiple levels of abstraction.
 
@@ -16,15 +22,16 @@ Machine Learning was born in contrast to the programming paradigm, which is base
 In the Machine Learning paradigm, we are instead given the data, along with the results, and we try to learn the \textbf{model}. The learned model
 (e.g. splits in a decision tree, linear function for SVMs) represents the solution to the problem, and it can be used to make predictions on new data.
 
-\subsection{Why do we need Machine Learning}
+\subsubsection{Why do we need Machine Learning}
 The main reason why we need Machine Learning can be summarized in the following points:
 \begin{itemize}
-    \item \textbf{Complexity of the problem}: For many tasks, we have no human expertise to write explicit rules;
+    \item \textbf{Complexity of the problem}: For many tasks, we have no human expertise to write explicit rules or
+    we cannot write them down. The only plausible solution is to learn from data, which is often available in large quantities;
     \item \textbf{Personalized solutions}: For many tasks, we need to learn personalized solutions for each user, which is not feasible with the programming paradigm;
     \item \textbf{Huge amount of data}: Working with huge amount of data is not feasible, as it would require writing down explicit rules for each possible combination of inputs.
 \end{itemize}
 
-\subsection{Machine Learning - Another definition}
+\subsubsection{Machine Learning - Another definition}
 \definition{Machine Learning}{
     A computer program is said to learn from experience $E$ with respect to some class of tasks $T$
     and performance measure $P$, if its performance at tasks in $T$, as measured by $P$, improves with
@@ -47,7 +54,7 @@ We can identify three main types of learning:
 \end{itemize}
 
 \subsubsection{Supervised Learning}
-Supervised learning can be further divided into subcategories, such as:
+Supervised learning can be further divided into subcategories. In particular, we are interested in the following:
 \begin{itemize}
     \item \textbf{Classification}: The output is a discrete label. More formally, given a training set $\mathcal{D} = \{(\mathbf{x}_1, y_1), \dots, (\mathbf{x}_n, y_n)\}$ we can define it as:
     \begin{equation}
@@ -55,34 +62,36 @@ Supervised learning can be further divided into subcategories, such as:
     \end{equation}
     where $\mathcal{X}$ is the input space, and $\{1,\dots,k\}$ is the set of possible labels.
     
-    Based on the number of classes, we can further divide classification into \textbf{binary classification} and \textbf{multi-class classification}.
+    Based on the number of classes, we can further divide classification into \textbf{binary classification} ($k=2$) and \textbf{multi-class classification} ($k>2$).
     
     \item \textbf{Regression}: The output is a continuous value. More formally, given a training set $\mathcal{D} = \{(\mathbf{x}_1, y_1), \dots, (\mathbf{x}_n, y_n)\}$ we can define it as:
     \begin{equation}
         f: \mathcal{X} \rightarrow \mathbb{R}
     \end{equation}
     
-    \item \textbf{Structured output}: \textbf{supervised learning} doesn't necessarily require a \textbf{vector} as input, and a \textbf{scalar} as output.
+    \item \textbf{Structured output}: \textbf{supervised learning} doesn't necessarily require a \textbf{vector} as input and a \textbf{scalar} as output.
     We can have more complex input and output structures, such as images, graphs, or sequences.
     In all cases the output  is a structured object, with relationships between its components.
-    Some practical example of \textbf{structured input regression} problems are:
     
+    Some practical example of \textbf{structured input regression} problems are:
     \begin{itemize}
         \item \textbf{Semantic segmentation}: Given an image of input size $M \times N \times 3$, we
         want to predict a mask of size $M \times N$, where each pixel is labeled with a class.
-        The original solution to this kind of problem was to use \textbf{feature engineering} to extract features from neighborhoods of pixels. After that,
-        SVMs were used to make predictions based on the extracted features. \textbf{Neural Networks} show their real power in this kind of problems,
+        
+        Before the advent of deep learning, the original solution to this kind of problem was to use 
+        \textbf{feature engineering} to extract features from neighborhoods of pixels. After that,
+        the extracted features were passed to an SVM to predict the class of each pixel.
+        
+        \textbf{Neural Networks} show their real power in this kind of problems,
         as they are able to learn features directly from the data, without any human intervention.
         
         \item \textbf{Machine translation}: given a sentence (sequence of words) in a source language, we want to translate it
         to a target language. This is even more complex than the previous example, as not only the output is related to its adjacent components,
-        but also grammatical and semantic relationships between words need to be captured.
+        but also grammatical and semantic relationships between words need to be captured. We will see how \textbf{Recurrent Neural Networks} (RNNs) and \textbf{Transformers} are able 
+        to capture these relationships and produce state-of-the-art results in this kind of problems.
     \end{itemize}
 \end{itemize}
 
-\begin{comment}
-    Add image for Deep Clustering and Deep Generative Models
-\end{comment}
 \subsubsection{Unsupervised Learning}
 In unsupervised learning, we are given a training set of inputs, without any corresponding output labels, 
 and we want to learn the underlying structure of the data. Some examples of unsupervised learning tasks are:
@@ -91,18 +100,21 @@ and we want to learn the underlying structure of the data. Some examples of unsu
     
     \item \textbf{Deep clustering}: a technique that combines deep learning with classical clustering algorithms, such as k-means,
     to learn better representations of the data and improve clustering performance.
+    
     It is based on the idea of using a deep neural network to learn a low-dimensional representation of the data. This
-    is then used as input to a clustering algorithm, producing a set of \textbf{pseudo-labels} that are used to train the neural network
-    using backpropagation. This process is repeated iteratively until convergence;
+    is then used as input to a clustering algorithm, producing a set of \textbf{pseudo-labels} that are then used 
+    to train the neural network using classical backpropagation. This process is repeated iteratively until convergence;
     \begin{figure}[H]
         \centering
         \includegraphics[width=\textwidth]{chapters/01-ml-recap/media/deep_clustering.png}
-        \caption{Deep clustering.}
+        \caption{Deep clustering example}
     \end{figure}
+    
     \item \textbf{Generative Models}: models learn the underlying distribution of the data,
     and can be used to generate new data points, similar to the ones in the training set.
-    Also in this case, we can have \textbf{deep generative models}. They try to map exaples extracted from a simple distribution $Z$ to a more complex distribution $g_{\theta}(Z)$,
-    which is similar to the distribution of $X$.
+    
+    Also in this case, we can have \textbf{deep generative models}, which try to map examples extracted from a simple distribution $Z$
+    to a more complex distribution $g_{\theta}(Z)$, which is similar to the distribution of the training data $X$.
     \begin{figure}[H]
         \centering
         \includegraphics[width=0.5\textwidth]{chapters/01-ml-recap/media/deep_generative_models.png}
