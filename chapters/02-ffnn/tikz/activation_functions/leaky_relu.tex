@@ -1,7 +1,7 @@
 \begin{minipage}{0.45\textwidth}
     \centering
     \[
-    \text{LeakyReLU}(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
+    \lrelu(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
     \]
     where $\alpha = 0.01$
 \end{minipage}
@@ -11,7 +11,7 @@
     \begin{tikzpicture}[scale=1]
         \begin{axis}[
             xlabel=$x$,
-            ylabel=$\text{Leaky ReLU}(x)$,
+            ylabel=$\lrelu(x)$,
             grid=major,
             axis lines=middle,
             xmin=-6, xmax=6,

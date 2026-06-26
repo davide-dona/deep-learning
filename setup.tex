@@ -25,6 +25,18 @@
 \usetikzlibrary{arrows.meta, calc, positioning, backgrounds, shapes.geometric, fit, quotes}
 \usepackage{pgfplots}
 
+% --- Math notation ---
+\newcommand{\vct}[1]{\boldsymbol{#1}}   % vectors / bold symbols
+\newcommand{\mat}[1]{\boldsymbol{#1}}   % matrices
+\newcommand{\loss}{\mathcal{L}}         % loss / cost function
+\newcommand{\R}{\mathbb{R}}             % real numbers
+\newcommand{\E}{\mathbb{E}}             % expectation
+\DeclareMathOperator{\simop}{sim}
+\DeclareMathOperator{\relu}{ReLU}
+\DeclareMathOperator{\lrelu}{LeakyReLU}
+\DeclareMathOperator{\grelu}{GReLU}
+\DeclareMathOperator{\eluop}{ELU}
+
 % Command to get the current month name
 \newcommand{\MonthName}{
   \ifcase\month\or January\or February\or March\or April\or May\or June\or July\or August\or September\or October\or November\or December\fi}
@@ -52,22 +64,20 @@
 \fancyhead[L]{\leftmark} % Current section on the top left
 \fancyhead[R]{\thepage} % Page number on the right
 
-% Defines a command for framed definitions with a blue background and a title
-\newcommand{\definition}[2]{%
+% Defines a lightweight inline term definition: bold term lead-in with a left bar
+\newcommand{\termdef}[2]{%
 \begin{mdframed}[
-    hidealllines=false,
-    linecolor=blue!80!black,
-    linewidth=1pt,
-    backgroundcolor=blue!5,
-    roundcorner=5pt,
-    frametitle={#1},
-    frametitlebackgroundcolor=blue!80!black,
-    frametitlefont=\color{white}\bfseries,
-    innerbottommargin=10pt,
-    skipabove=10pt,
-    skipbelow=10pt
+    hidealllines=true,
+    leftline=true,
+    linecolor=blue!60!black,
+    linewidth=2pt,
+    backgroundcolor=blue!4,
+    innertopmargin=6pt,
+    innerbottommargin=6pt,
+    skipabove=6pt,
+    skipbelow=6pt
   ]
-  {#2}
+  \textbf{#1.}\ #2
   \end{mdframed}
 }
 

@@ -1,6 +1,6 @@
 \subsection{Feedforward Neural Networks}
 A Feedforward Neural Network (FFNN) is a type of artificial neural network that define a mapping from the input space to an output space. 
-The learned mapping $f(\boldsymbol{x})$ is defined as a composition of several functions, each representing a layer of the network.
+The learned mapping $f(\vct{x})$ is defined as a composition of several functions, each representing a layer of the network.
 \begin{figure}[H]
     \centering
     \scalebox{0.8}{
@@ -12,10 +12,10 @@ The learned mapping $f(\boldsymbol{x})$ is defined as a composition of several f
 
 For example, taking in consideration the FFNN architecture shown in the figure \ref{fig:FFNN_example} with three layers, we can express the mapping as follows:
 \begin{equation*}
-    f(\boldsymbol{x}) = f^{(5)}(f^{(4)}(f^{(3)}(f^{(2)}(f^{(1)}(\boldsymbol{x})))))
+    f(\vct{x}) = f^{(5)}(f^{(4)}(f^{(3)}(f^{(2)}(f^{(1)}(\vct{x})))))
 \end{equation*}
 \begin{itemize}
-    \item The first layer $f^{(1)}(\boldsymbol{x})$ is usually referred to as the \textbf{input layer}, each node corresponds to a feature of the input data. Usually no
+    \item The first layer $f^{(1)}(\vct{x})$ is usually referred to as the \textbf{input layer}, each node corresponds to a feature of the input data. Usually no
     computations are performed in this layer, as it simply serves as a conduit for the input data to be fed into the network;
     \item The layers $f^{(2)}$, $f^{(3)}$, and $f^{(4)}$ are called \textbf{hidden layers}, and they perform computations on the input data, applying a linear transformation followed by a non-linear activation function.
     The number of hidden layers and the number of neurons in each hidden layer depend on the architecture of the network and the complexity of the problem being solved.
@@ -34,8 +34,8 @@ FFNNs allow to overcome the limitations of linear models by introducing non-line
 FFNNs are not the only way to improve linear models, but they are one of the most powerful and widely used approaches.
 
 In general, to boost the performance of linear models, we can apply a non-linear transformation to the input data 
-$\boldsymbol{x} \rightarrow \phi(\boldsymbol{x})$, where $\phi$ is a non-linear function.
-We can then apply the same linear model as before to the transformed data $\phi(\boldsymbol{x})$. 
+$\vct{x} \rightarrow \phi(\vct{x})$, where $\phi$ is a non-linear function.
+We can then apply the same linear model as before to the transformed data $\phi(\vct{x})$. 
 The transformation $\phi$ can be implemented in various ways, such as:
 \begin{itemize}
     \item \textbf{Kernel Methods}: map the input data into a high-dimensional feature space (possibly infinite-dimensional) where linear models can be applied.
@@ -47,18 +47,18 @@ The transformation $\phi$ can be implemented in various ways, such as:
 \end{itemize}
 
 \subsubsection{Training a FFNN}
-To train a Neural Network, we need to optimize the parameters of the network (weights $\boldsymbol{\theta}$) to drive the output of the network $f(\boldsymbol{x}; \boldsymbol{\theta})$
-to match the target variable $y$ for a given input $\boldsymbol{x}$.
+To train a Neural Network, we need to optimize the parameters of the network (weights $\vct{\theta}$) to drive the output of the network $f(\vct{x}; \vct{\theta})$
+to match the target variable $y$ for a given input $\vct{x}$.
 
 The training process is nothing different from training any other machine learning model.
-We need to define a loss function $\mathcal{L}(f(\boldsymbol{x}; \boldsymbol{\theta}), y)$ that measures the discrepancy between the predicted output and the true target variable.
+We need to define a loss function $\loss(f(\vct{x}; \vct{\theta}), y)$ that measures the discrepancy between the predicted output and the true target variable.
 
 The largest difference with respect to linear models comes from the fact that most loss functions are non-convex, which removes the guarantee of finding a global minimum and makes the optimization process more challenging.
 
 \subsubsection{Modelling Choices}
 When designing a FFNN, we need to make several modelling choices, such as:
 \begin{itemize}
-    \item \textbf{Cost Function}: the choice of the loss function $\mathcal{L}$ depends on the type of problem we are trying to solve (e.g., regression, classification) and the properties of the data.
+    \item \textbf{Cost Function}: the choice of the loss function $\loss$ depends on the type of problem we are trying to solve (e.g., regression, classification) and the properties of the data.
     Each function has its own advantages and disadvantages, and the choice can significantly impact the performance of the model.
     \item \textbf{Form of Output}: the function applied in the output layer. Similarly to the cost function, the choice of the output units depends on the type of problem we are trying to solve;
     \item \textbf{Activation Function}: the non-linear function applied in the hidden layers. It's independent from the type of problem we are trying to solve, but it can significantly impact the

@@ -31,23 +31,23 @@ In this section, we will discuss some of the most common regularization methods 
 One of the most common regularization techniques is to add a penalty term to the loss function that encourages the model to have smaller weights.
 The general formulation of this regularization technique can be expressed as follows:
 \begin{equation*}
-    \mathcal{L}_{\text{reg}}(\boldsymbol{\theta}) = \mathcal{L}(\boldsymbol{\theta}) + \lambda \Omega(\boldsymbol{\theta})
+    \loss_{\text{reg}}(\vct{\theta}) = \loss(\vct{\theta}) + \lambda \Omega(\vct{\theta})
 \end{equation*}
-where $\mathcal{L}(\boldsymbol{\theta})$ is the original loss function, $\Omega(\boldsymbol{\theta})$ is the regularization term, and $\lambda$
+where $\loss(\vct{\theta})$ is the original loss function, $\Omega(\vct{\theta})$ is the regularization term, and $\lambda$
 is a hyperparameter that controls the strength of the regularization.
 
-The most common choices for the regularization term $\Omega(\boldsymbol{\theta})$ are:
+The most common choices for the regularization term $\Omega(\vct{\theta})$ are:
 \begin{itemize}
     \item \textbf{L2 Regularization}: also known as Ridge Regression, it adds a penalty term that encourages the model to have smaller weights 
     by adding the squared norm of the weights to the loss function. The regularization term can be expressed as follows:
     \begin{equation*}
-        \Omega(\boldsymbol{\theta}) = \frac{1}{2} \sum_{i} ||\theta_i^2||
+        \Omega(\vct{\theta}) = \frac{1}{2} \sum_{i} ||\theta_i^2||
     \end{equation*}
     \item \textbf{L1 Regularization}: also known as Lasso Regression, it adds a penalty term proportional to the absolute value of the weights.
     Differently from L2 regularization, L1 regularization favors the sparsity of the weights, setting the weights of less important features to zero. 
     The regularization term can be expressed as follows:
     \begin{equation*}
-        \Omega(\boldsymbol{\theta}) = \sum_{i} ||\theta_i||
+        \Omega(\vct{\theta}) = \sum_{i} ||\theta_i||
     \end{equation*}
 \end{itemize}
 \begin{comment}
@@ -83,12 +83,12 @@ levels of the network during training.
     Consequently, to minimize the expected loss, the network is encouraged to maintain smaller weights, mimicking the effect of $L_2$ regularization. 
     High levels of noise typically generate a smoother mapping function, improving generalization performance.
 
-    This concept is also foundational to \textit{Denoising Autoencoders}, where the network is trained to recover the original input 
+    This concept is also foundational to \textbf{Denoising Autoencoders}, where the network is trained to recover the original input 
     from a corrupted version, forcing it to learn more robust latent representations.
 
     \item \textbf{Weight Noise}: This technique adds noise to the weights during the forward pass, 
     forcing the model to remain performant even when parameters are slightly perturbed. 
-    This encourages the training process to converge to a \textit{flat minimum} of the loss function, 
+    This encourages the training process to converge to a \textbf{flat minimum} of the loss function, 
     where the model's performance is less sensitive to small changes in weight values.
 
     \item \textbf{Output Noise}: This discourages the model from making overconfident predictions by smoothing out the label distribution (often referred to as label smoothing). 
@@ -117,7 +117,7 @@ Multi-task learning is a regularization technique that involves training a model
     \label{fig:multi-task-learning}
 \end{figure}
 
-Usually, we have several tasks that share the same set of input data $\boldsymbol{x}$, as well as some intermediate representations $h^{(shared)}$,
+Usually, we have several tasks that share the same set of input data $\vct{x}$, as well as some intermediate representations $h^{(shared)}$,
 but may have different output layers $f^{(1)}$, $f^{(2)}$, ..., $f^{(n)}$ for each task.
 
 By sharing the intermediate representations, the model has 2 advantages:
@@ -135,7 +135,7 @@ This can be done by adding a penalty term to the loss function that encourages t
 In parameter sharing, we can enforce certain parameters to be exactly equal to each other.
 
 This technique can be particularly useful in cases where we have some prior knowledge about the structure of the data.
-In fact, it is at the base of \textit{Convolutional Neural Networks} (CNNs), where the same set of weights is shared across different spatial locations in the input image, 
+In fact, it is at the base of \textbf{Convolutional Neural Networks} (CNNs), where the same set of weights is shared across different spatial locations in the input image, 
 allowing the model to learn translation-invariant features.
 
 
@@ -143,7 +143,7 @@ allowing the model to learn translation-invariant features.
 We have already seen that the ensemble of multiple models can help to reduce overfitting by averaging out the errors of individual models.
 In deep learning, this approach would be computationally and time-consuming, as it would require training multiple models independently.
 
-\textit{Dropout} is a regularization technique born from the idea of ensemble learning, which allows to approximate the effect of training 
+\textbf{Dropout} is a regularization technique born from the idea of ensemble learning, which allows to approximate the effect of training 
 multiple models by randomly dropping out a subset of the neurons during training.
 \begin{figure}[H]
     \centering

@@ -1,21 +1,21 @@
 \subsection{Output Units}
 The output units are the last layer of the network, and their choice depends on the type of problem we are trying to solve.
 \begin{itemize}
-    \item \textbf{Linear Units}: used for regression problems, where the output is simply a linear combination of the inputs.
+    \item \textbf{Linear Units}: used for regression problems, where the output is simply a linear combination of the last hidden layer. 
+    For a given input $\vct{x}$, the output of the linear layer can be expressed as:
     \begin{equation*}
-        y = \boldsymbol{\theta}^T \boldsymbol{x} + \theta_0
+        y = \vct{\theta}^T \vct{x} + \theta_0
     \end{equation*}
+    Linear units usually do not saturate, which makes them effective for gradient-based optimization methods, 
+    as they do not suffer from the vanishing gradient problem.
     
-    \item \textbf{Softmax Units}: used for multi-class classification problems. They allow to take the unnormalized output of the last hidden layer
-    and convert it into a probability distribution over the classes.
-    For a given input $\boldsymbol{x}$, the output of the softmax layer can be expressed as:
+    \item \textbf{Softmax Units}: used for multi-class classification problems. 
+    A softmax layer takes the unnormalized output of the last hidden layer and converts it into a probability distribution over the classes.
+    For a given input $\vct{x}$, the output of the softmax layer can be expressed as:
     \begin{equation*}
         \hat{y}_i = \frac{\exp(z_i)}{\sum_{j=1}^{K} \exp(z_j)}
     \end{equation*}
     where $z_i$ is the output of the last hidden layer for class $i$, and $K$ is the total number of classes.
 
-    This produces a valid probability distribution over the classes, which also handles the multi-class classification case in a natural way.
+    The $exp$ function ensures that the output is always positive, and the normalization term ensures that the outputs sum to 1, making them naturally interpretable as probabilities.
 \end{itemize}
-\begin{comment}
-    #TODO: maybe more in softmax
-\end{comment}

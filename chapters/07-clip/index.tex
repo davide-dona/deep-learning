@@ -1,5 +1,5 @@
 \section{CLIP}
-\textit{CLIP} (Contrastive Language-Image Pretraining) is a SOTA \textit{Vision-Language-Model (VLM)}, designed to learn a joint embedding space for images and text, 
+\textbf{CLIP} (Contrastive Language-Image Pretraining) is a SOTA \textbf{Vision-Language-Model (VLM)}, designed to learn a joint embedding space for images and text, 
 enabling it to perform various tasks such as image classification, object detection, and zero-shot learning.
 
 CLIP is composed of two main components:
@@ -50,22 +50,22 @@ image-text pairs in a batch, while \textbf{minimizing} the cosine similarity of 
 
 The loss function used for training CLIP is a softmax-based contrastive loss, defined as:
 \begin{equation}
-    \mathcal{L} = -\frac{1}{2N} \sum_{i=1}^{N} \left(
-    \underbrace{\log \frac{\exp(\operatorname{sim}(v_i, t_i) / \tau)}{\sum_{j=1}^{N} \exp(\operatorname{sim}(v_i, t_j) / \tau)}}_{\textit{Image} \to \textit{Text}}
+    \loss = -\frac{1}{2N} \sum_{i=1}^{N} \left(
+    \underbrace{\log \frac{\exp(\simop(v_i, t_i) / \tau)}{\sum_{j=1}^{N} \exp(\simop(v_i, t_j) / \tau)}}_{\textit{Image} \to \textit{Text}}
     +
-    \underbrace{\log \frac{\exp(\operatorname{sim}(t_i, v_i) / \tau)}{\sum_{j=1}^{N} \exp(\operatorname{sim}(t_i, v_j) / \tau)}}_{\textit{Text} \to \textit{Image}}\right),
+    \underbrace{\log \frac{\exp(\simop(t_i, v_i) / \tau)}{\sum_{j=1}^{N} \exp(\simop(t_i, v_j) / \tau)}}_{\textit{Text} \to \textit{Image}}\right),
 \end{equation}
 
-where $v_i$ and $t_i$ are the embeddings of the $i$-th image and text pair, $\text{sim}$ is the cosine similarity function, and $\tau$ is a temperature hyperparameter that controls the sharpness of the distribution.
+where $v_i$ and $t_i$ are the embeddings of the $i$-th image and text pair, $\simop$ is the cosine similarity function, and $\tau$ is a \textbf{temperature} hyperparameter that controls the sharpness of the distribution.
 This loss encourages the model to learn a shared embedding space where semantically similar images and text are
 close together, while dissimilar pairs are far apart.
 
-\paragraph{Temperature}: The temperature $\tau$ is a hyperparameter that controls the sharpness of the distribution in the contrastive loss.
-A lower temperature makes the distribution sharper, which can lead to better performance but also increases the risk of overfitting. 
-Conversely, a higher temperature makes the distribution softer over the possible classes, which can help to prevent overfitting but may lead to worse performance.
+\termdef{Temperature}{The temperature $\tau$ is a hyperparameter that controls the sharpness of the distribution in the contrastive loss.
+A lower temperature makes the distribution sharper, which can lead to better performance but also increases the risk of overfitting.
+Conversely, a higher temperature makes the distribution softer over the possible classes, which can help to prevent overfitting but may lead to worse performance.}
 
-\paragraph{Training Phase}: Since the WebImageText dataset is very large, both the image and text encoders are trained from scratch, without using any pretraining on other datasets.
-Simple data augmentation techniques are applied to the images.
+\termdef{Training Phase}{Since the WebImageText dataset is very large, both the image and text encoders are trained from scratch, without using any pretraining on other datasets.
+Simple data augmentation techniques are applied to the images.}
 
 \paragraph{Limitations of the training approach}
 \label{CLIP:training-limitations}
@@ -134,7 +134,7 @@ are them summed with the learned prompt vectors to generate the final prompts th
 This allows CoCoOp to adapt the prompts based on the specific image being processed, improving generalization to new classes and reducing overfitting to the classes seen during training.
 
 The problem with this approach is that it is more computationally expensive than CoOp, as it requires an additional forward pass through the meta-network for each image,
-during the training phase.
+during the \textbf{training phase}.
 
 \paragraph{Visual Prompt Tuning}
 All the approaches described so far have focused on optimizing the text prompts, while keeping the image encoder fixed.

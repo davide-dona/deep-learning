@@ -4,43 +4,43 @@ To fit a model to some data distribution, a simple and common approach is to use
 \subsubsection{Maximum Likelihood Estimation}
 In MLE, we want to estimate the parameters of an assumed probability distribution, given some observed data. For example, if we assume that the data is generated from a Gaussian distribution, we can estimate the mean and variance of that distribution using MLE.
 
-More formally, given a dataset $\boldsymbol{X} = \{\boldsymbol{x}_1, \boldsymbol{x}_2, \ldots, \boldsymbol{x}_N\}$ and a known probability distribution $p_{\text{model}}(\boldsymbol{x}|\boldsymbol{\theta})$
-we want to find the parameters $\boldsymbol{\theta}$ that better explain the data.
+More formally, given a dataset $\mat{X} = \{\vct{x}_1, \vct{x}_2, \ldots, \vct{x}_N\}$ and a known probability distribution $p_{\text{model}}(\vct{x}|\vct{\theta})$
+we want to find the parameters $\vct{\theta}$ that better explain the data.
 \begin{equation}
     \label{MLE}
-    \boldsymbol{\theta}^* = \arg\max_{\boldsymbol{\theta}} p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta})
+    \vct{\theta}^* = \arg\max_{\vct{\theta}} p_{\text{model}}(\mat{X}|\vct{\theta})
 \end{equation}
 Assuming that the data points are independent and identically distributed (i.i.d.), we can express the likelihood as a product of individual probabilities:
 \begin{equation*}
-    p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta}) = \prod_{i=1}^{N} p_{\text{model}}(\boldsymbol{x}_i|\boldsymbol{\theta})
+    p_{\text{model}}(\mat{X}|\vct{\theta}) = \prod_{i=1}^{N} p_{\text{model}}(\vct{x}_i|\vct{\theta})
 \end{equation*}
 To simplify the optimization process, we often take the logarithm of the likelihood function, which transforms the product into a sum:
 \begin{equation*}
-    \log p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta}) = \sum_{i=1}^{N} \log p_{\text{model}}(\boldsymbol{x}_i|\boldsymbol{\theta})
+    \log p_{\text{model}}(\mat{X}|\vct{\theta}) = \sum_{i=1}^{N} \log p_{\text{model}}(\vct{x}_i|\vct{\theta})
 \end{equation*}
 We can show that this is equivalent to considering the expected value of the log-likelihood over the empirical (observed) data distribution:
 \begin{equation*}
-    \log p_{\text{model}}(\boldsymbol{X}|\boldsymbol{\theta}) = N \cdot \mathbb{E}_{\boldsymbol{x} \sim p_{\text{data}}}[\log p_{\text{model}}(\boldsymbol{x}|\boldsymbol{\theta})]
+    \log p_{\text{model}}(\mat{X}|\vct{\theta}) = N \cdot \E_{\vct{x} \sim p_{\text{data}}}[\log p_{\text{model}}(\vct{x}|\vct{\theta})]
 \end{equation*}
-where $p_{\text{data}}$ is the empirical distribution of the observed data and $\mathbb{E}_{\boldsymbol{x} \sim p_{\text{data}}}$ denotes the expected value sampled from this distribution.
+where $p_{\text{data}}$ is the empirical distribution of the observed data and $\E_{\vct{x} \sim p_{\text{data}}}$ denotes the expected value sampled from this distribution.
 
-To find the optimal parameters $\boldsymbol{\theta}^*$, we usually differentiate the log-likelihood with respect to $\boldsymbol{\theta}$ and set it
+To find the optimal parameters $\vct{\theta}^*$, we usually differentiate the log-likelihood with respect to $\vct{\theta}$ and set it
 to zero. We can then resolve the resulting equation to find the optimal parameters.
 
-The equation \ref{MLE} can also be extended to the case of conditional probability distributions ($p_{\text{model}}(y|\boldsymbol{x}, \boldsymbol{\theta})$) in order to predict a target variable $y$ given an input variable $\boldsymbol{x}$:
+The equation \ref{MLE} can also be extended to the case of conditional probability distributions ($p_{\text{model}}(y|\vct{x}, \vct{\theta})$) in order to predict a target variable $y$ given an input variable $\vct{x}$:
 \begin{equation*}
-    \boldsymbol{\theta}^* = \arg\max_{\boldsymbol{\theta}} p_{\text{model}}(y|\boldsymbol{x}, \boldsymbol{\theta})
+    \vct{\theta}^* = \arg\max_{\vct{\theta}} p_{\text{model}}(y|\vct{x}, \vct{\theta})
 \end{equation*}
 
 \subsubsection{Example: Logistic Regression}
 One of the simplest examples of MLE is \textbf{Logistic Regression}, which is a linear model used for binary classification tasks. 
-In Logistic Regression, we assume that the conditional probability distribution of the target variable $y$ given the input variable $\boldsymbol{x}$ follows a logistic function:
+In Logistic Regression, we assume that the conditional probability distribution of the target variable $y$ given the input variable $\vct{x}$ follows a logistic function:
 \begin{equation}
     \label{Logistic Regression}
-    p_{\text{model}}(y=1|\boldsymbol{x}, \boldsymbol{\theta}) = \sigma(\boldsymbol{\theta}^T \boldsymbol{x}) = \frac{1}{1 + e^{-\boldsymbol{\theta}^T \boldsymbol{x}}}
+    p_{\text{model}}(y=1|\vct{x}, \vct{\theta}) = \sigma(\vct{\theta}^T \vct{x}) = \frac{1}{1 + e^{-\vct{\theta}^T \vct{x}}}
 \end{equation}
 We can clearly see that the logistic function $\sigma(z)$ can be interpreted as a \textbf{neuron}:
 \begin{itemize}
-    \item The input to the neuron is the linear combination of the input features $\boldsymbol{x}$ and the parameters $\boldsymbol{\theta}$.
+    \item The input to the neuron is the linear combination of the input features $\vct{x}$ and the parameters $\vct{\theta}$.
     \item The sigmoid activation function $\sigma(z)$ is a non-linear function that maps the input to a probability value between 0 and 1.
 \end{itemize}

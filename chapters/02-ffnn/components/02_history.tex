@@ -33,14 +33,14 @@ The prediction $\hat{y}$ of the perceptron is given by the following formula:
 where $\theta_i$ are the weights associated with each input $x_i$, and $\sigma$ is the activation function.
 We can also express the prediction in vector form as follows:
 \begin{equation}
-    \hat{y} = \sigma\left(\boldsymbol{\theta}^T \boldsymbol{x} + \theta_0\right)
+    \hat{y} = \sigma\left(\vct{\theta}^T \vct{x} + \theta_0\right)
 \end{equation}
 
 The most important intuition is that the weights $\theta_i$ are not fixed, but rather learned from data.
 
 The bias term is introduced to allow the model to shift the decision boundary (hyperplane) away from the origin.
 
-\definition{Perceptron}{
+\termdef{Perceptron}{
     An artificial neuron, i.e., a perceptron is a non-linear parametrized function
     with a restricted output range.
 }
@@ -50,17 +50,17 @@ which allows the model to learn complex patterns in the data.
 \paragraph{Perceptron Learning Algorithm}
 \label{perceptron-training}
 The weights of the perceptron are learned from data using the \textbf{Perceptron Training Rule}.
-Given a set of training examples $\mathcal{T} = \{(\boldsymbol{x_1}, y_1), (\boldsymbol{x_2}, y_2), \ldots, (\boldsymbol{x_N}, y_N)\}$, $y_i \in \{0, 1\}$
+Given a set of training examples $\mathcal{T} = \{(\vct{x}_1, y_1), (\vct{x}_2, y_2), \ldots, (\vct{x}_N, y_N)\}$, $y_i \in \{0, 1\}$
 and a learning rate $\eta$, the weights are updated as follows:
 \begin{enumerate}
     \item Initialize the weights $\theta_i$ to small random values;
     \item Until convergence, repeat:
     \begin{enumerate}
-        \item Select randomly a training example $(\boldsymbol{x_i}, y_i)$ from $\mathcal{T}$;
+        \item Select randomly a training example $(\vct{x}_i, y_i)$ from $\mathcal{T}$;
         \item Compute the prediction $\hat{y}_i$ using the current weights:
-        \[ \hat{y}_i = \sigma\left(\boldsymbol{\theta}^T \boldsymbol{x_i} + \theta_0 \right) \]
+        \[ \hat{y}_i = \sigma\left(\vct{\theta}^T \vct{x}_i + \theta_0 \right) \]
         \item Update the weights based on the error between the prediction and the true label:
-        \[ \boldsymbol{\theta}^{(t+1)} \leftarrow \boldsymbol{\theta}^{(t)} + \eta (y_i - \hat{y}_i) \boldsymbol{x_i} \]
+        \[ \vct{\theta}^{(t+1)} \leftarrow \vct{\theta}^{(t)} + \eta (y_i - \hat{y}_i) \vct{x}_i \]
         \item Update the bias:
         \[ \theta_0^{(t+1)} \leftarrow \theta_0^{(t)} + \eta (y_i - \hat{y}_i) \]
     \end{enumerate}
@@ -87,16 +87,16 @@ The perceptron learning algorithm is not suitable for training MLPs, as no expec
 Backpropagation is an efficient algorithm for computing the gradients also for large datasets.
 At a high level, the algorithm can be summarized as follows:
 \begin{enumerate}
-    \item \textbf{Forward propagation}: Given an input $\boldsymbol{x}$, compute the output of the network $\hat{y}$ by
+    \item \textbf{Forward propagation}: Given an input $\vct{x}$, compute the output of the network $\hat{y}$ by
     propagating the input through the layers of the network;
-    \item \textbf{Loss computation}: Compute the loss $L(y, f(\boldsymbol{x}, \boldsymbol{\theta}))$, where $y$ is the true label and $f(\boldsymbol{x}, \boldsymbol{\theta})$ is the output of the network with parameters $\boldsymbol{\theta}$;
+    \item \textbf{Loss computation}: Compute the loss $L(y, f(\vct{x}, \vct{\theta}))$, where $y$ is the true label and $f(\vct{x}, \vct{\theta})$ is the output of the network with parameters $\vct{\theta}$;
     \item \textbf{Backward propagation}: the error signal is propagated backwards through the network and it's used to update the weights.
 \end{enumerate}
 This concept is covered in more detail later in this chapter.
 
 \paragraph{Cybenko's Theorem}
 Cybenko's theorem states that a 2-layer feed-forward neural network with linear output
-can approximate any continuous function on a compact subset of $\mathbb{R}^n$ with arbitrary accuracy.
+can approximate any continuous function on a compact subset of $\R^n$ with arbitrary accuracy.
 
 In practice, the more hidden layers we have, the more complex functions we can learn. Deep
 neural networks need a lot of labeled data to be trained, and cannot be trained easily.

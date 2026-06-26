@@ -32,7 +32,7 @@ The main reason why we need Machine Learning can be summarized in the following 
 \end{itemize}
 
 \subsubsection{Machine Learning - Another definition}
-\definition{Machine Learning}{
+\termdef{Machine Learning}{
     A computer program is said to learn from experience $E$ with respect to some class of tasks $T$
     and performance measure $P$, if its performance at tasks in $T$, as measured by $P$, improves with
     experience $E$.
@@ -56,7 +56,7 @@ We can identify three main types of learning:
 \subsubsection{Supervised Learning}
 Supervised learning can be further divided into subcategories. In particular, we are interested in the following:
 \begin{itemize}
-    \item \textbf{Classification}: The output is a discrete label. More formally, given a training set $\mathcal{D} = \{(\mathbf{x}_1, y_1), \dots, (\mathbf{x}_n, y_n)\}$ we can define it as:
+    \item \textbf{Classification}: The output is a discrete label. More formally, given a training set $\mathcal{D} = \{(\vct{x}_1, y_1), \dots, (\vct{x}_n, y_n)\}$ we can define it as:
     \begin{equation}
         f: \mathcal{X} \rightarrow \{1,\dots,k\}
     \end{equation}
@@ -64,9 +64,9 @@ Supervised learning can be further divided into subcategories. In particular, we
     
     Based on the number of classes, we can further divide classification into \textbf{binary classification} ($k=2$) and \textbf{multi-class classification} ($k>2$).
     
-    \item \textbf{Regression}: The output is a continuous value. More formally, given a training set $\mathcal{D} = \{(\mathbf{x}_1, y_1), \dots, (\mathbf{x}_n, y_n)\}$ we can define it as:
+    \item \textbf{Regression}: The output is a continuous value. More formally, given a training set $\mathcal{D} = \{(\vct{x}_1, y_1), \dots, (\vct{x}_n, y_n)\}$ we can define it as:
     \begin{equation}
-        f: \mathcal{X} \rightarrow \mathbb{R}
+        f: \mathcal{X} \rightarrow \R
     \end{equation}
     
     \item \textbf{Structured output}: \textbf{supervised learning} doesn't necessarily require a \textbf{vector} as input and a \textbf{scalar} as output.

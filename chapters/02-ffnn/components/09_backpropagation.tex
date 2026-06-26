@@ -1,11 +1,12 @@
 \subsection{Backpropagation}
-The perceptron learning algorithm (see \ref{perceptron-training}) is not suitable for training FFNNs,
-as it requires to compute the difference between the predicted output and the ground truth for each training example.
-This is not possible for FFNNs, as in fact for hidden layers we don't have access to the true output, and we need to compute 
-the error based on the output of the network and the true target variable.
+The perceptron learning algorithm (see Section~\ref{perceptron-training}) is designed for single-layer perceptrons and therefore cannot be directly applied to Feedforward Neural Networks (FFNNs). 
+In a multilayer network, only the output layer can be directly compared with the ground truth, while the hidden layers do not have target values from which their errors can be computed.
 
-To solve this problem, we can use the \textbf{Stochastic Gradient Descent} (SGD) algorithm, in combination with the \textbf{backpropagation} algorithm, 
-which allows to efficiently compute the gradients of the loss function with respect to the parameters of the network.
+To train an FFNN, the error observed at the output layer must be propagated backward through the network to determine how each parameter contributes to the overall loss. 
+This is achieved by the \textbf{backpropagation} algorithm, which efficiently computes the gradient of the loss function with respect to every trainable parameter by repeatedly applying the chain rule of calculus.
+
+Once these gradients have been computed, they are used by an optimization algorithm, such as \textbf{Stochastic Gradient Descent} (SGD), to update the network parameters and minimize the loss function.
+
 \subsubsection{Idea behind Backpropagation}
 Before backpropagation, a few ideas were proposed to learn the weights inside a FFNN:
 \begin{itemize}
@@ -21,12 +22,11 @@ From the last idea, the backpropagation algorithm was born, which instead measur
 \subsubsection{The algorithm}
 The backpropagation algorithm, introduced in the section \ref{introduction-backpropagation}, consists of three main steps:
 \begin{itemize}
-    \item \textbf{Forward Pass}: compute the output of the network for a given input $\boldsymbol{x}$ and the current parameters $\boldsymbol{\theta}$;
+    \item \textbf{Forward Pass}: compute the output of the network for a given input $\vct{x}$ and the current parameters $\vct{\theta}$;
     \item \textbf{Error Computation}: compute the error at the output layer by comparing the predicted output with the true target variable $y$;
     \item \textbf{Backward Pass}: propagate the error signal back through the network, allowing to update the parameters of the network using the computed gradients.
 \end{itemize}
-As said before, we cannot know from the training data what the expected output of the hidden units should be, but we can compute how
-the error changes with respect to the change in the hidden units.
+As discussed previously, the expected outputs of the hidden units are not available in the training data. Instead, backpropagation determines how changes in the activations of the hidden units affect the overall loss. By repeatedly applying the chain rule, the algorithm computes the contribution of each hidden unit to the loss and, consequently, the gradients required to update the network parameters during the optimization step.
 
 \subsubsection{Single Neuron Case}
 Let's first consider a neural network with just one neuron in each layer.
@@ -37,25 +37,25 @@ After performing the forward pass, we can express the output of the network as f
 where $a^{(L)}$ is the output of the last layer, $\sigma$ is a non-linear activation function, 
 $w^{(L)}$ and $b^{(L)}$ are respectively the weight and bias of the last layer, and $a^{(L-1)}$ is the output of the previous layer.
 
-Our goal is to understand how a small change in the parameters $w^{(l)}$ will affect the loss function $\mathcal{L}$.
+Our goal is to understand how a small change in the parameters $w^{(l)}$ will affect the loss function $\loss$.
 When computing this, we need to consider the chain of dependencies between the parameters and the loss function:
 \begin{itemize}
     \item How a change in $w^{(l)}$ affects the output of the layer $z^{(l)}$;
     \item How a change in $z^{(l)}$ affects the output of the layer $a^{(l)}$;
-    \item How a change in $a^{(l)}$ affects the loss function $\mathcal{L}$.
+    \item How a change in $a^{(l)}$ affects the loss function $\loss$.
 \end{itemize}
 This is where the chain rule of calculus comes into play, allowing us to compute the gradient of the 
 loss function with respect to the parameters by multiplying the gradients along the chain of dependencies.
 
 Formally, we can express the gradient of the loss function with respect to the parameters $w^{(l)}$ as follows:
 \begin{equation*}
-    \frac{\partial \mathcal{L}}{\partial w^{(l)}} = \frac{\partial z^{(l)}}{\partial w^{(l)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \mathcal{L}}{\partial a^{(l)}}
+    \frac{\partial \loss}{\partial w^{(l)}} = \frac{\partial z^{(l)}}{\partial w^{(l)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \loss}{\partial a^{(l)}}
 \end{equation*}
 where respectively:
 \begin{itemize}
     \item $\frac{\partial z^{(l)}}{\partial w^{(l)}}$ measures how a small change in the weight $w^{(l)}$ affects the output of the layer $z^{(l)}$;
     \item $\frac{\partial a^{(l)}}{\partial z^{(l)}}$ measures how a small change in the output of the layer $z^{(l)}$ affects the output of the activation function $a^{(l)}$;
-    \item $\frac{\partial \mathcal{L}}{\partial a^{(l)}}$ measures how a small change in the output of the activation function $a^{(l)}$ affects the loss function $\mathcal{L}$.
+    \item $\frac{\partial \loss}{\partial a^{(l)}}$ measures how a small change in the output of the activation function $a^{(l)}$ affects the loss function $\loss$.
 \end{itemize}
 The process can be extended to deeper layers. In those cases, we need to consider the chain of dependencies from the parameter we want to update
 to the output of the network, computing the gradients along the way using the chain rule of calculus.
@@ -66,7 +66,7 @@ to the output of the network, computing the gradients along the way using the ch
 \end{figure}
 Taking in consideration the architecture shown in the figure above, we can express the derivative of the loss function with respect to a parameter $w^{(l-1)}$ in a deeper layer as follows:
 \begin{equation*}
-    \frac{\partial \mathcal{L}}{\partial w^{(l-1)}} = \frac{\partial z^{(l-1)}}{\partial w^{(l-1)}} \cdot \frac{\partial a^{(l-1)}}{\partial z^{(l-1)}} \cdot \underbrace{\frac{\partial z^{(l)}}{\partial a^{(l-1)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \mathcal{L}}{\partial a^{(l)}}}_{\frac{\partial \mathcal{L}}{\partial a^{(l-1)}}}
+    \frac{\partial \loss}{\partial w^{(l-1)}} = \frac{\partial z^{(l-1)}}{\partial w^{(l-1)}} \cdot \frac{\partial a^{(l-1)}}{\partial z^{(l-1)}} \cdot \underbrace{\frac{\partial z^{(l)}}{\partial a^{(l-1)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \loss}{\partial a^{(l)}}}_{\frac{\partial \loss}{\partial a^{(l-1)}}}
 \end{equation*}
 \subsubsection{General Case}
 The general case of backpropagation doesn't differ much from the single neuron case. We simply have to consider all the possible
@@ -83,7 +83,7 @@ where $a_j^{(l-1)}$ is the output of the $j$-th neuron in the previous layer, an
 
 When we consider the output layer neurons, the chain of dependencies remains the same as in the single neuron case, as each output neuron is directly connected to the loss function.
 \begin{equation*}
-    \frac{\partial \mathcal{L}}{\partial w_{ij}^{(L)}} = \frac{\partial z_i^{(L)}}{\partial w_{ij}^{(L)}} \cdot \frac{\partial a_i^{(L)}}{\partial z_i^{(L)}} \cdot \frac{\partial \mathcal{L}}{\partial a_i^{(L)}}
+    \frac{\partial \loss}{\partial w_{ij}^{(L)}} = \frac{\partial z_i^{(L)}}{\partial w_{ij}^{(L)}} \cdot \frac{\partial a_i^{(L)}}{\partial z_i^{(L)}} \cdot \frac{\partial \loss}{\partial a_i^{(L)}}
 \end{equation*}
 
 For the hidden layer neurons, we instead need to consider all the possible paths from the parameter we want to update to the output layer, and compute the gradients accordingly.
@@ -94,5 +94,5 @@ For the hidden layer neurons, we instead need to consider all the possible paths
     \label{fig:backpropagation_output}
 \end{figure}
 \begin{equation*}
-    \frac{\partial \mathcal{L}}{\partial a_j^{(l-1)}} = \sum_{i} \frac{\partial z_i^{(l)}}{\partial a_j^{(l-1)}} \cdot \frac{\partial a_i^{(l)}}{\partial z_i^{(l)}} \cdot \frac{\partial \mathcal{L}}{\partial a_i^{(l)}}
+    \frac{\partial \loss}{\partial a_j^{(l-1)}} = \sum_{i} \frac{\partial z_i^{(l)}}{\partial a_j^{(l-1)}} \cdot \frac{\partial a_i^{(l)}}{\partial z_i^{(l)}} \cdot \frac{\partial \loss}{\partial a_i^{(l)}}
 \end{equation*}
