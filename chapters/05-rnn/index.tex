@@ -1,8 +1,8 @@
 \section{Recurrent Neural Networks}
 Unlike the architectures previously discussed, which only process data represented as fixed-size vectors for both input and output, 
 \textbf{Recurrent Neural Networks} (RNNs) are designed to handle sequential data. 
-Standard feed-forward models face significant limitations with real-world data types—such as text, audio, and video—which are inherently sequential 
-and vary in length.
+
+Standard feed-forward models face significant limitations with real-world data types such as text, audio, and video, which are inherently sequential and vary in length.
 
 \textbf{Recurrent Neural Networks} (RNNs) were the first architectures specifically designed to handle
 this kind of data, enabling solutions to a wide range of tasks, such as:
@@ -19,7 +19,7 @@ this kind of data, enabling solutions to a wide range of tasks, such as:
 
 \subsection{RNN Architecture types}
 While classical Feed-Forward Neural Networks (FFNNs) are categorized as \textbf{one-to-one} (or single-to-single) 
-architectures—taking one input and producing one output—RNNs are classified based on how they map input sequences to output sequences.
+architectures, taking one input and producing one output, RNNs are classified based on how they map input sequences to output sequences.
 The primary types include:
 \begin{itemize}
     \item \textbf{Many-to-One}: This type of RNN takes a sequence of inputs and produces a single output.
@@ -164,7 +164,7 @@ This approach is particularly effective for tasks where long-term dependencies a
 it fails to capture dependencies that span more than $k_2$ time steps, but it can still be useful for many applications where recent context is more relevant.
 
 \subsection{Long Short-Term Memory (LSTM)}
-To address the limitations of Vanilla RNNs—specifically the \textbf{vanishing gradient problem}—\textbf{Long Short-Term Memory} (LSTM) 
+To address the limitations of Vanilla RNNs, specifically the \textbf{vanishing gradient problem}, \textbf{Long Short-Term Memory} (LSTM) 
 networks were introduced. LSTMs utilize a gated architecture designed to maintain a persistent state over long sequences, 
 allowing the model to learn when to forget old information and when to update with new inputs.
 

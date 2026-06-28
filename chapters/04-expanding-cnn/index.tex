@@ -1,15 +1,17 @@
 \section{Expanding CNN Beyond Classification}
 In the previous chapter, we have seen how Convolutional Neural Networks (CNNs) can be used for image classification tasks. 
-However, CNNs can be applied to a wide range of other tasks beyond classification, such as \textbf{object detection}, 
+
+CNNs can however be applied to a wide range of other tasks beyond classification, such as \textbf{object detection}, 
 \textbf{semantic segmentation}, and \textbf{captioning}, among others.
 In this chapter, we will explore some of these applications and how CNNs can be adapted to solve them.
 
 \subsection{Object Detection}
-Object detection is the task of identifying and localizing objects within an image. It can be seen as a combination of
-classification (what object is present) and regression (where is the object located).
+\textbf{Object detection} is the task of identifying and localizing objects within an image. It can be seen as a combination of
+\textbf{regression} (where is the object located)and \textbf{classification} (what object is present).
 The task input would be an image, and the output would be a set of bounding boxes around the detected objects, along with their corresponding class labels.
 
-This task is more complex than image classification, as it requires the model to not only recognize the presence of objects but also to accurately localize them within the image.
+This task is more complex than basic image classification, as it requires the model not only to recognize the presence of objects, 
+but also to accurately localize them within the image.
 This makes also the training process more challenging, as several issues can arise, such as:
 \begin{itemize}
     \item \textbf{Data scarcity}: Object detection datasets are often smaller than classification datasets. Also,
@@ -21,7 +23,7 @@ This makes also the training process more challenging, as several issues can ari
 To address these issues, several architectures have been proposed, such as \textbf{R-CNN}, \textbf{Fast R-CNN}, and \textbf{YOLO} (You Only Look Once), among others.
 
 \subsubsection{Before CNNs: DPM}
-Before AlexNet and the rise of CNNs, one of the most popular approaches for object detection was the Deformable Part Model (DPM).
+Before the rise of deep learning and CNNs, one of the most popular approaches for object detection was the \textbf{Deformable Part Model} (DPM).
 DPM is a method that models objects as a collection of parts, where each part can be described by a set of features. 
 The model learns to detect these parts and their spatial relationships to identify the presence of an object in an image.
 
@@ -29,35 +31,43 @@ This approach was quite effective for its time, but reached a plateau in perform
 
 \subsubsection{Selective Search}
 One of the key challenges in object detection is to efficiently search for objects in an image.
-Selective Search is a method that generates a set of candidate regions (also called proposals) in an image
-that are likely to contain objects. 
+\textbf{Selective Search} is a method that generates a set of candidate regions (also called \textbf{proposals}) in an image that are likely to contain objects. 
+
 Given the proposals, the process of object detection can be simplified to a classification task, where the model only needs to classify the proposals as containing an object or not,
 which is much easier than searching for objects in the entire image.
 
 To detect objects at any scale, Selective Search uses a hierarchical grouping of superpixels, which are small regions of an image that 
 have similar features (such as color, texture, or intensity).
-The algorithm starts by generating all the possible candidate objects. Similar regions
-are then merged together based on their similarity. 
-Once the merging process is complete, the algorithm uses the resulting regions as proposals for object detection.
+
+The algorithm starts by generating all the possible candidate objects. 
+Similar regions are then recursively merged together based on their similarity. 
+Once the merging process is complete, the algorithm uses the resulting regions as candidate object proposals for the object detection task.
 
 \subsubsection{R-CNN}
-R-CNN (Region-based Convolutional Neural Networks) is one of the first architectures that successfully applied CNNs to object detection. 
+\textbf{R-CNN} (Region-based Convolutional Neural Networks) is one of the first architectures that successfully applied CNNs to object detection. 
 The R-CNN architecture consists of three main steps:
 \begin{itemize}
     \item \textbf{Region Proposal}: The first step is to generate a set of candidate regions (proposals) in the image using Selective Search.
-    \item \textbf{Feature Extraction}: The second step is to extract features from each proposal using a CNN.
-    \item \textbf{Classification}: The final step is to classify each proposal as containing an object or not, and to assign a class label to the detected objects.
+    
+    \item \textbf{Feature Extraction}: Each proposal is then first resized to a fixed size (e.g., 224x224) and then passed through a CNN to extract a fixed-length feature vector.
+    
+    \item \textbf{Classification}: the extracted features are then used to classify each proposal as containing an object or not, and to assign a class label to the detected objects.
     This was typically done using a Support Vector Machine (SVM) classifier, which was trained on the features extracted from the proposals.
 \end{itemize}
 
-This approach was a significant improvement over previous methods, but had a few limitations, such as:
+This approach was a significant improvement over previous methods, but it still had a few major limitations, such as:
 \begin{itemize}
     \item \textbf{NOT an end-to-end architecture}: The R-CNN architecture is not an end-to-end architecture, as it requires separate training for the region proposal, feature extraction, and classification steps.
     Deep learning models are known to perform better when trained end-to-end, as they can learn to optimize the entire process jointly.
+    
     \item \textbf{Image resizing}: Each proposal must be resized to a fixed size (e.g., 224x224) before being fed into the CNN for feature extraction.
     This can lead to a loss of information, especially for small objects, and can also introduce distortions in the aspect ratio of the proposals.
+    
     \item \textbf{Computationally expensive}: The R-CNN architecture is computationally expensive, as it requires running the CNN for each proposal, 
     which can be in the order of thousands per image (takes around 47 seconds per image on a GPU).
+    
+    \item \textbf{Selective Search}: The region proposal step relies on Selective Search, which is a hand-crafted and fixed algorithm.
+    It may not be optimal for all types of images and objects, and can never be improved through learning.
 \end{itemize}
 
 \subsubsection{Fast R-CNN}
@@ -68,29 +78,34 @@ The main innovations of Fast R-CNN are:
 \begin{itemize}
     \item \textbf{Shared Convolutional Architecture}: Instead of running the CNN separately for each proposal, 
     Fast R-CNN processes the entire image through a convolutional network to produce a global feature map. 
-    \item \textbf{RoI Pooling Layer}: To handle the variable sizes of the region proposals, 
-    Fast R-CNN introduces a Region of Interest (RoI) pooling layer.
-    This layer takes the feature map generated from the entire image and extracts fixed-size feature vectors for each region proposal. 
+    
+    \item \textbf{RoI Pooling Layer}: To handle the variable sizes of the region proposals, Fast R-CNN introduces a \textbf{Region of Interest} (RoI) \textbf{pooling} layer.
+    This layer takes the feature map generated from the entire image and extracts fixed-size feature vectors for each region proposal.
     The RoI pooling layer divides the feature map into a grid and applies max pooling to each grid cell, resulting in a fixed-size output regardless of the original proposal size.
+    
     \item \textbf{Multi-Task Loss}: Fast R-CNN also introduces a multi-task loss function that combines classification and bounding box regression into a single optimization problem.
     This allows the model to learn both tasks simultaneously, improving the overall performance and efficiency of the training process.
 \end{itemize}
-This approach allowed reducing inference time significantly (to around 0.3 seconds per image on a GPU, from the 47 seconds of R-CNN), while also improving the accuracy of the model,
-while also allowing for end-to-end training of the entire architecture.
+
+This approach allowed reducing inference time significantly (to around 0.3 seconds per image on a GPU, from the 47 seconds of R-CNN), while also slightly improving the accuracy of the model.
 
 \subsubsection{Faster R-CNN}
 While Fast R-CNN significantly reduced the computational cost of the detection head, it remained bottlenecked by external region proposal 
 methods like \textbf{Selective Search}, which typically took $\sim 2$ seconds per image on a CPU. 
+Not only did this slow down the inference time, but it also prevented the model from being trained end-to-end, as the region proposal step was not learnable.
 
-Faster R-CNN addresses this by introducing a \textbf{Region Proposal Network (RPN)}, 
-allowing for a truly unified, end-to-end object detection framework.
+Faster R-CNN addresses this by introducing a \textbf{Region Proposal Network (RPN)}, allowing for a truly unified, end-to-end object detection framework.
 
 The architecture of Faster R-CNN consists of the following components:
 \begin{itemize}
     \item \textbf{Shared Convolutional Network}: Like its predecessor, it processes the entire image once to generate a high-level feature map.
+    
     \item \textbf{Region Proposal Network (RPN)}: A small, fully convolutional network that slides over the feature map. 
     At each sliding window location, it predicts objectness scores and bounding box offsets for $k$ \textbf{anchor boxes} of varying scales and aspect ratios.
+    This implies that, for each position in the feature map, the RPN generates $k$ proposals, which are then filtered using non-maximum suppression (NMS) to remove redundant boxes.
+    
     \item \textbf{RoI Pooling Layer}: This layer crops and reshapes the regions proposed by the RPN from the shared feature map into fixed-size feature vectors.
+    
     \item \textbf{Classification and Bounding Box Regression}: The final stage consists of fully connected layers that predict the specific object class and perform fine-grained coordinates refinement.
 \end{itemize}
 
@@ -99,7 +114,7 @@ By replacing Selective Search with the RPN, Faster R-CNN achieves an inference t
 Furthermore, because the RPN is trained specifically for the task, it typically yields higher-quality proposals than traditional computer vision algorithms, leading to improved mAP.
 
 \paragraph{You Only Look Once (YOLO)}
-YOLO (You Only Look Once) is a different approach to object detection. Instead of using a two-stage process like R-CNN and its variants,
+\textbf{YOLO} (You Only Look Once) is a different approach to object detection. Instead of using a two-stage process like R-CNN and its variants,
 which was very slow and hard to train, YOLO treats object detection as a single regression problem, 
 directly predicting bounding boxes and class probabilities from the input image in one pass through the network.
 
@@ -107,40 +122,47 @@ The process of YOLO can be summarized as follows:
 \begin{itemize}
     \item \textbf{Grid Division}: The input image is divided into an $S \times S$ grid. 
     Each grid cell is responsible for predicting $m$ bounding boxes;
+    
     \item \textbf{Bounding Box Prediction}: For each bounding box, the model predicts the coordinates of
     the box and a class confidence score that indicates the likelihood of the box containing an object and the class of the object;
-    \item \textbf{Buonding Box Selection}: During inference, the model selects only the bounding boxes which have
+    
+    \item \textbf{Bounding Box Selection}: During inference, the model selects only the bounding boxes which have
     a confidence score above a certain threshold.
 \end{itemize}
+
 This design allows YOLO to achieve real-time object detection, with inference times as low as 0.02 seconds per image on a GPU, while still maintaining competitive accuracy compared to two-stage detectors.
 Even YOLO has some limitations, such as:
+
 \begin{itemize}
     \item \textbf{Small Object Detection}: YOLO can struggle with detecting small objects, 
     as the grid cell responsible for predicting the object may not have enough information to accurately localize it.
+    
     \item \textbf{Different Aspect Ratios}: YOLO uses a fixed set of anchor boxes, which may not be optimal for all object shapes and sizes, 
     leading to suboptimal performance for objects with unusual aspect ratios.
+    
     \item \textbf{Loss Function}: The original YOLO loss is very complex and can be difficult to optimize,
     as it combines classification and localization losses, which can have different scales and gradients.
 \end{itemize}
 
 \subsection{Instance Segmentation}
 A different task that can be tackled with CNNs is \textbf{instance segmentation}.
-Instance segmentation is the task of assigning a class label to each pixel in an image,
-while also distinguishing between different instances of the same class.
-For example, in an image containing multiple people, instance segmentation would not only identify the pixels belonging
-to the "person" class but also differentiate between each individual person.
+Instance segmentation is the task of assigning a class label to each pixel in an image, while also distinguishing between different instances of the same class.
+
+For example, in an image containing multiple people, instance segmentation would not only identify the pixels belonging to the "person" class, 
+but also differentiate between each individual person.
 
 This task is more complex than object detection, as it requires not only localizing objects but also accurately segmenting them at the pixel level.
 
 \subsubsection*{Mask R-CNN}
-One of the most popular architectures for instance segmentation is \textbf{Mask R-CNN}, 
-which extends the Faster R-CNN architecture by adding a branch for predicting segmentation masks on each Region of Interest (RoI).
+One of the most popular architectures for instance segmentation is \textbf{Mask R-CNN}, showing again the flexibility of CNNs to be adapted to different tasks.
+Mask R-CNN builds upon the Faster R-CNN architecture by adding a branch for predicting segmentation masks on each Region of Interest (RoI).
 
 To achieve this, Mask R-CNN introduces:
 \begin{itemize}
     \item \textbf{RoIAlign Layer}: Instead of using the RoI Pooling layer from Faster R-CNN,
     which can quantize the RoI and lead to misalignments between the RoI and the extracted features,
     Mask R-CNN uses a RoIAlign layer that preserves the spatial alignment of the features, allowing for more accurate mask predictions.
+    
     \item \textbf{Mask Branch}: In addition to the classification and bounding box regression branches, Mask R-CNN includes a separate branch that predicts a binary mask for each RoI. 
-    This branch is typically implemented as a small fully convolutional network that takes the aligned features from the RoIAlign layer and outputs a mask of fixed size for each class.
+    This branch is typically implemented as a small fully connected network that takes the aligned features from the RoIAlign layer and outputs a mask of fixed size for each class.
 \end{itemize}
