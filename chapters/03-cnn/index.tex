@@ -278,17 +278,17 @@ This approach has a few advantages, such as:
 \end{itemize}
 
 \subsubsection{SENet (2019)}
-\textbf{SENet} (Squeeze-and-Excitation Networks) is a type of CNN architecture that introduces the concept of \textbf{channel attention}. 
-Instead of assuming that all channels of the feature maps are equally important, channel attention allows the network to learn to focus on the most important channels of the feature maps, 
-by applying a weighting mechanism to the channels based on their importance for the task at hand.
+\textbf{SENet} (Squeeze-and-Excitation Networks) introduces the concept of \textbf{channel attention} to CNN architectures. 
+Rather than assuming all feature map channels contribute equally, SENet adaptively recalibrates channel-wise responses, learning to emphasize informative features and suppress irrelevant ones based on the task at hand.
 
-The SE block learns to emphasize informative channels and suppress less useful ones, effectively allowing the network to adaptively recalibrate channel-wise feature responses.
-This is achieved through a two-step process:
+This dynamic recalibration is achieved through a lightweight module called the SE block, which operates in two distinct steps:
 \begin{itemize}
-    \item \textbf{Squeeze}: Global average pooling is applied to the input feature, producing an average representation of each channel;
-    \item \textbf{Excitation}: Using a sigmoid activation function, the network learns to generate weights for each channel. 
+    \item \textbf{Squeeze}: Spatial information is aggregated using global average pooling. This compresses the spatial dimensions of the input feature map, producing a $1 \times 1 \times C_{in}$ vector that serves as a global, statistical summary of each channel's activations.
+    
+    \item \textbf{Excitation}: The squeezed vector is passed through a gating mechanism (typically a small multi-layer perceptron) followed by a sigmoid activation function. This step learns the relative importance of each channel, generating a dynamic weight between 0 and 1 for each one. This is conceptually similar to the attention mechanism in Transformers; however, SENet applies weights channel-wise rather than token-wise.
 \end{itemize}
-The output of the SE block is obtained by multiplying the input feature maps by these learned weights, effectively emphasizing important channels and suppressing less useful ones.
+
+The final output of the SE block is obtained by multiplying the original input feature maps by these learned weights, effectively scaling each channel by its relevance.
 
 \subsubsection{ConvNext (2022)}
 In the later years, the trend of transformer-based architectures has dominated the field of computer vision, with models such as \textbf{Vision Transformer (ViT)} and \textbf{Swin Transformer} 
@@ -301,9 +301,6 @@ then processes the entire sequence of patches, produing a global latent represen
 is then used for downstream tasks such as classification or object detection.
 
 Differently from what we have seen in CNNs, the spatial reletionships between the patches are not explicitly modeled, but rather learned through the self-attention mechanism of the transformer architecture.
-\begin{comment}
-    #TODO: come back after transformers architecture is explained
-\end{comment}
 
 \textbf{ConvNext} is a CNN architecture that was proposed in 2022. It showed that with some modifications to the standard CNN architecture, it is possible to achieve performance 
 comparable to transformer-based architectures, while still maintaining the efficiency and simplicity of CNNs.

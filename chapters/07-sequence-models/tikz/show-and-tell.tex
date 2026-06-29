@@ -1,0 +1,34 @@
+\begin{tikzpicture}[
+    >=Stealth,
+    rnn/.style={rectangle, rounded corners=3pt, draw, fill=orange!70, thick,
+                minimum width=1.3cm, minimum height=0.65cm},
+    clf/.style={rectangle, rounded corners=3pt, draw, fill=orange!55, thick,
+                minimum width=1.3cm, minimum height=0.65cm, font=\small},
+    word/.style={font=\small\itshape, text=teal!70!black},
+    arr/.style={->, thick}
+]
+    % ---- CNN encoder ----
+    \node[trapezium, trapezium angle=65, draw, fill=orange!70, thick,
+          minimum width=1.0cm, minimum height=0.7cm, font=\small] (cnn) at (0,0) {CNN};
+
+    % ---- columns ----
+    \def\dx{2.0}
+    % image cell (receives CNN), then 5 word cells
+    \node[rnn] (h0) at (1.6,0) {};
+    \foreach \i/\out/\in in {1/The/START, 2/kids/The, 3/are/kids, 4/jumping/are, 5/STOP/jumping} {
+        \node[rnn] (h\i) at ({1.6+\i*\dx},0) {};
+        \node[clf, above=0.85cm of h\i] (c\i) {Classifier};
+        \node[word, above=0.5cm of c\i] (y\i) {``\out''};
+        \node[word, below=0.9cm of h\i] (x\i) {``\in''};
+        \draw[arr] (x\i.north) -- (h\i.south);
+        \draw[arr] (h\i.north) -- (c\i.south);
+        \draw[arr] (c\i.north) -- (y\i.south);
+    }
+    % CNN feeds the image cell
+    \draw[arr] (cnn.north) -- (h0.south);
+
+    % ---- recurrent connections with hidden-state labels ----
+    \foreach \i [evaluate=\i as \j using int(\i+1)] in {0,1,2,3,4} {
+        \draw[arr] (h\i.east) -- node[below, font=\small] {$h_{\i}$} (h\j.west);
+    }
+\end{tikzpicture}

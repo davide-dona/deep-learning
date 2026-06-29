@@ -1,0 +1,53 @@
+\begin{tikzpicture}[
+    >=Stealth,
+    enc/.style={rectangle, draw, fill=cyan!30, thick, minimum width=0.8cm, minimum height=0.45cm, font=\small},
+    dec/.style={rectangle, draw, fill=red!45, thick, minimum width=0.7cm, minimum height=0.6cm, font=\small},
+    sum/.style={circle, draw, thick, minimum size=0.55cm, inner sep=0pt},
+    lbl/.style={font=\small},
+    wlbl/.style={font=\footnotesize},
+    arr/.style={->, thick}
+]
+    % ============ Bidirectional encoder ============
+    \def\fy{0.65} \def\by{0.05}
+    \foreach \i/\x in {1/1, 2/2.3, 3/3.6, T/5.4} {
+        \node[enc] (f\i) at (\x,\fy) {$\overrightarrow{h}_{\i}$};
+        \node[enc] (b\i) at (\x,\by) {$\overleftarrow{h}_{\i}$};
+        \node[draw, dashed, gray, fit=(f\i)(b\i), inner sep=1.2mm] (col\i) {};
+        \node[lbl] (x\i) at (\x,-0.95) {$x_{\i}$};
+        \draw[arr] (x\i.north) -- (b\i.south);
+    }
+    % forward / backward recurrence
+    \foreach \a/\b in {1/2, 2/3} {
+        \draw[arr] (f\a.east) -- (f\b.west);
+        \draw[arr] (b\b.west) -- (b\a.east);
+    }
+    \draw[arr, dashed] (f3.east) -- (fT.west);
+    \draw[arr, dashed] (bT.west) -- (b3.east);
+    \node at (4.5,0.35) {$\cdots$};
+
+    % ============ Attention sum node ============
+    \node[sum] (oplus) at (4.4,2.3) {$+$};
+
+    % alignment weights from each column up to the sum
+    \foreach \i/\w in {1/{t,1}, 2/{t,2}, 3/{t,3}, T/{t,T}} {
+        \draw[arr] (f\i.north) -- node[wlbl, pos=0.22, fill=white, inner sep=0.5pt] {$\alpha_{\w}$} (oplus);
+    }
+
+    % ============ Decoder ============
+    \node[dec] (sp) at (5.2,3.5) {$s_{t-1}$};
+    \node[dec] (st) at (6.7,3.5) {$s_{t}$};
+    \node[lbl] at (4.4,3.5) {$\cdots$};
+    \node[lbl] at (7.5,3.5) {$\cdots$};
+    \draw[arr] (4.7,3.5) -- (sp.west);
+    \draw[arr] (sp.east) -- (st.west);
+    \draw[arr] (st.east) -- (7.3,3.5);
+
+    \node[lbl] (yp) at (5.2,4.5) {$y_{t-1}$};
+    \node[lbl] (yt) at (6.7,4.5) {$y_{t}$};
+    \draw[arr] (sp.north) -- (yp.south);
+    \draw[arr] (st.north) -- (yt.south);
+
+    % alignment model reads previous decoder state; context feeds new state
+    \draw[arr] (sp.south) to[out=-90,in=60] (oplus);
+    \draw[arr] (oplus) to[out=30,in=-120] node[lbl, pos=0.55, right=0.5mm] {$c_t$} (st.south);
+\end{tikzpicture}
