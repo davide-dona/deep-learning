@@ -26,7 +26,7 @@ The primary types include:
     This is the case of document classification, where the input is a sequence of words and the output is a single class label.
     \begin{figure}[H]
         \centering
-        \input{chapters/05-rnn/tikz/Many-to-One.tex}
+        \input{chapters/06-rnn/tikz/Many-to-One.tex}
         \caption{Many-to-One RNN architecture.}
     \end{figure}
 
@@ -34,7 +34,7 @@ The primary types include:
     This is the case of image captioning, where the input is an image and the output is a sequence of words that describe the image.
     \begin{figure}[H]
         \centering
-        \input{chapters/05-rnn/tikz/One-to-Many.tex}
+        \input{chapters/06-rnn/tikz/One-to-Many.tex}
         \caption{One-to-Many RNN architecture.}
     \end{figure}
     \item \textbf{Many-to-Many}: This type of RNN takes a sequence of inputs and produces a sequence of outputs.
@@ -49,33 +49,32 @@ The primary types include:
         \centering
         \begin{minipage}{0.45\textwidth}
             \centering
-            \input{chapters/05-rnn/tikz/Many-to-Many-Synchronized.tex}
+            \input{chapters/06-rnn/tikz/Many-to-Many-Synchronized.tex}
             \caption{Many-to-Many Synchronized RNN architecture.}
         \end{minipage}
         \hfill
         \begin{minipage}{0.45\textwidth}
             \centering
-            \input{chapters/05-rnn/tikz/Many-to-Many-E-D.tex}
+            \input{chapters/06-rnn/tikz/Many-to-Many-E-D.tex}
             \caption{Many-to-Many Encoder-Decoder RNN architecture.}
         \end{minipage}
     \end{figure}
 \end{itemize}
 
 \subsection{Vanilla RNNs}
-The simplest form of RNN is the \textbf{Vanilla RNN}, which consists of a single layer of recurrent units.
+The simplest form of RNN is the \textbf{Vanilla RNN}, which consists of a single hidden layer that is recurrently connected to itself.
 \begin{figure}[H]
     \centering
-    \input{chapters/05-rnn/tikz/Vanilla-RNN.tex}
+    \input{chapters/06-rnn/tikz/Vanilla-RNN.tex}
     \caption{Vanilla RNN architecture.}
 \end{figure}
 
-At time step $t$, the model takes an input $x_t$, passes it through a hidden layer to produce a hidden representation $h_t$, 
-which is then fed into a classifier to produce the output $y_t$.
+At each time step $t$, the model combines the current input $x_t$ with the previous hidden representation $h_{t-1}$
+to compute a new hidden representation $h_t$.
+The updated state $h_t$ is then used to produce the output $y_t$ and is passed forward to the next step $t+1$.
+By managing this recurrent connection, the model creates a memory across time steps, enabling it to capture the temporal dependencies in the input sequence.
 
-At the next time step $t+1$, the model takes the next input $x_{t+1}$ and also receives the hidden representation from the previous time step $h_t$ as part of its input,
-allowing it to maintain a form of memory across time steps.
-This recurrent connection is what enables the model to capture temporal dependencies in the data, making it suitable for sequential tasks.
-
+\paragraph{Hidden representation}
 The hidden representation $h_t$ can be computed as:
 \begin{equation}
     h_t = \sigma_{W}(x_t, h_{t-1})
@@ -83,23 +82,22 @@ The hidden representation $h_t$ can be computed as:
 Where $\sigma_{W}$ is a non-linear activation function (e.g., ReLU, Tanh) applied to a linear transformation of the current input $x_t$ and the previous hidden state $h_{t-1}$,
 with $W$ representing the learnable parameters of the model.
 
-Usually, the choosen activation function is the hyperbolic tangent (tanh), which gives us:
-\begin{equation*}
-    h_t = \tanh W \begin{bmatrix}
-        x_t \\
-        h_{t-1}
-    \end{bmatrix}
-    = \tanh (W_x x_t + W_h h_{t-1})
-\end{equation*}
+Taking the Tanh activation function as an example, we can express the hidden representation as:
+\begin{equation}
+    h_t = \tanh(W_{x} x_t + W_{h} h_{t-1})
+\end{equation}
+where $W_{x}$ and $W_{h}$ are the weight matrices associated with the input and hidden state, respectively.
 
+\paragraph{Unrolled Representation}
 The RNN can also be unrolled in time, which means that we can represent the RNN as a feed-forward network where each layer corresponds to a time step in the sequence.
-\begin{figure}
+\begin{figure}[H]
     \centering
     \scalebox{0.8}{
-        \input{chapters/05-rnn/tikz/Unrolled.tex}
+        \input{chapters/06-rnn/tikz/Unrolled.tex}
     }
     \caption{Unrolled RNN architecture.}
 \end{figure}
+
 \subsubsection{Backpropagation Through Time}
 To train RNNs, we use a variant of backpropagation called \textbf{Backpropagation Through Time} (BPTT), 
 which follows the same principles as standard backpropagation.
@@ -107,6 +105,7 @@ which follows the same principles as standard backpropagation.
 The unfolded RNN is treated as a deep feed-forward network, where each layer corresponds to a time step in the sequence.
 The weights are shared across all time steps, and the error is backpropagated through the entire sequence, allowing the model to learn from the temporal dependencies in the data.
 
+\paragraph{BPTT Example}
 Let's see a simple example of how BPTT works in a Vanilla RNN:
 \begin{itemize}
     \item \textbf{Forward Pass}: The input sequence $(x_1, x_2, x_3)$ is fed into the RNN, producing hidden states $(h_1, h_2, h_3)$ and outputs $(y_1, y_2, y_3)$.
@@ -119,15 +118,19 @@ Let's see a simple example of how BPTT works in a Vanilla RNN:
     \begin{equation}
         L = L_1(y_1, \hat{y}_1) + L_2(y_2, \hat{y}_2) + L_3(y_3, \hat{y}_3) = L_1 + L_2 + L_3
     \end{equation}
-    \item \textbf{Backward Pass}: considering the weights associated with the hidden layer $W_h$, 
-    the gradient of the loss with respect to these weights is computed by summing the contributions from all time steps:
+    \item \textbf{Backward Pass}: in this example we will compute the gradient of the loss with respect to the weights associated with the hidden layer $W_h$.
+    Note that the process is analogous for the weights associated with the input layer $W_x$ and the output layer $W_y$.
+    
+    The gradient of the loss with respect to these weights is computed by summing the contributions from all time steps:
     \begin{equation}
         \frac{\partial L}{\partial W_h} = \sum_{t=1}^{T} \frac{\partial L_t}{\partial W_h}
     \end{equation}
+    
     Where each term $\frac{\partial L_t}{\partial W_h}$ is computed as:
     \begin{equation}
         \frac{\partial L_t}{\partial W_h} = \frac{\partial L_t}{\partial y_t} \cdot \frac{\partial y_t}{\partial h_t} \cdot \frac{\partial h_t}{\partial W_h}
     \end{equation}
+    
     For example, computing the gradient of the error with respect to $h_1$ (how the hidden state at time step 1 contributes to the loss) we have to consider:
     \begin{itemize}
         \item How $h_1$ contributes to $h_2$;
@@ -138,19 +141,27 @@ Let's see a simple example of how BPTT works in a Vanilla RNN:
     \begin{equation}
         \frac{\partial L}{\partial h_1} = \frac{\partial L}{\partial h_3} \cdot \frac{\partial h_3}{\partial h_2} \cdot \frac{\partial h_2}{\partial h_1}
     \end{equation}
+
 \end{itemize}
-\subsubsection{BPTT issues}
-While BPTT allows RNNs to learn from sequential data, it suffers from the \textbf{vanishing gradient} problem.
-In fact, early time steps in the sequence receive gradients through a long chain of multiplications, 
-which can lead to very small gradients that effectively prevent the model from learning long-term dependencies in the data.
 
-This issue is particularly problematic for tasks that require understanding of long-range dependencies, such as language modeling or machine translation, 
-where the model needs to capture relationships between words that are far apart in the input sequence.
+\subsubsection{Challenges with BPTT: The Vanishing Gradient}
 
-\subsubsection{Truncated BPTT}
-A common practical solution to the vanishing gradient problem and the high 
-computational cost of standard BPTT is \textbf{Truncated Backpropagation Through Time} (TBPTT). 
-The core idea is to process the sequence in smaller chunks rather than the entire history at once.
+When generalizing to a sequence of length $T$, the gradient of the loss with respect to the initial hidden state $h_1$ is computed using the chain rule:
+\begin{equation}
+    \frac{\partial L}{\partial h_1} = \frac{\partial L}{\partial h_T} \cdot \prod_{t=2}^{T} \frac{\partial h_t}{\partial h_{t-1}}
+\end{equation}
+
+While Backpropagation Through Time (BPTT) allows RNNs to learn from sequential data, this multiplicative chain introduces a critical flaw known as the \textbf{vanishing gradient} problem. The issue can be broken down as follows:
+
+\begin{itemize}
+    \item \textbf{The Mechanism:} Early time steps in a sequence receive gradients through a long chain of multiplications. If the sequence is long, these repeated multiplications cause the gradients to shrink exponentially as they propagate backward.
+    \item \textbf{The Consequence:} The gradients for early states (like $h_1$) become vanishingly small, which effectively prevents the model from updating its weights and learning long-term dependencies in the data.
+    \item \textbf{The Real-World Impact:} This is particularly problematic for tasks that require a deep understanding of long-range context—such as language modeling or machine translation—where the model must capture relationships between words that are far apart in the input sequence.
+\end{itemize}
+
+\subsubsection{A partial solution: Truncated BPTT}
+A common practical solution to the vanishing gradient problem and the high computational cost of standard BPTT is \textbf{Truncated Backpropagation Through Time} (TBPTT). 
+The core idea is to approximate the computation by processing the sequence in smaller chunks rather than the entire history at once.
 
 The algorithm can be characterized by two parameters:
 \begin{itemize}
@@ -168,9 +179,9 @@ To address the limitations of Vanilla RNNs, specifically the \textbf{vanishing g
 networks were introduced. LSTMs utilize a gated architecture designed to maintain a persistent state over long sequences, 
 allowing the model to learn when to forget old information and when to update with new inputs.
 
-\subsubsection{The Memory Cell and Cell State}
+\subsubsection{The Cell State}
 The core innovation of the LSTM is the \textbf{cell state} (denoted as $C_t$), which acts as a long-term memory conveyor belt. 
-Unlike the hidden state $h_t$, which undergoes multiple non-linear transformations at every time step, the cell state $C_t$ 
+Unlike the hidden state $h_t$, which undergoes a non-linear transformation at every time step, the cell state $C_t$ 
 interacts with the rest of the network primarly through linear operations.
 
 This linear path allows gradients to flow through many time steps with minimal decay, 
@@ -184,7 +195,7 @@ These gates are learned parameters that determine the flow of information.
 \begin{figure}[H]
     \centering
     \resizebox{.8\textwidth}{!}{
-        \input{chapters/05-rnn/tikz/LSTM.tex}
+        \input{chapters/06-rnn/tikz/LSTM.tex}
     }
     \caption{Internal gated architecture of an LSTM cell.}
 \end{figure}
@@ -242,12 +253,13 @@ While $C_t$ stores long-term information, $h_t$ serves as the "working memory" u
 
 \subsubsection{Gradients and Backpropagation}
 The architectural beauty of the LSTM lies in its additive update rule for $C_t$.
-Even tough some non-linearities are present in the gates, the cell state $C_t$ itself is updated through a combination of linear operations (multiplication and addition),
-which allows gradients to flow more easily during backpropagation.
-This effectively bypasses the vanishing gradient problem inherent in the multiplicative chain of standard RNNs.
+Even though the gates introduce non-linearities, the cell state $C_t$ itself is updated through a combination of linear operations (element-wise multiplication and addition),
+which provides a nearly linear path for gradients to flow during backpropagation.
+This significantly mitigates the vanishing gradient problem inherent in the multiplicative chain of standard RNNs.
 
 \subsection{Gated Recurrent Unit (GRU)}
-Gated Recurrent Units (GRUs) are a simplified version of LSTMs that combine the forget and input gates into a single "update gate" and merge the cell state and hidden state into a single state.
+Gated Recurrent Units (GRUs) are a simplified version of LSTMs that tries to reduce the number of parameters and computational complexity while maintaining similar performance.
+GRUs achieve this by combining the forget and input gates into a single "update gate" and merge the cell state and hidden state into a single state.
 This results in a more streamlined architecture that is computationally more efficient while still capturing long-term dependencies effectively.
 
 \subsubsection{GRU Cell Architecture}
@@ -256,7 +268,7 @@ In a GRU cell, we have only two gates: the \textbf{update gate} ($z_t$) and the 
 \begin{figure}[H]
     \centering
     \resizebox{.8\textwidth}{!}{
-        \input{chapters/05-rnn/tikz/GRU.tex}
+        \input{chapters/06-rnn/tikz/GRU.tex}
     }
     \caption{Internal gated architecture of a GRU cell.}
 \end{figure}
@@ -293,4 +305,27 @@ weighted by the update gate $z_t$:
 \end{equation}
 This allows the GRU to adaptively capture long-term dependencies while maintaining a simpler architecture compared to LSTMs. 
 
+\paragraph{LSTM vs GRU}
+The LSTM and GRU architectures both address the vanishing gradient problem and are capable of capturing long-term dependencies in sequential data.
+However, they differ in complexity and performance characteristics:
+\begin{itemize}
+    \item \textbf{Complexity:} LSTMs have three gates and a separate cell state, while GRUs have two gates and combine the cell and hidden states.
+    This allows GRUs to have a lower number of parameters.
+    \item \textbf{Training Speed:} GRUs are generally faster to train due to their smaller number of parameters and simpler architecture.
+    \item \textbf{Performance:} LSTM were shown to be very strong in capturing long-term dependencies, while GRUs are often competitive,
+    but may not perform as well on tasks that require modeling very long sequences.
+\end{itemize}
 
+\subsection{Multi-Layer RNNs}
+To increase the representational capacity of RNNs, we can stack multiple RNN layers on top of each other, creating a \textbf{multi-layer RNN} (also known as a deep RNN).
+In this architecture, the hidden state of each layer serves as the input to the next layer, allowing the model to learn hierarchical representations of the sequential data.
+
+\begin{comment}
+    #TODO: Add a figure showing a multi-layer RNN architecture.
+\end{comment}
+
+\subsubsection{Bi-directional RNNs}
+Very popular in the speech recognition community are the Bi-directional RNNS. They allow processing input sequences in both
+forward and backward directions, enabling the model to capture context from both past and future time steps.
+
+Altough bi-directional RNNs are powerful, they are not suitable for real-time applications, as they require access to the entire input sequence before making predictions.
