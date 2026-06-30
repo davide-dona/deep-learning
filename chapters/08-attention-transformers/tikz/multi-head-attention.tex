@@ -1,7 +1,6 @@
 \begin{tikzpicture}[
     >=Stealth,
     arr/.style={->, thick, dlgray!75!black},
-    steplbl/.style={font=\footnotesize, text=dlgray!80!black, align=left, anchor=north west},
     matlbl/.style={font=\small\bfseries},
 ]
     % grid matrix: (#1,#2)=top-left, #3=cols, #4=rows, #5=cellsize, #6=color
@@ -22,11 +21,6 @@
               \textcolor{dlorange!85!black}{W^{K}_{#3}}\;
               \textcolor{dlsky!75!black}{W^{V}_{#3}}$};%
     }
-
-    % ===== Step captions =====
-    \node[steplbl] at (-0.2,2.0)  {1) Input\\$\;\;\;$sentence $X$};
-    \node[steplbl] at (2.9,2.0)   {2) Weight matrices\\$\;\;\;$per head};
-    \node[steplbl] at (5.7,2.0)   {3) Attention\\$\;\;\;$output $Z_i$};
 
     % ===== Input X (vertically centred on the head column) =====
     \node[font=\small\bfseries, text=dlgreen!55!black] at (0.64,-1.65) {$X$};
@@ -49,12 +43,8 @@
     \node[font=\large] at (\hx+0.5,-3.8) {$\vdots$};
     \node[font=\large] at (\zx+0.4,-3.8) {$\vdots$};
 
-    % ===== Step 4 caption =====
-    \node[steplbl] at (-0.2,-6.5)
-        {4) Concatenate all $Z_i$ and project with $W^{O}$\\$\;\;\;$to obtain the final output $Z$};
-
     % ===== Concatenation row =====
-    \def\cy{-8.1}
+    \def\cy{-7.0}
     % concatenated Z (8 segments)
     \begin{scope}[shift={(0,\cy)}]
         \fill[dlpurple!50, draw=dlpurple!80!black] (0,0.3) rectangle (4.16,-0.3);
