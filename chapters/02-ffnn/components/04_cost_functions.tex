@@ -8,14 +8,14 @@ Various functions can be defined based on the type of problem.
     It measures the dissimilarity between the predicted probability of class $\hat{y}_i$ and the true class label.
     For a single data point, the loss can be expressed as:
     \begin{equation*}
-        L(y, \hat{y}) = -\sum_{i=1}^{C} y_i \log(\hat{y}_i)
+        \loss(y, \hat{y}) = -\sum_{i=1}^{C} y_i \log(\hat{y}_i)
     \end{equation*}
     where $C$ is the number of classes, $y_i$ is the true label (one-hot encoded), and $\hat{y}_i$ is the predicted probability for class $i$.
     
     \item \textbf{Binary Cross-Entropy Loss}: special case of the categorical cross-entropy loss for binary classification problems.
     For a single data point, the loss can be expressed as:
     \begin{equation*}
-        L(y, \hat{y}) = -[y \log(\hat{y}) + (1 - y) \log(1 - \hat{y})]
+        \loss(y, \hat{y}) = -[y \log(\hat{y}) + (1 - y) \log(1 - \hat{y})]
     \end{equation*}
 \end{itemize}
 
@@ -25,7 +25,7 @@ Various functions can be defined based on the type of problem.
     It measures the average squared difference between the predicted and true values.
     For a single data point, the loss can be expressed as:
     \begin{equation*}
-        L(y, \hat{y}) = \frac{1}{2}(y - \hat{y})^2
+        \loss(y, \hat{y}) = \frac{1}{2}(y - \hat{y})^2
     \end{equation*}
     The squared term ensures that the function is convex (easy to optimize), but penalizes larger errors more than smaller ones, as the difference is squared.
     This causes the loss function to be sensitive to outliers in the data, as they can have a disproportionate influence on the overall loss.
@@ -33,14 +33,14 @@ Various functions can be defined based on the type of problem.
     \item \textbf{Mean Absolute Error (MAE)}: similar to MSE but uses the absolute difference instead of the squared difference.
     For a single data point, the loss can be expressed as:
     \begin{equation*}
-        L(y, \hat{y}) = |y - \hat{y}|
+        \loss(y, \hat{y}) = |y - \hat{y}|
     \end{equation*}
     This one penalizes large errors less than MSE, making it more robust to outliers.
     
     \item \textbf{Huber Loss}: combines the properties of MSE and MAE. It behaves like MSE for small errors and like MAE for large errors, providing a balance between sensitivity to outliers and smoothness of the loss function.
     Formally, for a single data point, the loss can be expressed as:
     \begin{equation*}
-        L(y, \hat{y}) = \begin{cases}
+        \loss(y, \hat{y}) = \begin{cases}
         \frac{1}{2}(y - \hat{y})^2 & \text{for } |y - \hat{y}| \leq \delta \\
         \delta (|y - \hat{y}| - \frac{1}{2}\delta) & \text{for } |y - \hat{y}| > \delta
         \end{cases}

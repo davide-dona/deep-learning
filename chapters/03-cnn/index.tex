@@ -37,8 +37,8 @@ And so on, where $w_i$ are the weights of the filter and $x_i$ are the input val
 \subsubsection{2-D Convolution}
 In the 2D case, which is the one actually used in CNNs, the input is a 2D image, and the convolution operation is performed by 
 sliding a small \textbf{filter} (also called \textbf{kernel}) across the image and computing the \textbf{dot product} between the filter and the local region of the image.
-Formally, the output of a convolution operation for a given input image $I$ and filter $K$ is defined as:
-$$ (I * K)(x, y) = \sum_{i} \sum_{j} I(x+i, y+j) \cdot K(i, j) $$
+Formally, the output of a convolution operation for a given input image $\mat{I}$ and filter $\mat{K}$ is defined as:
+$$ (\mat{I} * \mat{K})(x, y) = \sum_{i} \sum_{j} \mat{I}(x+i, y+j) \cdot \mat{K}(i, j) $$
 where $ * $ denotes the convolution operation.
 
 \begin{figure}[H]
@@ -246,7 +246,7 @@ This simple yet profound architectural innovation provided several critical bene
 \begin{figure}[H]
     \centering
     \input{chapters/03-cnn/tikz/residualBlock.tex}
-    \caption{A residual block: the identity skip connection adds the block's input $x$ back to the transformed output $\mathcal{F}(x)$.}
+    \caption{A residual block: the identity skip connection adds the block's input $\vct{x}$ back to the transformed output $\mathcal{F}(\vct{x})$.}
     \label{fig:residual-block}
 \end{figure}
 

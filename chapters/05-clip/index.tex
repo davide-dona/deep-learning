@@ -51,12 +51,12 @@ image-text pairs in a batch, while \textbf{minimizing} the cosine similarity of 
 The loss function used for training CLIP is a softmax-based contrastive loss, defined as:
 \begin{equation}
     \loss = -\frac{1}{2N} \sum_{i=1}^{N} \left(
-    \underbrace{\log \frac{\exp(\simop(v_i, t_i) / \tau)}{\sum_{j=1}^{N} \exp(\simop(v_i, t_j) / \tau)}}_{\textit{Image} \to \textit{Text}}
+    \underbrace{\log \frac{\exp(\simop(\vct{v}_i, \vct{t}_i) / \tau)}{\sum_{j=1}^{N} \exp(\simop(\vct{v}_i, \vct{t}_j) / \tau)}}_{\textit{Image} \to \textit{Text}}
     +
-    \underbrace{\log \frac{\exp(\simop(t_i, v_i) / \tau)}{\sum_{j=1}^{N} \exp(\simop(t_i, v_j) / \tau)}}_{\textit{Text} \to \textit{Image}}\right),
+    \underbrace{\log \frac{\exp(\simop(\vct{t}_i, \vct{v}_i) / \tau)}{\sum_{j=1}^{N} \exp(\simop(\vct{t}_i, \vct{v}_j) / \tau)}}_{\textit{Text} \to \textit{Image}}\right),
 \end{equation}
 
-where $v_i$ and $t_i$ are the embeddings of the $i$-th image and text pair, $\simop$ is the cosine similarity function, and $\tau$ is a \textbf{temperature} hyperparameter that controls the sharpness of the distribution.
+where $\vct{v}_i$ and $\vct{t}_i$ are the embeddings of the $i$-th image and text pair, $\simop$ is the cosine similarity function, and $\tau$ is a \textbf{temperature} hyperparameter that controls the sharpness of the distribution.
 This loss encourages the model to learn a shared embedding space where semantically similar images and text are
 close together, while dissimilar pairs are far apart.
 

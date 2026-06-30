@@ -89,7 +89,7 @@ At a high level, the algorithm can be summarized as follows:
 \begin{enumerate}
     \item \textbf{Forward propagation}: Given an input $\vct{x}$, compute the output of the network $\hat{y}$ by
     propagating the input through the layers of the network;
-    \item \textbf{Loss computation}: Compute the loss $L(y, f(\vct{x}, \vct{\theta}))$, where $y$ is the true label and $f(\vct{x}, \vct{\theta})$ is the output of the network with parameters $\vct{\theta}$;
+    \item \textbf{Loss computation}: Compute the loss $\loss(y, f(\vct{x}, \vct{\theta}))$, where $y$ is the true label and $f(\vct{x}, \vct{\theta})$ is the output of the network with parameters $\vct{\theta}$;
     \item \textbf{Backward propagation}: the error signal is propagated backwards through the network and it's used to update the weights.
 \end{enumerate}
 This concept is covered in more detail later in this chapter.

@@ -1,6 +1,6 @@
 \section{Recurrent Neural Networks}
-Unlike the architectures previously discussed, which only process data represented as fixed-size vectors for both input and output, 
-\textbf{Recurrent Neural Networks} (RNNs) are designed to handle sequential data. 
+Unlike the architectures previously discussed, which only process data represented as fixed-size vectors for both input and output,
+\textbf{Recurrent Neural Networks} (RNNs) are designed to handle sequential data.
 
 Standard feed-forward models face significant limitations with real-world data types such as text, audio, and video, which are inherently sequential and vary in length.
 
@@ -18,7 +18,7 @@ this kind of data, enabling solutions to a wide range of tasks, such as:
 \end{itemize}
 
 \subsection{RNN Architecture types}
-While classical Feed-Forward Neural Networks (FFNNs) are categorized as \textbf{one-to-one} (or single-to-single) 
+While classical Feed-Forward Neural Networks (FFNNs) are categorized as \textbf{one-to-one} (or single-to-single)
 architectures, taking one input and producing one output, RNNs are classified based on how they map input sequences to output sequences.
 The primary types include:
 \begin{itemize}
@@ -40,9 +40,9 @@ The primary types include:
     \item \textbf{Many-to-Many}: This type of RNN takes a sequence of inputs and produces a sequence of outputs.
     We can have 2 subtypes of this architecture:
     \begin{itemize}
-        \item \textbf{Synchronized}: The input and output sequences have the same length, and an output is generated for every input 
+        \item \textbf{Synchronized}: The input and output sequences have the same length, and an output is generated for every input
         (e.g., Frame-level video classification or Part-of-Speech tagging).
-        \item \textbf{Encoder-Decoder}: The model first processes the entire input sequence (encoding) before generating an output sequence of a potentially different length (decoding), 
+        \item \textbf{Encoder-Decoder}: The model first processes the entire input sequence (encoding) before generating an output sequence of a potentially different length (decoding),
         as seen in Machine Translation.
     \end{itemize}
     \begin{figure}[H]
@@ -69,24 +69,24 @@ The simplest form of RNN is the \textbf{Vanilla RNN}, which consists of a single
     \caption{Vanilla RNN architecture.}
 \end{figure}
 
-At each time step $t$, the model combines the current input $x_t$ with the previous hidden representation $h_{t-1}$
-to compute a new hidden representation $h_t$.
-The updated state $h_t$ is then used to produce the output $y_t$ and is passed forward to the next step $t+1$.
+At each time step $t$, the model combines the current input $\vct{x}_t$ with the previous hidden representation $\vct{h}_{t-1}$
+to compute a new hidden representation $\vct{h}_t$.
+The updated state $\vct{h}_t$ is then used to produce the output $y_t$ and is passed forward to the next step $t+1$.
 By managing this recurrent connection, the model creates a memory across time steps, enabling it to capture the temporal dependencies in the input sequence.
 
 \paragraph{Hidden representation}
-The hidden representation $h_t$ can be computed as:
+The hidden representation $\vct{h}_t$ can be computed as:
 \begin{equation}
-    h_t = \sigma_{W}(x_t, h_{t-1})
+    \vct{h}_t = \sigma_{\mat{W}}(\vct{x}_t, \vct{h}_{t-1})
 \end{equation}
-Where $\sigma_{W}$ is a non-linear activation function (e.g., ReLU, Tanh) applied to a linear transformation of the current input $x_t$ and the previous hidden state $h_{t-1}$,
-with $W$ representing the learnable parameters of the model.
+Where $\sigma_{\mat{W}}$ is a non-linear activation function (e.g., ReLU, Tanh) applied to a linear transformation of the current input $\vct{x}_t$ and the previous hidden state $\vct{h}_{t-1}$,
+with $\mat{W}$ representing the learnable parameters of the model.
 
 Taking the Tanh activation function as an example, we can express the hidden representation as:
 \begin{equation}
-    h_t = \tanh(W_{x} x_t + W_{h} h_{t-1})
+    \vct{h}_t = \tanh(\mat{W}_{x} \vct{x}_t + \mat{W}_{h} \vct{h}_{t-1})
 \end{equation}
-where $W_{x}$ and $W_{h}$ are the weight matrices associated with the input and hidden state, respectively.
+where $\mat{W}_{x}$ and $\mat{W}_{h}$ are the weight matrices associated with the input and hidden state, respectively.
 
 \paragraph{Unrolled Representation}
 The RNN can also be unrolled in time, which means that we can represent the RNN as a feed-forward network where each layer corresponds to a time step in the sequence.
@@ -99,7 +99,7 @@ The RNN can also be unrolled in time, which means that we can represent the RNN 
 \end{figure}
 
 \subsubsection{Backpropagation Through Time}
-To train RNNs, we use a variant of backpropagation called \textbf{Backpropagation Through Time} (BPTT), 
+To train RNNs, we use a variant of backpropagation called \textbf{Backpropagation Through Time} (BPTT),
 which follows the same principles as standard backpropagation.
 
 The unfolded RNN is treated as a deep feed-forward network, where each layer corresponds to a time step in the sequence.
@@ -108,59 +108,59 @@ The weights are shared across all time steps, and the error is backpropagated th
 \paragraph{BPTT Example}
 Let's see a simple example of how BPTT works in a Vanilla RNN:
 \begin{itemize}
-    \item \textbf{Forward Pass}: The input sequence $(x_1, x_2, x_3)$ is fed into the RNN, producing hidden states $(h_1, h_2, h_3)$ and outputs $(y_1, y_2, y_3)$.
+    \item \textbf{Forward Pass}: The input sequence $(\vct{x}_1, \vct{x}_2, \vct{x}_3)$ is fed into the RNN, producing hidden states $(\vct{h}_1, \vct{h}_2, \vct{h}_3)$ and outputs $(y_1, y_2, y_3)$.
     \item \textbf{Loss Calculation}: The loss is computed based on the outputs and the true labels for each time step.
     The error is expressed as the sum of the losses at each time step:
     \begin{equation}
-        L = \sum_{t=1}^{T} L_t(y_t, \hat{y}_t)
+        \loss = \sum_{t=1}^{T} \loss_t(y_t, \hat{y}_t)
     \end{equation}
     In our example, with $T=3$, we have:
     \begin{equation}
-        L = L_1(y_1, \hat{y}_1) + L_2(y_2, \hat{y}_2) + L_3(y_3, \hat{y}_3) = L_1 + L_2 + L_3
+        \loss = \loss_1(y_1, \hat{y}_1) + \loss_2(y_2, \hat{y}_2) + \loss_3(y_3, \hat{y}_3) = \loss_1 + \loss_2 + \loss_3
     \end{equation}
-    \item \textbf{Backward Pass}: in this example we will compute the gradient of the loss with respect to the weights associated with the hidden layer $W_h$.
-    Note that the process is analogous for the weights associated with the input layer $W_x$ and the output layer $W_y$.
-    
+    \item \textbf{Backward Pass}: in this example we will compute the gradient of the loss with respect to the weights associated with the hidden layer $\mat{W}_h$.
+    Note that the process is analogous for the weights associated with the input layer $\mat{W}_x$ and the output layer $\mat{W}_y$.
+
     The gradient of the loss with respect to these weights is computed by summing the contributions from all time steps:
     \begin{equation}
-        \frac{\partial L}{\partial W_h} = \sum_{t=1}^{T} \frac{\partial L_t}{\partial W_h}
+        \frac{\partial \loss}{\partial \mat{W}_h} = \sum_{t=1}^{T} \frac{\partial \loss_t}{\partial \mat{W}_h}
     \end{equation}
-    
-    Where each term $\frac{\partial L_t}{\partial W_h}$ is computed as:
+
+    Where each term $\frac{\partial \loss_t}{\partial \mat{W}_h}$ is computed as:
     \begin{equation}
-        \frac{\partial L_t}{\partial W_h} = \frac{\partial L_t}{\partial y_t} \cdot \frac{\partial y_t}{\partial h_t} \cdot \frac{\partial h_t}{\partial W_h}
+        \frac{\partial \loss_t}{\partial \mat{W}_h} = \frac{\partial \loss_t}{\partial y_t} \cdot \frac{\partial y_t}{\partial \vct{h}_t} \cdot \frac{\partial \vct{h}_t}{\partial \mat{W}_h}
     \end{equation}
-    
-    For example, computing the gradient of the error with respect to $h_1$ (how the hidden state at time step 1 contributes to the loss) we have to consider:
+
+    For example, computing the gradient of the error with respect to $\vct{h}_1$ (how the hidden state at time step 1 contributes to the loss) we have to consider:
     \begin{itemize}
-        \item How $h_1$ contributes to $h_2$;
-        \item How $h_2$ effects $h_3$;
-        \item How $h_3$ contributes to the error at time step 3.
+        \item How $\vct{h}_1$ contributes to $\vct{h}_2$;
+        \item How $\vct{h}_2$ effects $\vct{h}_3$;
+        \item How $\vct{h}_3$ contributes to the error at time step 3.
     \end{itemize}
     This gives us:
     \begin{equation}
-        \frac{\partial L}{\partial h_1} = \frac{\partial L}{\partial h_3} \cdot \frac{\partial h_3}{\partial h_2} \cdot \frac{\partial h_2}{\partial h_1}
+        \frac{\partial \loss}{\partial \vct{h}_1} = \frac{\partial \loss}{\partial \vct{h}_3} \cdot \frac{\partial \vct{h}_3}{\partial \vct{h}_2} \cdot \frac{\partial \vct{h}_2}{\partial \vct{h}_1}
     \end{equation}
 
 \end{itemize}
 
 \subsubsection{Challenges with BPTT: The Vanishing Gradient}
 
-When generalizing to a sequence of length $T$, the gradient of the loss with respect to the initial hidden state $h_1$ is computed using the chain rule:
+When generalizing to a sequence of length $T$, the gradient of the loss with respect to the initial hidden state $\vct{h}_1$ is computed using the chain rule:
 \begin{equation}
-    \frac{\partial L}{\partial h_1} = \frac{\partial L}{\partial h_T} \cdot \prod_{t=2}^{T} \frac{\partial h_t}{\partial h_{t-1}}
+    \frac{\partial \loss}{\partial \vct{h}_1} = \frac{\partial \loss}{\partial \vct{h}_T} \cdot \prod_{t=2}^{T} \frac{\partial \vct{h}_t}{\partial \vct{h}_{t-1}}
 \end{equation}
 
 While Backpropagation Through Time (BPTT) allows RNNs to learn from sequential data, this multiplicative chain introduces a critical flaw known as the \textbf{vanishing gradient} problem. The issue can be broken down as follows:
 
 \begin{itemize}
     \item \textbf{The Mechanism:} Early time steps in a sequence receive gradients through a long chain of multiplications. If the sequence is long, these repeated multiplications cause the gradients to shrink exponentially as they propagate backward.
-    \item \textbf{The Consequence:} The gradients for early states (like $h_1$) become vanishingly small, which effectively prevents the model from updating its weights and learning long-term dependencies in the data.
+    \item \textbf{The Consequence:} The gradients for early states (like $\vct{h}_1$) become vanishingly small, which effectively prevents the model from updating its weights and learning long-term dependencies in the data.
     \item \textbf{The Real-World Impact:} This is particularly problematic for tasks that require a deep understanding of long-range context—such as language modeling or machine translation—where the model must capture relationships between words that are far apart in the input sequence.
 \end{itemize}
 
 \subsubsection{A partial solution: Truncated BPTT}
-A common practical solution to the vanishing gradient problem and the high computational cost of standard BPTT is \textbf{Truncated Backpropagation Through Time} (TBPTT). 
+A common practical solution to the vanishing gradient problem and the high computational cost of standard BPTT is \textbf{Truncated Backpropagation Through Time} (TBPTT).
 The core idea is to approximate the computation by processing the sequence in smaller chunks rather than the entire history at once.
 
 The algorithm can be characterized by two parameters:
@@ -168,28 +168,28 @@ The algorithm can be characterized by two parameters:
     \item $k_1$: The number of time steps between gradient updates (the forward pass length).
     \item $k_2$: The maximum number of time steps backpropagated (the truncation window).
 \end{itemize}
-This approach allows the model to learn from recent history while mitigating the vanishing gradient problem, as we only backpropagate through a limited number of time steps, 
+This approach allows the model to learn from recent history while mitigating the vanishing gradient problem, as we only backpropagate through a limited number of time steps,
 thus. It also reduces the computational cost, allowing for more efficient training of RNNs on long sequences.
 
 This approach is particularly effective for tasks where long-term dependencies are less critical, as in fact
 it fails to capture dependencies that span more than $k_2$ time steps, but it can still be useful for many applications where recent context is more relevant.
 
 \subsection{Long Short-Term Memory (LSTM)}
-To address the limitations of Vanilla RNNs, specifically the \textbf{vanishing gradient problem}, \textbf{Long Short-Term Memory} (LSTM) 
-networks were introduced. LSTMs utilize a gated architecture designed to maintain a persistent state over long sequences, 
+To address the limitations of Vanilla RNNs, specifically the \textbf{vanishing gradient problem}, \textbf{Long Short-Term Memory} (LSTM)
+networks were introduced. LSTMs utilize a gated architecture designed to maintain a persistent state over long sequences,
 allowing the model to learn when to forget old information and when to update with new inputs.
 
 \subsubsection{The Cell State}
-The core innovation of the LSTM is the \textbf{cell state} (denoted as $C_t$), which acts as a long-term memory conveyor belt. 
-Unlike the hidden state $h_t$, which undergoes a non-linear transformation at every time step, the cell state $C_t$ 
+The core innovation of the LSTM is the \textbf{cell state} (denoted as $\vct{C}_t$), which acts as a long-term memory conveyor belt.
+Unlike the hidden state $\vct{h}_t$, which undergoes a non-linear transformation at every time step, the cell state $\vct{C}_t$
 interacts with the rest of the network primarly through linear operations.
 
-This linear path allows gradients to flow through many time steps with minimal decay, 
+This linear path allows gradients to flow through many time steps with minimal decay,
 effectively creating a "highway" for gradients during backpropagation, which is crucial for learning long-term dependencies in sequential data.
 
 \subsubsection{Gating Mechanisms}
-LSTMs regulate the cell state using three specialized "gates." 
-Each gate consists of a sigmoid layer ($\sigma$) and an element-wise multiplication operation ($\odot$). 
+LSTMs regulate the cell state using three specialized "gates."
+Each gate consists of a sigmoid layer ($\sigma$) and an element-wise multiplication operation ($\odot$).
 These gates are learned parameters that determine the flow of information.
 
 \begin{figure}[H]
@@ -200,60 +200,60 @@ These gates are learned parameters that determine the flow of information.
     \caption{Internal gated architecture of an LSTM cell.}
 \end{figure}
 
-\paragraph{Input Gate ($i_t$):}
-The input gate decides which values in the cell state will be updated. 
-Simultaneously, a \textit{candidate} cell state $\tilde{C}_t$ is created using a $\tanh$ layer to represent new information that could be added to the state.
+\paragraph{Input Gate ($\vct{i}_t$):}
+The input gate decides which values in the cell state will be updated.
+Simultaneously, a \textit{candidate} cell state $\tilde{\vct{C}}_t$ is created using a $\tanh$ layer to represent new information that could be added to the state.
 \begin{equation}
-    i_t = \sigma\left(W_i \cdot [h_{t-1}, x_t] + b_i\right)
+    \vct{i}_t = \sigma\left(\mat{W}_i \cdot [\vct{h}_{t-1}, \vct{x}_t] + \vct{b}_i\right)
 \end{equation}
-The input gate takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+The input gate takes the previous hidden state $\vct{h}_{t-1}$ and the current input $\vct{x}_t$ as input, applies a linear transformation followed by a sigmoid activation function,
 and outputs a value between 0 and 1 for each element in the cell state, where 0 means "do not update" and 1 means "update".
 
-On the other hand, the candidate cell state $\tilde{C}_t$, similarly to the hidden state in a Vanilla RNN, 
+On the other hand, the candidate cell state $\tilde{\vct{C}}_t$, similarly to the hidden state in a Vanilla RNN,
 is computed as a non-linear transformation of the current input and the previous hidden state:
 \begin{equation}
-    \tilde{C}_t = \tanh\left(W_C \cdot [h_{t-1}, x_t] + b_C\right)
+    \tilde{\vct{C}}_t = \tanh\left(\mat{W}_C \cdot [\vct{h}_{t-1}, \vct{x}_t] + \vct{b}_C\right)
 \end{equation}
 
-\paragraph{Forget Gate ($f_t$):}
-This gate decides what information from the previous cell state $C_{t-1}$ is no longer useful and should be discarded.
+\paragraph{Forget Gate ($\vct{f}_t$):}
+This gate decides what information from the previous cell state $\vct{C}_{t-1}$ is no longer useful and should be discarded.
 \begin{equation}
-    f_t = \sigma\left(W_f \cdot [h_{t-1}, x_t] + b_f\right)
+    \vct{f}_t = \sigma\left(\mat{W}_f \cdot [\vct{h}_{t-1}, \vct{x}_t] + \vct{b}_f\right)
 \end{equation}
-It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
-and outputs a value between 0 and 1 for each element in the cell state. 
+It takes the previous hidden state $\vct{h}_{t-1}$ and the current input $\vct{x}_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+and outputs a value between 0 and 1 for each element in the cell state.
 The output can be interpreted as a soft mask, where $0$ means "completely forget," while $1$ means "completely retain."
 
-\paragraph{Output Gate ($o_t$):} 
-This gate decides what information to output from the cell state. 
+\paragraph{Output Gate ($\vct{o}_t$):}
+This gate decides what information to output from the cell state.
 \begin{equation}
-    o_t = \sigma\left(W_o \cdot [h_{t-1}, x_t] + b_o\right)
+    \vct{o}_t = \sigma\left(\mat{W}_o \cdot [\vct{h}_{t-1}, \vct{x}_t] + \vct{b}_o\right)
 \end{equation}
-It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
-and outputs a value between 0 and 1 for each element in the hidden state. 
+It takes the previous hidden state $\vct{h}_{t-1}$ and the current input $\vct{x}_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+and outputs a value between 0 and 1 for each element in the hidden state.
 The output can be interpreted as a soft mask, where $0$ means "completely forget," while $1$ means "completely retain."
 
 \subsubsection{Memory Cell Update}
-The new cell state $C_t$ is updated by combining the gated previous state and the gated candidate state. 
+The new cell state $\vct{C}_t$ is updated by combining the gated previous state and the gated candidate state.
 This is the "update" step where the network actually forgets and learns:
 \begin{equation}
-    C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t
+    \vct{C}_t = \vct{f}_t \odot \vct{C}_{t-1} + \vct{i}_t \odot \tilde{\vct{C}}_t
 \end{equation}
-By using the forget gate $f_t$, the network can reset the memory of a specific unit if it is no longer relevant, preventing the internal state from growing indefinitely.
+By using the forget gate $\vct{f}_t$, the network can reset the memory of a specific unit if it is no longer relevant, preventing the internal state from growing indefinitely.
 
-Using the input gate $i_t$ and the candidate cell state $\tilde{C}_t$, the network can add new information to the cell state, allowing it to learn from new inputs while retaining important past information.
+Using the input gate $\vct{i}_t$ and the candidate cell state $\tilde{\vct{C}}_t$, the network can add new information to the cell state, allowing it to learn from new inputs while retaining important past information.
 
 \subsubsection{Hidden State Generation}
-Finally, the hidden state $h_t$ is updated. 
-We pass the cell state through a $\tanh$ (to push the values between $-1$ and $1$) and multiply it by the output gate $o_t$:
+Finally, the hidden state $\vct{h}_t$ is updated.
+We pass the cell state through a $\tanh$ (to push the values between $-1$ and $1$) and multiply it by the output gate $\vct{o}_t$:
 \begin{equation}
-    h_t = o_t \odot \tanh(C_t)
+    \vct{h}_t = \vct{o}_t \odot \tanh(\vct{C}_t)
 \end{equation}
-While $C_t$ stores long-term information, $h_t$ serves as the "working memory" used for the immediate prediction and as an input for the next time step.
+While $\vct{C}_t$ stores long-term information, $\vct{h}_t$ serves as the "working memory" used for the immediate prediction and as an input for the next time step.
 
 \subsubsection{Gradients and Backpropagation}
-The architectural beauty of the LSTM lies in its additive update rule for $C_t$.
-Even though the gates introduce non-linearities, the cell state $C_t$ itself is updated through a combination of linear operations (element-wise multiplication and addition),
+The architectural beauty of the LSTM lies in its additive update rule for $\vct{C}_t$.
+Even though the gates introduce non-linearities, the cell state $\vct{C}_t$ itself is updated through a combination of linear operations (element-wise multiplication and addition),
 which provides a nearly linear path for gradients to flow during backpropagation.
 This significantly mitigates the vanishing gradient problem inherent in the multiplicative chain of standard RNNs.
 
@@ -263,7 +263,7 @@ GRUs achieve this by combining the forget and input gates into a single "update 
 This results in a more streamlined architecture that is computationally more efficient while still capturing long-term dependencies effectively.
 
 \subsubsection{GRU Cell Architecture}
-In a GRU cell, we have only two gates: the \textbf{update gate} ($z_t$) and the \textbf{reset gate} ($r_t$).
+In a GRU cell, we have only two gates: the \textbf{update gate} ($\vct{z}_t$) and the \textbf{reset gate} ($\vct{r}_t$).
 
 \begin{figure}[H]
     \centering
@@ -273,37 +273,37 @@ In a GRU cell, we have only two gates: the \textbf{update gate} ($z_t$) and the 
     \caption{Internal gated architecture of a GRU cell.}
 \end{figure}
 
-\paragraph{Reset Gate ($r_t$):}
-The reset gate determines how much of the previous hidden state $h_{t-1}$ should be used when computing the candidate hidden state $\tilde{h}_t$.
+\paragraph{Reset Gate ($\vct{r}_t$):}
+The reset gate determines how much of the previous hidden state $\vct{h}_{t-1}$ should be used when computing the candidate hidden state $\tilde{\vct{h}}_t$.
 \begin{equation}
-    r_t = \sigma\left(W_r \cdot [h_{t-1}, x_t] + b_r\right)
+    \vct{r}_t = \sigma\left(\mat{W}_r \cdot [\vct{h}_{t-1}, \vct{x}_t] + \vct{b}_r\right)
 \end{equation}
-It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+It takes the previous hidden state $\vct{h}_{t-1}$ and the current input $\vct{x}_t$ as input, applies a linear transformation followed by a sigmoid activation function,
 and outputs a value between 0 and 1 for each element in the hidden state, where 0 means "completely reset" and 1 means "completely retain."
 
-\paragraph{Candidate Hidden State ($\tilde{h}_t$):}
+\paragraph{Candidate Hidden State ($\tilde{\vct{h}}_t$):}
 The candidate hidden state is computed based on the reset gate and the previous hidden state.
 \begin{equation}
-    \tilde{h}_t = \tanh\left(W_h \cdot [r_t \odot h_{t-1}, x_t] + b_h\right)
+    \tilde{\vct{h}}_t = \tanh\left(\mat{W}_h \cdot [\vct{r}_t \odot \vct{h}_{t-1}, \vct{x}_t] + \vct{b}_h\right)
 \end{equation}
-The reset gate $r_t$ controls how much of the previous hidden state $h_{t-1}$ is used in the computation of the candidate hidden state $\tilde{h}_t$.
-If $r_t$ is close to 0, the previous hidden state is effectively ignored, allowing the model to reset its memory when necessary.
+The reset gate $\vct{r}_t$ controls how much of the previous hidden state $\vct{h}_{t-1}$ is used in the computation of the candidate hidden state $\tilde{\vct{h}}_t$.
+If $\vct{r}_t$ is close to 0, the previous hidden state is effectively ignored, allowing the model to reset its memory when necessary.
 
-\paragraph{Update Gate ($z_t$):}
-The update gate determines how much of the previous hidden state $h_{t-1}$ and the candidate hidden state $\tilde{h}_t$ should be 
-combined to form the new hidden state $h_t$.
+\paragraph{Update Gate ($\vct{z}_t$):}
+The update gate determines how much of the previous hidden state $\vct{h}_{t-1}$ and the candidate hidden state $\tilde{\vct{h}}_t$ should be
+combined to form the new hidden state $\vct{h}_t$.
 \begin{equation}
-    z_t = \sigma\left(W_z \cdot [h_{t-1}, x_t] + b_z\right)
+    \vct{z}_t = \sigma\left(\mat{W}_z \cdot [\vct{h}_{t-1}, \vct{x}_t] + \vct{b}_z\right)
 \end{equation}
-It takes the previous hidden state $h_{t-1}$ and the current input $x_t$ as input, applies a linear transformation followed by a sigmoid activation function,
+It takes the previous hidden state $\vct{h}_{t-1}$ and the current input $\vct{x}_t$ as input, applies a linear transformation followed by a sigmoid activation function,
 and outputs a value between 0 and 1 for each element in the hidden state, where 0 means "completely update" and 1 means "completely retain."
 
-The new hidden state $h_t$ is then computed as a linear interpolation between the previous hidden state $h_{t-1}$ and the candidate hidden state $\tilde{h}_t$,
-weighted by the update gate $z_t$:
+The new hidden state $\vct{h}_t$ is then computed as a linear interpolation between the previous hidden state $\vct{h}_{t-1}$ and the candidate hidden state $\tilde{\vct{h}}_t$,
+weighted by the update gate $\vct{z}_t$:
 \begin{equation}
-    h_t = (1 - z_t) \odot h_{t-1} + z_t \odot \tilde{h}_t
+    \vct{h}_t = (1 - \vct{z}_t) \odot \vct{h}_{t-1} + \vct{z}_t \odot \tilde{\vct{h}}_t
 \end{equation}
-This allows the GRU to adaptively capture long-term dependencies while maintaining a simpler architecture compared to LSTMs. 
+This allows the GRU to adaptively capture long-term dependencies while maintaining a simpler architecture compared to LSTMs.
 
 \paragraph{LSTM vs GRU}
 The LSTM and GRU architectures both address the vanishing gradient problem and are capable of capturing long-term dependencies in sequential data.

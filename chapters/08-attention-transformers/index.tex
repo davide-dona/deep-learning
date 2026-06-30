@@ -29,3 +29,163 @@ The size of these intervals is determined by the \textit{dilation rate}. This te
 
 For instance, consider a standard $3 \times 3$ convolutional filter applied to adjacent pixels. This configuration corresponds to a dilation rate of $1$, yielding a $3 \times 3$ receptive field. 
 If the dilation rate is increased to $2$, the filter skips one pixel between each consecutive sample. Consequently, the filter's effective receptive field expands to a $5 \times 5$ area, despite still relying on the same $9$ trainable parameters.
+
+\subsubsection{Temporal Convolutional Networks (TCNs)}
+The \textbf{Temporal Convolutional Network (TCN)} is a prominent architecture that applies dilated convolutions directly to sequence modeling. 
+By addressing the historical limitations of standard CNNs, TCNs demonstrated that convolutional architectures can be highly competitive with RNNs, achieving comparable or superior performance in various sequence tasks.
+
+TCNs achieve this through two core architectural mechanisms:
+\begin{itemize}
+    \item \textbf{Hierarchical Dilated Convolutions:} To capture long-range dependencies, TCNs utilize a stack of convolutional layers where the dilation rate increases with depth. The initial layer processes the input with a small receptive field, while subsequent layers progressively expand this field. This hierarchical approach allows the network to model relationships across extended time spans while maintaining parameter efficiency.
+    \item \textbf{Causal Convolutions:} To ensure strict adherence to temporal ordering, TCNs employ causal convolutions. This guarantees that the network's prediction at time step $t$ is computed using only inputs from time step $t$ and earlier, fundamentally preventing any information leakage from future states.
+\end{itemize}
+
+\subsection{Transformers}
+Instead of using attention as a supplementary mechanism within RNNs or CNNs, the \textbf{Transformer} architecture relies entirely on attention to model dependencies between input and output sequences.
+Transformers are neural network architectures based on the \textit{self-attention} mechanism.
+This architecture has been shown to be more efficient and parallelizable than RNNs and CNNs, leading to faster training and strong performance on a wide range of sequence modeling tasks.
+
+\subsubsection{The Architecture}
+The architecture of the Transformer still follows the encoder-decoder paradigm, but it entirely rethinks the way each component is implemented.
+
+\begin{itemize}
+    \item \textbf{Encoder:} The encoder receives the entire input sequence and processes it in parallel, producing a sequence of encoded representations of the same length as the input.
+    
+    \item \textbf{Decoder:} The decoder predicts the output sequence one token at a time, using previously generated tokens and the encoder's output as context.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.85\textwidth}{!}{\input{chapters/08-attention-transformers/tikz/transformer-architecture.tex}}
+    \caption{The Transformer architecture. A stack of $N$ encoders maps the input sequence into contextualized representations,
+    which feed the encoder-decoder attention of a stack of $N$ decoders. The decoder generates the output sequence one token at a time.}
+\end{figure}
+
+Let's now go deeper into the details of each component of the Transformer architecture.
+
+\subsubsection{Encoder}
+\begin{comment}
+    AS of now, this subssubsection is a mix of various concepts
+\end{comment}
+The encoder transforms the input tokens into a \textbf{contextualized representation}. 
+Each input token is first mapped to a high-dimensional vector through an \textbf{embedding layer}. This layer captures the semantic meaning of each token, transforming it into a numerical representation.
+
+Each token is processed in parallel within the encoder layers, while \textbf{self-attention} allows the model to capture dependencies between tokens, modeling relationships across the sequence.
+
+The \textbf{feed-forward layer} then processes the output of the self-attention mechanism, applying a non-linear transformation to each token's representation independently.
+Since self-attention has already mixed information across tokens, the feed-forward layer refines each token's representation without further token interaction, enabling efficient parallel computation.
+
+\subsubsection{Positional Encoding}
+The first encoder layer receives a sequence of token embeddings, but these embeddings do not inherently contain any information about the order of the tokens.
+To address this, positional information is provided through an additive \textbf{positional encoding} vector, of the same dimension as the token embeddings. 
+
+With positional encoding, words will be closer not only based on their semantic similarity but also based on their relative positions in the sequence.
+
+This is usually implemented using sinusoidal functions, which allow the model to learn relative positions and generalize to sequences longer than those seen during training.
+
+\subsubsection{Self-Attention}
+The self-attention mechanism is the core of the Transformer architecture.
+It allows creating arbitrarly \textbf{long-range dependencies} between tokens in a sequence, regardless of their distance from each other.
+Each token in the input sequence to attend every other token considered relevant for the current token's representation.
+
+\paragraph{How to compute it}
+From their embeddings, the \textbf{self-attention} mechanism creates 3 vectors for each token: 
+\begin{itemize}
+    \item \textbf{Query (Q):} What the token is looking for in the other tokens.
+    
+    \item \textbf{Key (K):} What the token has to offer to the other tokens.
+    
+    \item \textbf{Value (V):} The actual information that the token carries, which will be used to compute the final representation.
+\end{itemize}
+
+The idea is that when the query of a token matches the key of another token (high attention score), the value of that token will be used to compute the final representation of the first token.
+
+The Q, K, and V vectors are computed as a linear transformation of the input embeddings, using learned weight matrices:
+
+\[
+    \vct{Q} = \vct{X} \vct{W}_Q, \quad
+    \vct{K} = \vct{X} \vct{W}_K, \quad
+    \vct{V} = \vct{X} \vct{W}_V
+\]
+
+\paragraph{Score Computation}
+Once the Q, K, and V vectors are computed, the next step is to calculate the attention scores.
+Given a query vector $\vct{Q}_i$ for token $i$ and key vectors $\vct{K}_j$ for all tokens $j$, the attention score $s_{ij}$ is computed as the dot product of the query and key vectors:
+\[
+s_{ij} = \vct{Q}_i \cdot \vct{K}_j
+\]
+This score indicates how much attention token $i$ should pay to token $j$.
+
+These scores are then normalized for ensuring that the dot products do not grow too large, which can lead to instability during training. 
+This is typically done by dividing the scores by the square root of the dimension of the key vectors, $d_k$:
+\[
+\hat{s}_{ij} = \frac{s_{ij}}{\sqrt{d_k}}
+\]
+
+Finally, a softmax function is applied to convert the scores into a probability distribution:
+\[
+\alpha_{ij} = \text{softmax}(\hat{s}_{ij}) = \frac{e^{\hat{s}_{ij}}}{\sum_{k} e^{\hat{s}_{ik}}}
+\]
+
+\paragraph{Output Computation}
+The final step in the self-attention mechanism is to compute a weighted sum of the \textbf{value} vectors based on the attention scores.
+\begin{equation}
+    \label{eq:weighted_sum_values}
+    \hat{\vct{V}}_i = \sum_{j} \alpha_{ij} \vct{V}_j
+\end{equation}
+
+This output vector \(\hat{\vct{V}}_i\) represents the refined representation of token \(i\) after considering the context provided by all other tokens in the sequence,
+giving more importance to tokens that are more relevant according to the attention scores.
+
+\paragraph{Putting Everything Together}
+Putting all the steps together, the self-attention mechanism can be expressed in matrix form as:
+\[
+\text{Attention}(\vct{Q}, \vct{K}, \vct{V}) = \text{softmax}\left(\frac{\vct{Q} \cdot \vct{K}^T}{\sqrt{d_k}}\right) \vct{V}
+\]
+
+\paragraph{Multi-Head Attention}
+An evolution of the self-attention mechanism is \textbf{multi-head attention}, which allows the model to focus on different aspects of the input sequence simultaneously.
+Instead of computing a single set of $\vec{Q}$, $\vec{K}$, and $\vec{V}$ vectors, the model computes multiple sets (or "\textbf{heads}") of these vectors, each with its own learned weight matrices.
+
+Altough demenostrated to be effective, multi-head attention increases the number of parameters and computational cost.
+Some heads may learn redundant information, reducing the overall efficiency of the model. Altough, we have no way to discard them
+a priori and we cannot enforce diversity among the heads.
+
+This gives the attention layer multiple representations subspaces to attend to, allowing it to capture a richer set of relationships between tokens.
+
+The final output of the multi-head attention mechanism is obtained by concatenating the outputs of all heads and applying a learned linear transformation to combine them into a single representation.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{\input{chapters/08-attention-transformers/tikz/multi-head-attention.tex}}
+    \caption{Multi-head attention. The input $X$ is projected by $h$ independent sets of weight matrices $W_i^Q, W_i^K, W_i^V$,
+    producing one attention output $Z_i$ per head. The heads are concatenated and projected by $W^O$ to obtain the final output $Z$.}
+\end{figure}
+
+\subsubsection{Layer Normalization}
+Between each sub-layer (self-attention and feed-forward), the Transformer has a \textbf{residual connection} followed by \textbf{layer normalization}.
+The residual connection allows the model to possibly learn identity mappings, which can help with training deeper networks.
+Layer normalization stabilizes the learning process by normalizing the inputs across the features, ensuring a better gradient flow and faster convergence.
+
+\subsubsection{Encoder-Decoder Attention}
+In the decoder, there is an additional attention mechanism called \textbf{encoder-decoder attention}.
+This mechanism allows the decoder to attend to the encoder's output, enabling it to incorporate information from the input sequence while generating the output sequence.
+
+To ensure the causal nature of the decoder, a masking mechanism is applied to prevent the decoder from attending to future tokens in the output sequence during training.
+
+
+\subsection{Language Pretraining}
+Similarly to what we have seen in the CNN section, the Transformer architecture could be trained for tasks in Natural Language Processing (NLP).
+This started a new era in NLP, where large-scale unsupervised pretraining on massive text corpora became the standard approach for building state-of-the-art models.
+These pretrained models could then be fine-tuned on specific downstream tasks, with some supervised data, achieving remarkable performance across a wide range of NLP benchmarks.
+
+Some of the most notable Transformer-based pretrained models include:
+\begin{itemize}
+    \item \textbf{BERT (Bidirectional Encoder Representations from Transformers):} an encoder-only model that captures bidirectional context, excelling in tasks like question answering and sentiment analysis.
+    \item \textbf{GPT (Generative Pre-trained Transformer):} a decoder-only model that generates coherent and contextually relevant text, widely used for text generation and completion tasks.
+\end{itemize}
+
+\subsection{Vision Transformers}
+\begin{comment}
+    #TODO!
+\end{comment}
