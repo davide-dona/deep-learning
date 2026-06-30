@@ -1,9 +1,9 @@
 \begin{tikzpicture}[
     >=Stealth,
-    enc/.style={rectangle, draw, fill=cyan!35, minimum width=0.5cm, minimum height=1.1cm, thick},
-    dec/.style={rectangle, draw, fill=red!55, minimum width=0.5cm, minimum height=1.1cm, thick},
-    ctx/.style={rectangle, draw, fill=cyan!55, minimum width=0.5cm, minimum height=1.2cm, thick},
-    att/.style={rectangle, draw, fill=gray!30, minimum width=0.5cm, minimum height=1.2cm, thick},
+    enc/.style={rectangle, draw, fill=attncontext!70, minimum width=0.5cm, minimum height=1.1cm, thick},
+    dec/.style={rectangle, draw, fill=attnscore, minimum width=0.5cm, minimum height=1.1cm, thick},
+    ctx/.style={rectangle, draw, fill=attncontext, minimum width=0.5cm, minimum height=1.2cm, thick},
+    att/.style={rectangle, draw, fill=dlgray!40, minimum width=0.5cm, minimum height=1.2cm, thick},
     lbl/.style={font=\small},
     arr/.style={->, thick}
 ]
@@ -24,7 +24,7 @@
     \node[lbl, right=1mm of s] {$s_t$};
 
     % ---- Attention window highlight ----
-    \node[draw=red!80!black, very thick, rounded corners, fit=(h2)(h4), inner sep=2.5mm] (win) {};
+    \node[draw=dlred!80!black, very thick, rounded corners, fit=(h2)(h4), inner sep=2.5mm] (win) {};
 
     % ---- Context vector ----
     \node[ctx] (c) at (2.2, 2.6) {};
@@ -32,7 +32,7 @@
     \node[lbl] at (3.7,3.05) {Context vector};
 
     % ---- Local weights ----
-    \node[att, minimum height=0.75cm, fill=gray!20] (a) at (4.0, 1.7) {};
+    \node[att, minimum height=0.75cm, fill=dlgray!30] (a) at (4.0, 1.7) {};
     \node[lbl, above=0.5mm of a] {$a_t$};
     \node[lbl] at (5.4,1.3) {Local weights};
 

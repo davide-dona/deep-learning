@@ -21,12 +21,12 @@
             legend pos=north west,
             legend style={font=\tiny, inner sep=1pt}
         ]
-            \addplot[blue, thick, domain=-7:0] {0};
+            \addplot[plotfunc, thick, domain=-7:0] {0};
             \addlegendentry{$\relu(x)$}
-            \addplot[blue, thick, forget plot, domain=0:6] {x};
-            \addplot[red, dashed, thick, domain=-7:0] {0};
+            \addplot[plotfunc, thick, forget plot, domain=0:6] {x};
+            \addplot[plotderiv, dashed, thick, domain=-7:0] {0};
             \addlegendentry{$\relu'(x)$}
-            \addplot[red, dashed, thick, forget plot, domain=0:6] {1};
+            \addplot[plotderiv, dashed, thick, forget plot, domain=0:6] {1};
         \end{axis}
     \end{tikzpicture}
 \end{minipage}

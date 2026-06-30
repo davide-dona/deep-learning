@@ -25,6 +25,75 @@
 \usetikzlibrary{arrows.meta, calc, positioning, backgrounds, shapes.geometric, fit, quotes}
 \usepackage{pgfplots}
 
+% ============================================================
+% Shared figure palette and TikZ building blocks
+% Single source of truth for all TikZ figures. Because setup.tex
+% is \input before every chapter and figures are \input inline,
+% these definitions are visible to every figure - no figure
+% should redefine colors or the styles below locally.
+% ============================================================
+
+% --- Tier 1: base primitives (Okabe-Ito, colorblind-safe) ---
+\definecolor{dlblue}{HTML}{0072B2}   % primary structure
+\definecolor{dlsky}{HTML}{56B4E9}    % light-blue accent / kernels
+\definecolor{dlorange}{HTML}{E69F00} % accent - RNN blocks, regions
+\definecolor{dlgreen}{HTML}{009E73}  % accent
+\definecolor{dlred}{HTML}{D55E00}    % accent - bias, skip, scores (vermillion)
+\definecolor{dlpurple}{HTML}{CC79A7} % accent - 3rd category when needed
+\definecolor{dlyellow}{HTML}{F0E442} % highlight
+\definecolor{dlgray}{HTML}{8C8C8C}   % neutral
+
+% --- Tier 2: semantic aliases (concept-named, built on Tier 1) ---
+% Neurons / connections (feed-forward figures)
+\colorlet{neuronedge}{dlblue!70!black}
+\colorlet{neuronfill}{dlblue!22}
+\colorlet{neuronfillin}{dlblue!12}
+\colorlet{neuronfillhid}{dlblue!22}
+\colorlet{neuronfillout}{dlblue!35}
+\colorlet{conncolor}{dlblue!55!black}
+\colorlet{biasedge}{dlred!75!black}
+\colorlet{biasfill}{dlred!12}
+% Tensors / feature maps (CNN figures)
+\colorlet{tensorfill}{dlblue!20}
+\colorlet{tensorfillalt}{dlblue!45}
+\colorlet{tensoredge}{dlblue!50!gray}
+\colorlet{kernelfill}{dlsky}
+\colorlet{kerneledge}{dlblue!70}
+\colorlet{highlightfill}{dlyellow}
+\colorlet{relufill}{dlorange!45}
+\colorlet{skipcolor}{dlred!80!black}
+% Recurrent blocks / gates (RNN figures)
+\colorlet{rnnblock}{dlorange!75}
+\colorlet{gatecandidate}{dlblue!25}
+\colorlet{gateinput}{dlred!25}
+\colorlet{gateoutput}{dlgreen!25}
+\colorlet{gatecell}{dlgray!30}
+\colorlet{gateupdate}{dlpurple!30}
+\colorlet{gatereset}{dlorange!35}
+% Activation-function plots
+\colorlet{plotfunc}{dlblue}
+\colorlet{plotderiv}{dlred}
+\colorlet{plotasymp}{dlgray}
+% Attention (ch. sequence models) - recolored from the same set
+\colorlet{attncontext}{dlsky!50}
+\colorlet{attnscore}{dlred!50}
+\colorlet{attnregion}{dlorange!60}
+
+% --- Tier 3: shared TikZ styles ---
+% Figures may override geometry (minimum size, font) locally;
+% only color/structure is centralized here.
+\tikzset{
+  neuron/.style={circle, draw=neuronedge, fill=neuronfill, minimum size=22pt, font=\small},
+  neuron in/.style={neuron, fill=neuronfillin},
+  neuron hid/.style={neuron, fill=neuronfillhid},
+  neuron out/.style={neuron, fill=neuronfillout},
+  bias/.style={neuron, draw=biasedge, fill=biasfill},
+  conn/.style={->, thick, conncolor, opacity=0.5},
+  layerlabel/.style={font=\small\bfseries, text=neuronedge, align=center},
+  tensorblock/.style={draw=tensoredge, fill=tensorfill},
+  tensorblock alt/.style={draw=tensoredge, fill=tensorfillalt},
+}
+
 % --- Math notation ---
 \newcommand{\vct}[1]{\boldsymbol{#1}}   % vectors / bold symbols
 \newcommand{\mat}[1]{\boldsymbol{#1}}   % matrices

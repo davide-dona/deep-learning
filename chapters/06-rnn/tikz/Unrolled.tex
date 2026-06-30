@@ -2,7 +2,7 @@
     >=stealth,
     node distance=1.2cm,
     box/.style={
-        rectangle, draw, fill=orange!70, 
+        rectangle, draw, fill=rnnblock, 
         rounded corners=3pt, minimum width=2.2cm, 
         minimum height=0.7cm, thick, font=\small\bfseries
     },
@@ -14,19 +14,19 @@
     \node[box] (HL1) {Hidden layer};
     \node[box, above=of HL1] (C1) {Classifier};
     \node[above=0.4cm of C1] (Y1) {$y_1$};
-    \node[label_node, below=0.6cm of HL1] (LX1) {$x_1$ \\ \textbf{\color{cyan!70!black} t = 1}};
+    \node[label_node, below=0.6cm of HL1] (LX1) {$x_1$ \\ \textbf{\color{dlsky!70!black} t = 1}};
 
     % --- Time Step 2 ---
     \node[box, right=1.8cm of HL1, yshift=0.8cm] (HL2) {Hidden layer};
     \node[box, above=of HL2] (C2) {Classifier};
     \node[above=0.4cm of C2] (Y2) {$y_2$};
-    \node[label_node, below=0.6cm of HL2] (LX2) {$x_2$ \\ \textbf{\color{cyan!70!black} t = 2}};
+    \node[label_node, below=0.6cm of HL2] (LX2) {$x_2$ \\ \textbf{\color{dlsky!70!black} t = 2}};
 
     % --- Time Step 3 ---
     \node[box, right=1.8cm of HL2, yshift=0.8cm] (HL3) {Hidden layer};
     \node[box, above=of HL3] (C3) {Classifier};
     \node[above=0.4cm of C3] (Y3) {$y_3$};
-    \node[label_node, below=0.6cm of HL3] (LX3) {$x_3$ \\ \textbf{\color{cyan!70!black} t = 3}};
+    \node[label_node, below=0.6cm of HL3] (LX3) {$x_3$ \\ \textbf{\color{dlsky!70!black} t = 3}};
 
     % --- External States ---
     \node[left=1.2cm of HL1, yshift=-0.8cm] (H0) {$h_0$};

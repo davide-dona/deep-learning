@@ -1,9 +1,9 @@
 \begin{tikzpicture}[
     >=Stealth,
-    enc/.style={rectangle, draw, fill=cyan!35, minimum width=0.4cm, minimum height=0.9cm, thick},
-    dec/.style={rectangle, draw, fill=red!55, minimum width=0.4cm, minimum height=0.9cm, thick},
-    ctx/.style={rectangle, draw, fill=cyan!55, minimum width=0.4cm, minimum height=1.0cm, thick},
-    att/.style={rectangle, draw, fill=gray!30, minimum width=0.4cm, minimum height=1.0cm, thick},
+    enc/.style={rectangle, draw, fill=attncontext!70, minimum width=0.4cm, minimum height=0.9cm, thick},
+    dec/.style={rectangle, draw, fill=attnscore, minimum width=0.4cm, minimum height=0.9cm, thick},
+    ctx/.style={rectangle, draw, fill=attncontext, minimum width=0.4cm, minimum height=1.0cm, thick},
+    att/.style={rectangle, draw, fill=dlgray!40, minimum width=0.4cm, minimum height=1.0cm, thick},
     lbl/.style={font=\footnotesize},
     arr/.style={->, thick}
 ]
@@ -20,11 +20,11 @@
     \draw[arr, dashed] (Le4.east) -- (Ls.west);
     \node[lbl, below=0.5mm of Ls] {$s_t$};
 
-    \node[draw=red!80!black, very thick, rounded corners, fit=(Le2)(Le3), inner sep=1.5mm] (Lwin) {};
+    \node[draw=dlred!80!black, very thick, rounded corners, fit=(Le2)(Le3), inner sep=1.5mm] (Lwin) {};
 
     \node[ctx] (Lc) at (1.5,2.0) {};
     \node[lbl, left=4mm of Lc] {$c_t$};
-    \node[att, minimum height=0.55cm, fill=gray!20] (La) at (2.7,1.25) {};
+    \node[att, minimum height=0.55cm, fill=dlgray!30] (La) at (2.7,1.25) {};
     \node[lbl, above=-0.5mm of La] {$a_t$};
     \node[lbl] (Lpt) at (3.6,1.4) {$p_t$};
     \node[att] (Lsh) at (4.5,2.0) {};
@@ -57,7 +57,7 @@
 
     \node[ctx] (Gc) at (1.5,2.0) {};
     \node[lbl, left=4mm of Gc] {$c_t$};
-    \node[att, minimum height=0.55cm, fill=gray!20] (Ga) at (3.0,1.25) {};
+    \node[att, minimum height=0.55cm, fill=dlgray!30] (Ga) at (3.0,1.25) {};
     \node[lbl, above=-0.5mm of Ga] {$a_t$};
     \node[att] (Gsh) at (4.5,2.0) {};
     \node[lbl] (Gyt) at (4.5,3.0) {$y_t$};

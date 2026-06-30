@@ -1,14 +1,14 @@
 \begin{tikzpicture}[
     >=Stealth,
-    rnn/.style={rectangle, rounded corners=3pt, draw, fill=orange!70, thick,
+    rnn/.style={rectangle, rounded corners=3pt, draw, fill=rnnblock, thick,
                 minimum width=1.3cm, minimum height=0.65cm},
-    clf/.style={rectangle, rounded corners=3pt, draw, fill=orange!55, thick,
+    clf/.style={rectangle, rounded corners=3pt, draw, fill=rnnblock!75, thick,
                 minimum width=1.3cm, minimum height=0.65cm, font=\small},
-    word/.style={font=\small\itshape, text=teal!70!black},
+    word/.style={font=\small\itshape, text=dlgreen!70!black},
     arr/.style={->, thick}
 ]
     % ---- CNN encoder ----
-    \node[trapezium, trapezium angle=65, draw, fill=orange!70, thick,
+    \node[trapezium, trapezium angle=65, draw, fill=rnnblock, thick,
           minimum width=1.0cm, minimum height=0.7cm, font=\small] (cnn) at (0,0) {CNN};
 
     % ---- columns ----

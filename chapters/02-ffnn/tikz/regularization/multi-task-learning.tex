@@ -1,17 +1,8 @@
-\colorlet{myred}{red!80!black}
-\colorlet{myblue}{blue!80!black}
-\colorlet{mybluee}{myblue!80!black}
-\colorlet{mygreen}{green!60!black}
-\colorlet{myorange}{orange!70!red!60!black}
-\colorlet{mydarkred}{red!30!black}
-\colorlet{mydarkblue}{blue!40!black}
-\colorlet{mydarkgreen}{green!30!black}
-
 % STYLES
 \tikzset{
   >=latex, % for default LaTeX arrow head
-  node/.style={thick,circle,draw=myblue,minimum size=22,inner sep=0.5,outer sep=0.6},
-  node in/.style={node,blue!20!black,draw=myblue!30!black,fill=myblue!20},
+  node/.style={thick,circle,draw=neuronedge,minimum size=22,inner sep=0.5,outer sep=0.6},
+  node in/.style={node,fill=neuronfill},
 }
 \def\nstyle{int(\lay<\Nnodlen?min(2,\lay):3)} % map layer number onto 1, 2, or 3
 

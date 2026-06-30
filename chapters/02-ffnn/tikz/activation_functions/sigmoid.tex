@@ -20,9 +20,9 @@
             legend pos=north west,
             legend style={font=\tiny, inner sep=1pt}
         ]
-            \addplot[blue, thick, domain=-6:6] {1/(1+exp(-x))};
+            \addplot[plotfunc, thick, domain=-6:6] {1/(1+exp(-x))};
             \addlegendentry{$\sigma(x)$}
-            \addplot[red, dashed, thick, domain=-6:6] {1/(1+exp(-x)) * (1 - 1/(1+exp(-x)))};
+            \addplot[plotderiv, dashed, thick, domain=-6:6] {1/(1+exp(-x)) * (1 - 1/(1+exp(-x)))};
             \addlegendentry{$\sigma'(x)$}
         \end{axis}
     \end{tikzpicture}

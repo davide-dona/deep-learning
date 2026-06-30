@@ -1,24 +1,18 @@
-\definecolor{kernelblue}{RGB}{100,180,220}
-\definecolor{boxgray}{RGB}{220,220,220}
-\definecolor{outputgray}{RGB}{200,200,200}
-\definecolor{highlightblue}{RGB}{60,140,200}
-\definecolor{receptiveyellow}{RGB}{255,215,70}
-
 \begin{tikzpicture}
 
 \def\S{0.75}
 \def\H{0.375}
 
 \tikzset{
-  IC/.style={draw=gray!50, fill=boxgray,
+  IC/.style={draw=dlgray!55, fill=dlgray!25,
     minimum width=\S cm, minimum height=\S cm, inner sep=0},
-  AC/.style={draw=highlightblue, fill=receptiveyellow!75,
+  AC/.style={draw=kerneledge, fill=highlightfill!75,
     minimum width=\S cm, minimum height=\S cm, inner sep=0, line width=0.6pt},
-  KC/.style={draw=highlightblue!90, fill=kernelblue,
+  KC/.style={draw=kerneledge!90, fill=kernelfill,
     minimum width=\S cm, minimum height=\S cm, inner sep=0, line width=0.6pt},
-  OC/.style={draw=gray!50, fill=outputgray,
+  OC/.style={draw=dlgray!55, fill=dlgray!40,
     minimum width=\S cm, minimum height=\S cm, inner sep=0},
-  OA/.style={draw=highlightblue, fill=receptiveyellow!60,
+  OA/.style={draw=kerneledge, fill=highlightfill!60,
     minimum width=\S cm, minimum height=\S cm, inner sep=0, line width=0.6pt},
 }
 
@@ -88,7 +82,7 @@
 
 % Input label — moved higher
 \node[font=\normalsize\bfseries]        at (1.5, 0.90) {Input};
-\node[font=\small, text=gray!65!black]  at (1.5, 0.62) {$5 \times 5$};
+\node[font=\small, text=dlgray!80!black]  at (1.5, 0.62) {$5 \times 5$};
 
 % ── KERNEL 3×3 with real values ──────────────────────────────────
 % kernel values: [[1,0,-1],[1,0,-1],[1,0,-1]]  (vertical edge detector)
@@ -112,18 +106,18 @@
 
 % Kernel label — moved higher
 \node[font=\normalsize\bfseries]        at (\KX+0.75, 0.90) {Kernel};
-\node[font=\small, text=gray!65!black]  at (\KX+0.75, 0.62) {$3 \times 3$};
+\node[font=\small, text=dlgray!80!black]  at (\KX+0.75, 0.62) {$3 \times 3$};
 
 % Top horizontal
-\draw[highlightblue!55, dashed, thin] (-\H, \H) -- (\KX-\H, \H);
+\draw[kerneledge!55, dashed, thin] (-\H, \H) -- (\KX-\H, \H);
 % Bottom horizontal
-\draw[highlightblue!55, dashed, thin] (-\H,-2*\S-\H) -- (\KX-\H,-2*\S-\H);
+\draw[kerneledge!55, dashed, thin] (-\H,-2*\S-\H) -- (\KX-\H,-2*\S-\H);
 % Left vertical (RF side)
-\draw[highlightblue!55, dashed, thin] (-\H, \H) -- (-\H,-2*\S-\H);
+\draw[kerneledge!55, dashed, thin] (-\H, \H) -- (-\H,-2*\S-\H);
 % Right vertical (kernel side)
-\draw[highlightblue!55, dashed, thin] (\KX-\H, \H) -- (\KX-\H,-2*\S-\H);
+\draw[kerneledge!55, dashed, thin] (\KX-\H, \H) -- (\KX-\H,-2*\S-\H);
 
-\draw[-{Stealth[length=9pt]}, line width=1.8pt, color=kernelblue!85!black]
+\draw[-{Stealth[length=9pt]}, line width=1.8pt, color=kernelfill!85!black]
     (7.30, -\S) -- (8.05, -\S);
 
 \def\OX{8.2}
@@ -149,7 +143,7 @@
 
 % Output label — moved higher
 \node[font=\normalsize\bfseries]        at (\OX+0.75, 0.90) {Output};
-\node[font=\small, text=gray!65!black]  at (\OX+0.75, 0.62) {$3 \times 3$};
+\node[font=\small, text=dlgray!80!black]  at (\OX+0.75, 0.62) {$3 \times 3$};
 
 \end{tikzpicture}
 

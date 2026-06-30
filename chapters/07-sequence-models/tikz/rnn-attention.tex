@@ -1,7 +1,7 @@
 \begin{tikzpicture}[
     >=Stealth,
-    enc/.style={rectangle, draw, fill=cyan!30, thick, minimum width=0.8cm, minimum height=0.45cm, font=\small},
-    dec/.style={rectangle, draw, fill=red!45, thick, minimum width=0.7cm, minimum height=0.6cm, font=\small},
+    enc/.style={rectangle, draw, fill=attncontext!70, thick, minimum width=0.8cm, minimum height=0.45cm, font=\small},
+    dec/.style={rectangle, draw, fill=attnscore!85, thick, minimum width=0.7cm, minimum height=0.6cm, font=\small},
     sum/.style={circle, draw, thick, minimum size=0.55cm, inner sep=0pt},
     lbl/.style={font=\small},
     wlbl/.style={font=\footnotesize},
@@ -12,7 +12,7 @@
     \foreach \i/\x in {1/1, 2/2.3, 3/3.6, T/5.4} {
         \node[enc] (f\i) at (\x,\fy) {$\overrightarrow{h}_{\i}$};
         \node[enc] (b\i) at (\x,\by) {$\overleftarrow{h}_{\i}$};
-        \node[draw, dashed, gray, fit=(f\i)(b\i), inner sep=1.2mm] (col\i) {};
+        \node[draw, dashed, dlgray, fit=(f\i)(b\i), inner sep=1.2mm] (col\i) {};
         \node[lbl] (x\i) at (\x,-0.95) {$x_{\i}$};
         \draw[arr] (x\i.north) -- (b\i.south);
     }

@@ -1,1 +1,31 @@
 \section{Attention \& Transformers}
+Early sequence processing models relied primarily on recurrent neural network (RNN) encoder-decoder architectures. 
+In these models, the encoder compresses the input sequence into a fixed-size representation, which the decoder then uses to generate the output. 
+However, this fixed bottleneck limits performance. The introduction of attention mechanisms demonstrated that creating a dynamic, context-aware representation of the input sequence significantly improves results. 
+
+Building on the success of attention, researchers sought to eliminate the sequential bottleneck of RNNs entirely. 
+This led to the development of more flexible architectures capable of processing sequences in parallel while still effectively capturing long-range dependencies.
+
+\subsection{Convolutional Sequence Models}
+Convolutional Neural Networks (CNNs) offer a natural alternative for sequence processing. 
+By using convolutional filters, they efficiently capture local dependencies, and stacking these layers allows the model to expand its receptive field to capture longer-range relationships.
+
+CNNs provide two primary advantages over RNNs:
+\begin{itemize}
+    \item \textbf{Parallelization:} Unlike RNNs, which must process tokens sequentially, CNNs process the entire sequence hierarchically. 
+    This enables massive parallelization and significantly faster training times.
+    
+    \item \textbf{Parameter Efficiency:} The parameter-sharing nature of convolutional filters makes CNNs highly efficient, 
+    reducing both the total number of parameters and overall computational cost.
+\end{itemize}
+
+Despite these strengths, traditional CNNs are constrained by a fixed input size. This limitation complicates their application 
+to variable-length sequences, often requiring workarounds that make them less flexible in certain scenarios.
+
+\paragraph{Dilated Convolutions}
+To capture long-range dependencies without inflating the parameter count, CNNs frequently employ \textbf{dilated convolutions}. 
+Unlike standard convolutions, a dilated filter is applied over a broader area by introducing gaps between the sampled input values. 
+The size of these intervals is determined by the \textit{dilation rate}. This technique effectively expands the network's receptive field while preserving both parameter efficiency and computational tractability.
+
+For instance, consider a standard $3 \times 3$ convolutional filter applied to adjacent pixels. This configuration corresponds to a dilation rate of $1$, yielding a $3 \times 3$ receptive field. 
+If the dilation rate is increased to $2$, the filter skips one pixel between each consecutive sample. Consequently, the filter's effective receptive field expands to a $5 \times 5$ area, despite still relying on the same $9$ trainable parameters.

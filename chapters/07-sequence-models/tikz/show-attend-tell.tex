@@ -1,18 +1,18 @@
 \begin{tikzpicture}[
     >=Stealth,
-    rnn/.style={rectangle, rounded corners=3pt, draw, fill=orange!75, thick,
+    rnn/.style={rectangle, rounded corners=3pt, draw, fill=rnnblock, thick,
                 minimum width=1.2cm, minimum height=0.65cm},
-    ctx/.style={rectangle, draw, fill=cyan!35, thick, minimum width=0.85cm, minimum height=0.6cm, font=\small},
-    yin/.style={rectangle, draw, fill=green!18, thick, minimum width=0.85cm, minimum height=0.6cm, font=\small},
-    pout/.style={rectangle, draw, fill=red!22, thick, minimum width=0.95cm, minimum height=0.6cm, font=\small},
+    ctx/.style={rectangle, draw, fill=attncontext!70, thick, minimum width=0.85cm, minimum height=0.6cm, font=\small},
+    yin/.style={rectangle, draw, fill=dlgreen!18, thick, minimum width=0.85cm, minimum height=0.6cm, font=\small},
+    pout/.style={rectangle, draw, fill=attnscore!45, thick, minimum width=0.95cm, minimum height=0.6cm, font=\small},
     lbl/.style={font=\small},
     arr/.style={->, thick},
-    grid3/.pic={\fill[yellow!22] (-0.3,-0.3) rectangle (0.3,0.3);
+    grid3/.pic={\fill[highlightfill!40] (-0.3,-0.3) rectangle (0.3,0.3);
                 \draw[step=0.2,thin] (-0.3,-0.3) grid (0.3,0.3);
                 \draw[thin] (-0.3,-0.3) rectangle (0.3,0.3);}
 ]
     % ---- CNN + feature map ----
-    \node[trapezium, trapezium angle=65, draw, fill=orange!75, thick,
+    \node[trapezium, trapezium angle=65, draw, fill=rnnblock, thick,
           minimum width=0.9cm, minimum height=0.6cm, font=\small] (cnn) at (0,-1.25) {CNN};
     \pic at (0,0) {grid3};
     \node[lbl, align=center] at (-1.15,0) {feature\\ map};
@@ -50,5 +50,5 @@
     \foreach \n in {z2,y1} { \draw[arr] (\n.north) -- (h2.south); }
 
     % ---- feedback: predicted word becomes next input ----
-    \draw[->, thick, magenta] (py1.south) to[out=-90,in=90] (y1.north);
+    \draw[->, thick, dlpurple] (py1.south) to[out=-90,in=90] (y1.north);
 \end{tikzpicture}

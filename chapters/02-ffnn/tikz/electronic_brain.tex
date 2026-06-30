@@ -1,9 +1,9 @@
 \begin{tikzpicture}[
   node distance=0.8cm,
-  input/.style={circle, draw=blue!80!black, fill=blue!10, minimum size=20pt, font=\small},
-  neuron/.style={circle, draw=blue!80!black, fill=blue!20, minimum size=25pt, font=\small\bfseries},
-  output/.style={circle, draw=blue!80!black, fill=blue!30, minimum size=30pt, font=\small\bfseries},
-  weight/.style={font=\normalfont, color=blue!70!black}
+  input/.style={circle, draw=neuronedge, fill=neuronfillin, minimum size=20pt, font=\small},
+  neuron/.style={circle, draw=neuronedge, fill=neuronfillhid, minimum size=25pt, font=\small\bfseries},
+  output/.style={circle, draw=neuronedge, fill=neuronfillout, minimum size=30pt, font=\small\bfseries},
+  weight/.style={font=\normalfont, color=neuronedge}
 ]
 
   % Input layer nodes

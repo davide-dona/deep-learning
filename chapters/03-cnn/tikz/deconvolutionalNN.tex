@@ -2,60 +2,53 @@
 \usetikzlibrary{3d,perspective}
 
 
-\colorlet{myred}{red!80!black}
-\colorlet{myblue}{blue!80!black}
-\colorlet{mybluee}{myblue!80!black}
-\colorlet{mygreen}{green!60!black}
-\colorlet{myorange}{orange!70!red!60!black}
-\colorlet{mydarkred}{red!20!black}
-\colorlet{mydarkblue}{blue!40!black}
-\colorlet{mydarkgreen}{green!20!black}
+% colors centralized in setup.tex
 
 \begin{tikzpicture}[font=\small,scale=1, every node/.style={outer sep=0pt, inner sep=0pt, align=center, fill=white}, w/.style={minimum width=#1},h/.style={minimum height=#1},s/.style={minimum size=#1}, eu/.style={shorten >=#1},ed/.style={shorten <=#1},line join=round,isometric view, canvas is xy plane at z=0]
 
 \tikzset{>={Latex[length=1.5mm, width=1.25mm]}}
 
   \foreach \i in {0,0.5,1,1.5} \foreach \j in {0,0.5,1,1.5} {
-    \pgfmathparse{ifthenelse(\i<1 && \j>=1, "yellow!25", ifthenelse(\i>=1 && \j>=1, "mygreen!25", ifthenelse(\i<1 && \j<1, "cyan!50!blue!25", "myred!25")))}
-    \fill[\pgfmathresult,draw=gray] (\i,\j) rectangle (\i+0.5,\j+0.5);
+    \pgfmathparse{ifthenelse(\i<1 && \j>=1, "dlyellow!40", ifthenelse(\i>=1 && \j>=1, "dlgreen!25", ifthenelse(\i<1 && \j<1, "dlsky!40", "dlred!25")))}
+    \fill[\pgfmathresult,draw=dlgray] (\i,\j) rectangle (\i+0.5,\j+0.5);
   }
-  \draw[gray] (0,0,0) rectangle (2, 2,0);
+  \draw[dlgray] (0,0,0) rectangle (2, 2,0);
 
 % Bars
-\node[draw, fill=gray, w=.15cm, h=.4cm, anchor=south] at (.25,1.75,0) {};
+\node[draw, fill=dlgray, w=.15cm, h=.4cm, anchor=south] at (.25,1.75,0) {};
 \node[draw, fill=white, w=.15cm, h=.6cm, anchor=south] at (.75,.75,0) {};
 \node[draw, fill=white, w=.15cm, h=.3cm, anchor=south] at (1.25,.25,0) {};
-\node[draw, fill=gray, w=.15cm, h=.6cm, anchor=south] at (1.75,1.25,0) {};
+\node[draw, fill=dlgray, w=.15cm, h=.6cm, anchor=south] at (1.75,1.25,0) {};
 
 
 % 2*2 matrix
 \begin{scope}[xshift=2cm, yshift=2cm]
 \foreach \i in {0,0.5} 
             \foreach \j in {0,0.5} {
-                \pgfmathparse{ifthenelse(\i==0 && \j==0.5, "yellow!25", 
-                               ifthenelse(\i==0.5 && \j==0.5, "mygreen!25", 
-                               ifthenelse(\i==0 && \j==0, "cyan!50!blue!25", 
-                               "myred!25")))}
+                \pgfmathparse{ifthenelse(\i==0 && \j==0.5, "dlyellow!40", 
+                               ifthenelse(\i==0.5 && \j==0.5, "dlgreen!25", 
+                               ifthenelse(\i==0 && \j==0, "dlsky!40", 
+                               "dlred!25")))}
                 % Center the smaller grid above the larger one
-                \fill[\pgfmathresult,draw=gray] (\i+0.5,\j+0.5,1) rectangle (\i+1,\j+1,1);
+                \fill[\pgfmathresult,draw=dlgray] (\i+0.5,\j+0.5,1) rectangle (\i+1,\j+1,1);
             }
-        \draw[gray] (0.5,0.5,1) rectangle (1.5,1.5,1);
+        \draw[dlgray] (0.5,0.5,1) rectangle (1.5,1.5,1);
 
 % Bars
-\node[draw, fill=gray, w=.15cm, h=.4cm, anchor=south] at (0.5+.8,0.5+.75,0) {};
+\node[draw, fill=dlgray, w=.15cm, h=.4cm, anchor=south] at (0.5+.8,0.5+.75,0) {};
 \node[draw, fill=white, w=.15cm, h=.5cm, anchor=south] at (0.5+.2,0.5+.25,0) {};
 \node[draw, fill=white, w=.15cm, h=.3cm, anchor=south] at (0.5+.75,0.5+.25,0) {};
-\node[draw, fill=gray, w=.15cm, h=.3cm, anchor=south] at (0.5+.25,0.5+.75,0) {};
+\node[draw, fill=dlgray, w=.15cm, h=.3cm, anchor=south] at (0.5+.25,0.5+.75,0) {};
 \end{scope}
 
 %---------------------------------------
 
 \begin{scope}[xshift=5cm, yshift=-5cm]
   \foreach \i in {0,0.5,1,1.5} \foreach \j in {0,0.5,1,1.5} {
-    \pgfmathparse{ifthenelse(\i<1 && \j>=1, "yellow!25", ifthenelse(\i>=1 && \j>=1, "mygreen!25", ifthenelse(\i<1 && \j<1, "cyan!50!blue!25", "myred!25")))}
-    \fill[\pgfmathresult,draw=gray] (\i,\j) rectangle (\i+0.5,\j+0.5);
+    \pgfmathparse{ifthenelse(\i<1 && \j>=1, "dlyellow!40", ifthenelse(\i>=1 && \j>=1, "dlgreen!25", ifthenelse(\i<1 && \j<1, "dlsky!40", "dlred!25")))}
+    \fill[\pgfmathresult,draw=dlgray] (\i,\j) rectangle (\i+0.5,\j+0.5);
   }
-  \draw[gray] (0,0,0) rectangle (2, 2,0);
+  \draw[dlgray] (0,0,0) rectangle (2, 2,0);
 
 % Bars
 \node[draw, fill=white, w=.15cm, h=.05cm, anchor=south] at (0.25,0.25,0) {};
@@ -67,22 +60,22 @@
 \node[draw, fill=white, w=.15cm, h=.05cm, anchor=south] at (.75,1.75,0) {};
 \node[draw, fill=white, w=.15cm, h=.2cm, anchor=south] at (.25,1.25,0) {};
 
-\node[draw, fill=gray, w=.15cm, h=.4cm, anchor=south] at (.25,1.75,0) {};
+\node[draw, fill=dlgray, w=.15cm, h=.4cm, anchor=south] at (.25,1.75,0) {};
 \node[draw, fill=white, w=.15cm, h=.6cm, anchor=south] at (.7,.75,0) {};
 \node[draw, fill=white, w=.15cm, h=.3cm, anchor=south] at (1.25,.25,0) {};
-\node[draw, fill=gray, w=.15cm, h=.6cm, anchor=south] at (1.75,1.25,0) {};
+\node[draw, fill=dlgray, w=.15cm, h=.6cm, anchor=south] at (1.75,1.25,0) {};
 % 2*2 matrix
 \begin{scope}[xshift=2cm, yshift=2cm]
 \foreach \i in {0,0.5} 
             \foreach \j in {0,0.5} {
-                \pgfmathparse{ifthenelse(\i==0 && \j==0.5, "yellow!25", 
-                               ifthenelse(\i==0.5 && \j==0.5, "mygreen!25", 
-                               ifthenelse(\i==0 && \j==0, "cyan!50!blue!25", 
-                               "myred!25")))}
+                \pgfmathparse{ifthenelse(\i==0 && \j==0.5, "dlyellow!40", 
+                               ifthenelse(\i==0.5 && \j==0.5, "dlgreen!25", 
+                               ifthenelse(\i==0 && \j==0, "dlsky!40", 
+                               "dlred!25")))}
                 % Center the smaller grid above the larger one
-                \fill[\pgfmathresult,draw=gray] (\i+0.5,\j+0.5,1) rectangle (\i+1,\j+1,1);
+                \fill[\pgfmathresult,draw=dlgray] (\i+0.5,\j+0.5,1) rectangle (\i+1,\j+1,1);
             }
-        \draw[gray] (0.5,0.5,1) rectangle (1.5,1.5,1);
+        \draw[dlgray] (0.5,0.5,1) rectangle (1.5,1.5,1);
 
 % Bars
 \node[draw, fill=white, w=.15cm, h=.4cm, anchor=south] at (0.5+.8,0.5+.75,0) {};
@@ -97,7 +90,7 @@
   \foreach \j in {0,0.5,1,1.5} {
     \pgfmathparse{ifthenelse(
       (\i==0 && \j==1.5) || (\i==1 && \j==0) || (\i==0.5 && \j==.5) || (\i==1.5 && \j==1),
-      "gray!20", "gray"
+      "dlgray!20", "dlgray"
     )}
     \fill[\pgfmathresult,draw=black!80] (\i,\j) rectangle (\i+0.5,\j+0.5);
 }
@@ -116,14 +109,14 @@
 \draw[->, ed=2mm] (7,-4.2) to[bend right] node[right=2mm] {\scriptsize Pooling} +(1.25,1.5);
 
 %------------------------
-\node[draw, w=5cm, h=.6cm, yshift=4cm, fill=mygreen!15] (a) {Reconstruction};
-\node[draw, w=5cm, h=.6cm, right=2cm of a, fill=myblue!15] (b) {Layer Below Pooled Maps};
-\node[draw, w=5cm, h=.6cm, above=1cm of a, fill=mygreen!15] (c) {Rectified Unpooled Maps};
-\node[draw, w=5cm, h=.6cm, right=2cm of c, fill=myblue!15] (d) {Feature Maps};
-\node[draw, w=5cm, h=.6cm, above=1cm of c, fill=mygreen!15] (e) {Unpooled Maps};
-\node[draw, w=5cm, h=.6cm, right=2cm of e, fill=myblue!15] (f) {Rectified Feature Maps};
-\node[draw, w=5cm, h=.6cm, above=1cm of e, fill=mygreen!15] (g) {Layer Above reconstruction};
-\node[draw, w=5cm, h=.6cm, right=2cm of g, fill=myblue!15] (h) {Pooled Maps};
+\node[draw, w=5cm, h=.6cm, yshift=4cm, fill=dlgreen!15] (a) {Reconstruction};
+\node[draw, w=5cm, h=.6cm, right=2cm of a, fill=dlblue!15] (b) {Layer Below Pooled Maps};
+\node[draw, w=5cm, h=.6cm, above=1cm of a, fill=dlgreen!15] (c) {Rectified Unpooled Maps};
+\node[draw, w=5cm, h=.6cm, right=2cm of c, fill=dlblue!15] (d) {Feature Maps};
+\node[draw, w=5cm, h=.6cm, above=1cm of c, fill=dlgreen!15] (e) {Unpooled Maps};
+\node[draw, w=5cm, h=.6cm, right=2cm of e, fill=dlblue!15] (f) {Rectified Feature Maps};
+\node[draw, w=5cm, h=.6cm, above=1cm of e, fill=dlgreen!15] (g) {Layer Above reconstruction};
+\node[draw, w=5cm, h=.6cm, right=2cm of g, fill=dlblue!15] (h) {Pooled Maps};
 
 \draw[->] (b)--node[align=left, right=2mm, font=\footnotesize] {Convolutional\\Filtering $\{F\}$} (d);
 \draw[->] (d)--node[align=left, right=2mm, font=\footnotesize] {Rectified\\Linear Function} (f);

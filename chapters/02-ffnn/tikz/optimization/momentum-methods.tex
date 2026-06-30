@@ -6,28 +6,28 @@
 \node[font=\large\bfseries] at (2.2, 3.6) {Momentum Update};
 
 % Origin dot
-\filldraw[red] (0,0) circle (4pt);
+\filldraw[dlred] (0,0) circle (4pt);
 % Gradient step (red, pointing right)
-\draw[->, red] (0,0) -- (2.4, 0) node[below, font=\small, red] {gradient step};
+\draw[->, dlred] (0,0) -- (2.4, 0) node[below, font=\small, dlred] {gradient step};
 % Momentum step (green, pointing upper-left)
-\draw[->, green!60!black] (0,0) -- (0.8, 2.2) node[left, font=\small, green!60!black, align=right] {momentum step};
+\draw[->, dlgreen] (0,0) -- (0.8, 2.2) node[left, font=\small, dlgreen, align=right] {momentum step};
 % Actual step (blue, diagonal upper-right) — sum of the two
-\draw[->, blue] (0,0) -- (3.2, 2.2) node[right, font=\small, blue] {actual step};
+\draw[->, dlblue] (0,0) -- (3.2, 2.2) node[right, font=\small, dlblue] {actual step};
 % Dashed lines to show components of the actual step
-\draw[->, dashed, red] (0.8, 2.2) -- (3.2, 2.2);
+\draw[->, dashed, dlred] (0.8, 2.2) -- (3.2, 2.2);
 
 %% ─── RIGHT DIAGRAM: Nesterov Momentum Update ─────────────────────────────────
 \node[font=\large\bfseries] at (9.5, 3.6) {Nesterov Momentum Update};
 % Shift origin for right diagram
 \begin{scope}[xshift=8.5cm]
   % Origin dot
-  \filldraw[red] (0,0) circle (4pt);
-  \draw[->, green!60!black] (0,0) -- (0.8, 2.2) node[left, font=\small, green!60!black, align=right] {momentum step};
+  \filldraw[dlred] (0,0) circle (4pt);
+  \draw[->, dlgreen] (0,0) -- (0.8, 2.2) node[left, font=\small, dlgreen, align=right] {momentum step};
   % "Lookahead" gradient step (red, from tip of momentum step)
-  \draw[->, red] (0.8, 2.2) -- (2.4, 1.8) node[font=\small, red] at (1.6, 2.8) {lookahead gradient step};
+  \draw[->, dlred] (0.8, 2.2) -- (2.4, 1.8) node[font=\small, dlred] at (1.6, 2.8) {lookahead gradient step};
   % Place a 
   % Actual step (blue) — goes to tip of lookahead arrow
-  \draw[->, blue] (0,0) -- (2.4, 1.8) node[below right, font=\small, blue] {actual step};
+  \draw[->, dlblue] (0,0) -- (2.4, 1.8) node[below right, font=\small, dlblue] {actual step};
 \end{scope}
 
 \end{tikzpicture}
