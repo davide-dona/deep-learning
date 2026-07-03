@@ -1,0 +1,95 @@
+\section{Autoencoders}
+Autoencoders (AEs) are a class of neural networks trained in an unsupervised manner to learn efficient, compressed representations of data. 
+
+\paragraph{The Core Idea}
+Conceptually, autoencoders are very similar to Principal Component Analysis (PCA) in that they aim to learn a lower-dimensional representation of the input data, known as the \textbf{latent space}. 
+
+While PCA is restricted to discovering strictly linear transformations, autoencoders leverage non-linear activation functions, allowing them to model much more complex, non-linear data manifolds. In fact, if an autoencoder uses only linear activations and is trained with a mean squared error loss, it learns to span the exact same principal subspace as PCA.
+
+This lower-dimensional representation is learned by training the network to map the input data $x$ to a compressed space $z$ via an \textit{encoder}, and then reconstruct the original data as accurately as possible from that representation via a dual network called the \textit{decoder}.
+
+\begin{comment}
+    #TODO: add figure of autoencoder architecture
+\end{comment}
+
+To train an autoencoder, we minimize the reconstruction loss between the input and the output of the network. 
+Formally, given an input $x$, the encoder $f_\theta$ maps it to a latent representation $z = f_\theta(x)$, and the decoder $g_\phi$ reconstructs the input as $\hat{x} = g_\phi(z)$. 
+
+The training objective is to minimize the reconstruction loss, which is typically defined using the Mean Squared Error (MSE):
+\begin{equation}
+    \mathcal{L}(x, \hat{x}) = ||x - \hat{x}||^2
+\end{equation}
+
+\paragraph{Implementation}
+Autoencoders give us a lot of flexibility in terms of architecture and design choices. In fact, while the idea is fixed, 
+the implementation can vary significantly depending on the specific use case and data type.
+
+
+\paragraph{Why AEs?}
+Autoencoders have been shown to be very effective feature extractors, and they can be used for a variety of tasks, including dimensionality reduction, anomaly detection, and generative modeling.
+To do so, the decoder is usually discarded after training. The encoder can then be used to map new data points to the learned latent space.
+
+
+\subsection{Variational Autoencoders}
+From the idea of autoencoders, we can derive a more powerful generative model called the \textbf{Variational Autoencoder} (VAE).
+This method belongs to the class of \textbf{explicit density estimation} generative models, which directly learn the probability distribution of the data.
+
+
+\paragraph{Idea}
+VAEs define a density function $p_\theta(x)$ over the data space, parameterized by a neural network with parameters $\theta$. 
+
+\begin{equation}
+    \label{eq:VAEs}
+    p_\theta(x) = \int p(z)\, p_\theta(x \mid z)\, dz,
+\end{equation}
+
+where $p(z)$ is a prior distribution over the latent variable $z$ (typically a standard Gaussian). 
+
+We would like to optimize the model with respect to $\theta$, but this is intractable. 
+The problem is that the integral in Equation \ref{eq:VAEs} cannot be computed in closed form when $p_\theta(x \mid z)$ is parameterized by a neural network. 
+You cannot integrate over all possible latent values $z$.
+
+A natural next thought is to use the \textit{posterior} distribution $p_\theta(z \mid x)$. Applying Bayes' rule, we can write the posterior as:
+\begin{equation}
+    p_\theta(z \mid x) = \frac{p_\theta(x \mid z)\, p(z)}{p_\theta(x)}.
+\end{equation}
+
+But again, the denominator $p_\theta(x)$ is intractable, so we cannot compute the posterior either.
+
+Since both the marginal likelihood and the posterior are intractable, we cannot directly optimize the model with respect to $\theta$.
+We can, however, introduce a new distribution $q_\phi(z \mid x)$, parameterized by a second neural network with parameters $\phi$, which will serve as an approximation to the true posterior $p_\theta(z \mid x)$.
+
+\paragraph{A tractable solution}
+Given this approximation, we can rewrite the marginal likelihood as:
+\begin{equation}
+    \log p_\theta(x) = E_z \left[ \log p_\theta(x \mid z) \right] - D_{KL}\left( q_\phi(z \mid x) || p(z) \right) + D_{KL}\left( q_\phi(z \mid x) || p_\theta(z \mid x) \right),
+\end{equation}
+
+where $D_{KL}$ is the Kullback-Leibler divergence, which measures the difference between two probability distributions.
+
+\begin{itemize}
+    \item The first term is the expected log-likelihood of the data given the latent variable $z$, which encourages the model to reconstruct the input data accurately.
+    It can be computed by sampling $z$ from the approximate posterior $q_\phi(z \mid x)$.
+    \item The second term is the KL divergence between the approximate posterior and the prior, which encourages the approximate posterior to be close to the prior distribution.
+    \item The third term cannot be computed directly, but it is always non-negative.
+\end{itemize}
+
+\paragraph{Evidence Lower Bound (ELBO)}
+
+To overcome the intractability of the marginal likelihood, VAEs maximize a tractable lower bound on the log-likelihood, known as the \textbf{Evidence Lower Bound} (ELBO):
+
+\begin{equation}
+    \mathbb{E}_{z} \left[\log p_\theta(x|z)\right] - D_{KL} \left(q_\phi(z|x)\,\|\,p(z)\right).
+\end{equation}
+
+The ELBO consists of two terms:
+
+\begin{itemize}
+    \item The first term is the \textit{reconstruction term}. It measures how well the decoder $p_\theta(x|z)$ can reconstruct the observed data $x$ from a latent representation sampled from the approximate posterior $q_\phi(z|x)$. Maximizing this term encourages accurate reconstructions.
+
+    \item The second term is the \textit{regularization term}. It is the Kullback--Leibler (KL) divergence between the approximate posterior $q_\phi(z|x)$ and the prior distribution $p(z)$. Minimizing this term encourages the latent representations to remain close to the prior, resulting in a smooth and well-structured latent space.
+\end{itemize}
+
+This loss function allows VAEs to learn a meaningful latent space, where similar inputs are mapped to nearby points in the latent space.
+
+\paragraph{Inference Time}
