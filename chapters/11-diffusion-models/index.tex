@@ -27,8 +27,10 @@ Then, we train a neural network to reverse this process, learning to denoise the
 
 More formally, we define:
 \begin{itemize}
-    \item \textbf{Forward diffusion process:} a Markov chain that gradually adds noise to the data sample $x_0$ over $T$ steps, 
-    resulting in a sequence of noisy samples $x_1, x_2, \ldots, x_T$, where $x_T$ is nearly pure noise.
+    \item \textbf{Forward diffusion process:} starting from a data sample $x_0$ from the data distribution, we define a fixed
+    Markov chain that gradually adds noise to the data sample $x_0$ over $T$ steps, resulting in a sequence of noisy samples 
+    $x_1, x_2, \ldots, x_T$, where $x_T$ is nearly pure Gaussian noise.
+
     \item \textbf{Reverse denoising process:} a neural network that learns to reverse the forward diffusion process,
     starting from the noisy sample $x_T$ and iteratively denoising it to recover the original data sample $x_0$.
 \end{itemize}
@@ -92,9 +94,10 @@ Applying Bayes' theorem, we can express the reverse process as:
     p(x_{t-1} | x_t) = \frac{p(x_t | x_{t-1}) p(x_{t-1})}{p(x_t)}
 \]
 
-But this is intractable in practice, since the marginal distribution $p(x_t)$ is unknown and difficult to compute.
+But this is intractable in practice, since the marginal distribution $p(x_t)$ would require to know the entire data distribution, at every step $t$, which is not feasible.
 
 Therefore, as previously seen in the VAE chapter, we can train a neural network to approximate the reverse process $p_\theta(x_{t-1} | x_t)$, where $\theta$ are the parameters of the neural network.
+
 By assuming $T \rightarrow \infty$ and $\beta_t \rightarrow 0$, we can show that the reverse process can be approximated as a Gaussian distribution:
 \[
     p_\theta(x_{t-1} | x_t) = \mathcal{N}(\mu_\theta(x_t, t), \Sigma_t)
@@ -104,11 +107,99 @@ where $\mu_\theta(x_t, t)$ is the mean predicted by the neural network and $\Sig
 Usually, only the mean $\mu_\theta(x_t, t)$ is predicted by the neural network, while the variance $\Sigma_t$ is fixed and known. 
 It was later shown that learning the variance $\Sigma_t$ can improve sample quality, but it is not strictly necessary.
 
-\subsubsection{Hierchical VAEs}
-We can also view diffusion models as a special case of hierarchical VAEs, with some important properties:
+\subsubsection{Hierarchical VAEs}
+
+Diffusion models can also be interpreted as a special case of hierarchical variational autoencoders (VAEs). While a standard VAE is formulated with a single latent variable \(z\), a diffusion model introduces a hierarchy of \(T\) latent variables,
+\[
+    x_1, x_2, \ldots, x_T,
+\]
+where each variable corresponds to a progressively noisier version of the data sample \(x_0\).
+
+Under this interpretation, diffusion models exhibit several distinctive characteristics:
+
 \begin{itemize}
-    \item \textbf{Fixed Encoder:} the encoder is fixed and defined by the forward diffusion process;
-    \item \textbf{Latent Variable:} all the latent variables $x_1, x_2, \ldots, x_T$ have the same dimensionality as the data sample $x_0$;
-    \item \textbf{Reusable Decoder:} the neural network decoder is reused at each step of the reverse process, conditioned on the current step $t$;
+    \item \textbf{Fixed encoder:} The encoder is not learned but is instead defined by the forward diffusion process, which gradually corrupts the input with Gaussian noise.
+    \item \textbf{Hierarchical latent variables:} The latent variables \(x_1, x_2, \ldots, x_T\) form a deep hierarchy, with each variable having the same dimensionality as the original data sample \(x_0\).
+    \item \textbf{Shared decoder:} A single neural network is reused at every step of the reverse diffusion process to model the conditional distributions \(p_\theta(x_{t-1}\mid x_t)\), with the timestep \(t\) provided as an additional conditioning input.
 \end{itemize}
 
+This interpretation immediatly suggests using the same training objective as in VAEs, which is the Evidence Lower Bound (ELBO).
+
+\subsubsection{Loss}
+Following the VAE framework, we can derive the loss function for diffusion models by maximizing the ELBO. The ELBO can be expressed as:
+
+\[
+    \mathcal{L} = \mathbb{E}_{q} \left[ 
+        \underbrace{D_{KL}(q(x_{T} | x_0) \| p_\theta(x_T))}_{\text{Ensure final Standard Gaussian}} +
+        \underbrace{\sum_{t=1}^{T} D_{KL}(q(x_{t-1} | x_t, x_0) \| p_\theta(x_{t-1} | x_t))}_{\text{KL divergence term}} -
+        \underbrace{\log p_\theta(x_0 | x_1)}_{\text{Reconstruction term}}
+        \right]
+\]
+
+Where:
+\begin{itemize}
+    \item \textbf{First term:} The first term measures the KL divergence between the final noisy sample \(x_T\) and the prior distribution \(p_\theta(x_T)\), which is typically a standard Gaussian. 
+    This term ensures that the final latent representation is as close as possible to the prior distribution.
+    
+    \item \textbf{Second term:} The second term sums the KL divergences between the true posterior \(q(x_{t-1} | x_t, x_0)\) and the learned reverse process \(p_\theta(x_{t-1} | x_t)\) for each timestep \(t\).
+    This term encourages the model to learn a reverse process that closely approximates the true posterior, effectively guiding the denoising process.
+
+    \item \textbf{Third term:} The third term is the reconstruction term, which measures how well the model can reconstruct the original data sample \(x_0\) from the first noisy sample \(x_1\).
+    This term ensures that the model learns to generate samples that are faithful to the original data distribution.
+\end{itemize}
+
+From the ELBO, we can derive a simplified loss function that is more practical for training diffusion models,
+that focuses on predicting the noise \(\epsilon\) added to the original data sample \(x_0\) at each timestep \(t\).
+\begin{equation}
+    \| \epsilon - \epsilon_\theta(x_t, t) \|^2
+\end{equation}
+Where \(\epsilon_\theta(x_t, t)\) is the noise predicted by the neural network at timestep \(t\).
+
+By applying some further simplifications and reparametrizations, we can express the final loss function as:
+\[
+    \mathcal{L} = \mathbb{E}_{x_0, \epsilon, t} \left[ \| \epsilon - \underbrace{\epsilon_\theta(\sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon, t)}_{\text{Predicted noise}} \|^2 \right]
+\]
+Where, at a high level, we are basically picking a random timestep \(t\), a random noise \(\epsilon\), and a random data sample \(x_0\). 
+In the forward process, we generate a noisy sample \(x_t\) by adding the noise \(\epsilon\) to the original data sample \(x_0\) according to the forward diffusion process. 
+Then, we feed this noisy sample \(x_t\) into the neural network to predict the noise \(\epsilon_\theta(x_t, t)\), and we compute the mean squared error between the predicted noise and the true noise \(\epsilon\).
+
+\subsubsection{Sampling}
+At sampling time, we start from a sample \(x_T\) drawn from the prior distribution (typically a standard Gaussian) and iteratively apply the learned reverse process, which is defined as:
+
+\begin{equation}
+    x_{t-1} = \frac{1}{\sqrt{\alpha_t}} \left( x_t - \frac{1 - \alpha_t}{\sqrt{1 - \bar{\alpha}_t}} \epsilon_\theta(x_t, t) \right) + \sigma_t z
+\end{equation}
+This formulation allow to re-weight the predicted noise \(\epsilon_\theta(x_t, t)\) based on the current timestep \(t\).
+In fact, early in the reverse process, when \(t\) is large, the updates are conservative, whereas later in the process, when \(t\) is small, the updates become more aggressive, allowing the model to refine the generated sample as it approaches the original data distribution.
+
+\subsection{The Generative Trilemma}
+The generative models landscape is often characterized by a trade-off between three key aspects: sample quality, diversity, and inference speed. 
+This trade-off is commonly referred to as the \textbf{Generative Trilemma}.
+
+In particular:
+\begin{itemize}
+    \item \textbf{GANs:} known for their high sample quality and fast inference speed, but they often suffer from mode collapse, leading to low diversity in generated samples.
+    \item \textbf{VAEs:} known for their high diversity and fast inference, but they often produce samples of lower quality due to the limitations of the variational approximation.
+    \item \textbf{Diffusion Models:} known for their high sample quality and high diversity, but they are typically slower in inference due to the iterative nature of the denoising process.
+\end{itemize}
+
+\subsection{Architectures}
+
+Again, similar to VAEs, diffusion models can be implemented using a variety of neural network architectures. 
+We can distinguish between \textbf{unconditional} and \textbf{conditional} diffusion models, depending on whether the model is conditioned on additional information (e.g., class labels, text prompts, etc.) or not.
+
+\subsubsection{Unconditional Models}
+\paragraph{U-Net}
+The most common architecture for image diffusion models is the \textbf{U-Net}, a convolutional neural network originally introduced for image segmentation. 
+It consists of an \textbf{encoder-decoder} structure with skip connections that preserve spatial information across multiple resolutions, enabling the reconstruction of fine-grained image details.
+
+Many diffusion models also incorporate \textbf{self-attention} layers within the U-Net to capture long-range dependencies between distant regions of the image, improving the quality and global coherence of the generated samples.
+
+Since the denoising network must condition its predictions on the current diffusion timestep \(t\), the timestep is embedded into a continuous vector representation before being provided to the network. 
+A common approach is to use \textbf{sinusoidal embeddings} (also known as Fourier features), which encode \(t\) using sine and cosine functions at multiple frequencies. 
+
+\paragraph{Transformers - DiT}
+Later, in 2021, researchers proposed using \textbf{transformers} as the backbone architecture for diffusion models, leading to the development of \textbf{DiT} (Diffusion Transformer).
+This approach, although more computationally expensive, shows that transformers can effectively model the denoising process, better than convolutional architectures.
+
+\subsubsection{Consitionla Models}
