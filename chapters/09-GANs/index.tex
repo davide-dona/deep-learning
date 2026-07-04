@@ -290,3 +290,13 @@ Despite the variety of metrics proposed to evaluate GANs, there is still no univ
 
 A fundamental challenge in evaluating GANs is that the generator's loss does not directly correlate with the visual or structural quality of the generated samples. In traditional Machine Learning, a core principle is that the loss function serves as a reliable proxy for model performance. However, in the adversarial framework of a GAN, the generator's loss is a moving target. Because it is heavily influenced by—and entirely relative to—the discriminator's current performance, a low generator loss simply indicates that it is currently fooling the discriminator, not necessarily that it is producing high-quality, realistic samples.
 
+\subsection{Properties of Generative Models}
+As we have seen, generative models can be evaluated based on several metrics, each one capturing different aspects of the generated distribution.
+These metrics in particular captures the most important properties that a good generative model should have:
+\begin{itemize}
+    \item \textbf{High quality samples:} the generated samples should be indistinguishable from real samples, used to train the model;
+    \item \textbf{Coverage:} samples should represent the entire data distribution, rather than a limited subset of it;
+    \item \textbf{Well-structured latent space:} every latent variable $z$ should correspond to a meaningful data sample $x$. 
+    Most importantly, small changes in the latent variable $z$ should result in small changes in the generated sample $x$.
+    \item \textbf{Efficient likelihood estimation:} if the model is probabilistic, it should be able to efficiently compute the likelihood of a given sample $x$.
+\end{itemize}

@@ -1,0 +1,64 @@
+\usetikzlibrary{arrows.meta, calc}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    flow/.style={-{Stealth[length=6pt]}, line width=1pt},
+    skip/.style={-{Stealth[length=6pt]}, line width=1pt, color=skipcolor},
+    lbl/.style={font=\small, align=center},
+    blocklabel/.style={font=\bfseries\small},
+    latentblock/.style={rectangle, draw, thick, fill=dlgray!25, minimum width=1.4cm, minimum height=0.7cm, font=\small, align=center},
+]
+    % Geometry, defined explicitly (rather than relying on the trapezium
+    % shape's anchors) so the loss arrow can be routed with exact clearance.
+    % Both blocks share the wide/narrow edge widths, so the silhouette forms
+    % a symmetric hourglass around the latent bottleneck.
+    \def\wideedge{1.5}   % half-width of the wide (data) edge
+    \def\narrowedge{0.7} % half-width of the narrow (latent) edge
+    \def\blockh{1.5}     % block height
+    \def\gap{1.2}        % gap between encoder and decoder, sized to fit the latent block
+
+    % Encoder: wide input (bottom) narrows to the code (top)
+    \coordinate (e-bl) at (-\wideedge,0);
+    \coordinate (e-br) at (\wideedge,0);
+    \coordinate (e-tr) at (\narrowedge,\blockh);
+    \coordinate (e-tl) at (-\narrowedge,\blockh);
+    \draw[thick, fill=rnnblock] (e-bl) -- (e-br) -- (e-tr) -- (e-tl) -- cycle;
+    \node[blocklabel] at (0,0.5*\blockh) {Encoder};
+
+    % Decoder: mirrored, the code (bottom) widens to the reconstruction (top)
+    \coordinate (d-bl) at (-\narrowedge,\blockh+\gap);
+    \coordinate (d-br) at (\narrowedge,\blockh+\gap);
+    \coordinate (d-tr) at (\wideedge,2*\blockh+\gap);
+    \coordinate (d-tl) at (-\wideedge,2*\blockh+\gap);
+    \draw[thick, fill=rnnblock] (d-bl) -- (d-br) -- (d-tr) -- (d-tl) -- cycle;
+    \node[blocklabel] at (0,\blockh+\gap+0.5*\blockh) {Decoder};
+
+    % Endpoints of the main data-flow arrow
+    \coordinate (xpt) at (0,-1);
+    \coordinate (zbot) at (0,\blockh);
+    \coordinate (ztop) at (0,\blockh+\gap);
+    \coordinate (xhatpt) at (0,2*\blockh+\gap+1);
+
+    % Latent space block, sitting in the bottleneck between the two networks
+    \coordinate (zmid) at ($(zbot)!0.5!(ztop)$);
+    \node[latentblock] (zblock) at (zmid) {$z$};
+    \draw[flow] (xpt) -- (0,0);
+    \draw[flow] (zbot) -- (zblock.south);
+    \draw[flow] (zblock.north) -- (ztop);
+    \draw[flow] (0,2*\blockh+\gap) -- (xhatpt);
+
+    % Endpoint labels
+    \node[lbl, below=1mm] at (xpt) {$x$};
+    \node[lbl, above=1mm] at (xhatpt) {$\hat{x}$};
+
+    % Side annotations, aligned with the relevant height
+    \node[lbl, anchor=east] at ($(xpt)+(-2.4,0)$) {Input data};
+    \node[lbl, anchor=east] at ($(zmid)+(-2.4,0)$) {Latent space};
+    \node[lbl, anchor=east] at ($(xhatpt)+(-2.4,0)$) {Reconstruction};
+
+    % Reconstruction loss, comparing x and x-hat, routed clear of both blocks
+    \draw[skip] (xpt) -- ++(\wideedge+1.0,0) coordinate (sk)
+                |- (xhatpt)
+                node[skipcolor, midway, right, align=center, font=\small]
+                {reconstruction loss\\$\mathcal{L}(x,\hat{x}) = \|x-\hat{x}\|^2$};
+\end{tikzpicture}

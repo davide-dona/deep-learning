@@ -1,1 +1,114 @@
 \section{Diffusion Models}
+Another class of explicit density estimation generative models is \textbf{diffusion models}. 
+Although initially proposed in 2015, they have only recently surged in popularity due to their ability to generate exceptionally high-quality samples. 
+Around 2015, Generative Adversarial Networks (GANs) were the state-of-the-art in generative modeling, despite having some serious limitations (as discussed in the previous chapter). 
+It was not until 2020 that breakthroughs in architectures and training techniques allowed diffusion models to surpass GANs in sample quality, establishing them as the current state-of-the-art.
+
+Similar to VAEs, diffusion models use neural networks to transform a simple prior distribution (e.g., a standard Gaussian) into a complex data distribution that ideally matches the training data.
+
+At a high level, the fundamental goal of this generative framework involves two simple steps:
+\begin{enumerate}
+    \item Sample a latent variable $z \sim \mathcal{N}(0, I)$ from a simple distribution;
+    \item Pass $z$ through a neural network to generate a sample $\hat{x}$.
+\end{enumerate}
+
+While traditional models like GANs might do this in a single pass, diffusion models achieve this transformation iteratively, gradually denoising the latent sample step-by-step. Ultimately, the network is trained to minimize the discrepancy between the generated data and the real data distribution.
+
+Two key questions arise from this overarching framework:
+\begin{itemize}
+    \item How do we define and structure the latent space distribution?
+    \item How do we measure distribution similarity (i.e., what objective function do we use to train the neural network)?
+\end{itemize}
+
+\subsection{Idea}
+The core idea behind diffusion models is actually quite simple: 
+we start with a sample from the data distribution and gradually add noise to it over a series of steps, until it becomes pure noise. 
+Then, we train a neural network to reverse this process, learning to denoise the noisy samples step-by-step until we recover the original data sample.
+
+More formally, we define:
+\begin{itemize}
+    \item \textbf{Forward diffusion process:} a Markov chain that gradually adds noise to the data sample $x_0$ over $T$ steps, 
+    resulting in a sequence of noisy samples $x_1, x_2, \ldots, x_T$, where $x_T$ is nearly pure noise.
+    \item \textbf{Reverse denoising process:} a neural network that learns to reverse the forward diffusion process,
+    starting from the noisy sample $x_T$ and iteratively denoising it to recover the original data sample $x_0$.
+\end{itemize}
+
+Let's now dive into the details of the forward diffusion process and the reverse denoising process, and how they are implemented in practice.
+
+\subsection{Forward Process}
+The forward diffusion process can be defined as a fixed Markov chain that gradually adds Gaussian noise to the data sample $x_0$ over $T$ steps.
+
+\termdef{Markov chain}
+{
+    A Markov chain is a stochastic process that satisfies the \textbf{Markov property}: 
+    the probability distribution of the next state depends only on the current state and not on the sequence of previous states. 
+    This property is also known as \textbf{memorylessness}.
+}
+
+This implies that the forward process requires no learning, since it is completely specified by a predefined noise schedule.
+
+We can formalize the forward diffusion process as follows:
+\begin{equation}
+    \label{eq:forward-diffusion}
+    q(x_t | x_{t-1}) = \mathcal{N}(\sqrt{{1 - \beta_t}} x_{t-1}, \beta_t I)
+\end{equation}
+where $\beta_t$ is a variance schedule that controls the amount of noise added at each step. 
+
+Basically, at each step $t$, we take the previous sample $x_{t-1}$, reduce its magnitude by a factor of $\sqrt{1 - \beta_t}$, subsituting it with a random Gaussian noise with variance $\beta_t$.
+
+\subsubsection{A problem}
+Suppose we have a data sample $x_0$ and we want to generate its noisy version $x_T$ at step $T$.
+We can do this by iteratively applying the forward diffusion (Equation \ref{eq:forward-diffusion}) process $T$ times, starting from $x_0$ and generating $x_1, x_2, \ldots, x_T$.
+This would result in:
+\[
+    q(x_T | x_0) = \prod_{i=1}^{T} q(x_i | x_{i-1})
+\]
+However, this approach is computationally expensive, especially for large $T$, since we would need to sample from the Gaussian distribution $T$ times, which can be slow and inefficient.
+
+\subsubsection{Reparametrization trick}
+Instead, we can use a reparametrization trick to directly sample $x_T$ from $x_0$ in a single step, without having to go through all the intermediate steps.
+
+First, we can rewrite the forward diffusion process in a more convenient form:
+\[
+    q(x_t | x_{t-1}) = \mathcal{N}(\sqrt{\alpha_t} x_0, (1 - \alpha_t) I)
+\]
+where $\alpha_t = (1 - \beta_t)$.
+
+By recursively applying this equation, we can derive a closed-form expression for $q(x_T | x_0)$:
+\[
+    q(x_T | x_0) = \mathcal{N}(\sqrt{\bar{\alpha}_T} x_0, (1 - \bar{\alpha}_T) I)
+\]
+where $\bar{\alpha}_T = \prod_{t=1}^{T} \alpha_t$.
+
+This makes training and sampling actually feasible, since we can now sample $x_T$ directly from $x_0$ in a single step, without having to go through all the intermediate steps.
+
+\subsection{Reverse Process}
+The reverse denoising process is the core of the diffusion model, where we train a neural network to learn the reverse of the forward diffusion process. 
+The goal is to start from a noisy sample $x_T$ and iteratively denoise it to recover the original data sample $x_0$.
+
+We could define the reverse process as a Markov chain that learns to reverse the forward diffusion process $p(x_{t-1} | x_t)$.
+Applying Bayes' theorem, we can express the reverse process as:
+\[
+    p(x_{t-1} | x_t) = \frac{p(x_t | x_{t-1}) p(x_{t-1})}{p(x_t)}
+\]
+
+But this is intractable in practice, since the marginal distribution $p(x_t)$ is unknown and difficult to compute.
+
+Therefore, as previously seen in the VAE chapter, we can train a neural network to approximate the reverse process $p_\theta(x_{t-1} | x_t)$, where $\theta$ are the parameters of the neural network.
+By assuming $T \rightarrow \infty$ and $\beta_t \rightarrow 0$, we can show that the reverse process can be approximated as a Gaussian distribution:
+\[
+    p_\theta(x_{t-1} | x_t) = \mathcal{N}(\mu_\theta(x_t, t), \Sigma_t)
+\]
+where $\mu_\theta(x_t, t)$ is the mean predicted by the neural network and $\Sigma_t$ is a fixed variance schedule.
+
+Usually, only the mean $\mu_\theta(x_t, t)$ is predicted by the neural network, while the variance $\Sigma_t$ is fixed and known. 
+It was later shown that learning the variance $\Sigma_t$ can improve sample quality, but it is not strictly necessary.
+
+\subsubsection{Hierchical VAEs}
+We can also view diffusion models as a special case of hierarchical VAEs, with some important properties:
+\begin{itemize}
+    \item \textbf{Fixed Encoder:} the encoder is fixed and defined by the forward diffusion process;
+    \item \textbf{Latent Variable:} all the latent variables $x_1, x_2, \ldots, x_T$ have the same dimensionality as the data sample $x_0$;
+    \item \textbf{Reusable Decoder:} the neural network decoder is reused at each step of the reverse process, conditioned on the current step $t$;
+\end{itemize}
+
