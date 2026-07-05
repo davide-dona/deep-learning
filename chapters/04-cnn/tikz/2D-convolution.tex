@@ -1,0 +1,149 @@
+\begin{tikzpicture}
+
+\def\S{0.75}
+\def\H{0.375}
+
+\tikzset{
+  IC/.style={draw=dlgray!55, fill=dlgray!25,
+    minimum width=\S cm, minimum height=\S cm, inner sep=0},
+  AC/.style={draw=kerneledge, fill=highlightfill!75,
+    minimum width=\S cm, minimum height=\S cm, inner sep=0, line width=0.6pt},
+  KC/.style={draw=kerneledge!90, fill=kernelfill,
+    minimum width=\S cm, minimum height=\S cm, inner sep=0, line width=0.6pt},
+  OC/.style={draw=dlgray!55, fill=dlgray!40,
+    minimum width=\S cm, minimum height=\S cm, inner sep=0},
+  OA/.style={draw=kerneledge, fill=highlightfill!60,
+    minimum width=\S cm, minimum height=\S cm, inner sep=0, line width=0.6pt},
+}
+
+% ── INPUT 5×5 with real values ───────────────────────────────────
+% Values row by row (r=0 top … r=4 bottom)
+\def\inputvals{
+  {1,2,0,3,1},
+  {0,3,1,2,0},
+  {2,1,0,1,3},
+  {1,0,2,0,1},
+  {3,1,1,2,0}
+}
+
+\foreach \r in {0,...,4}{
+  \foreach \c in {0,...,4}{
+    \node[IC] at (\c*\S, -\r*\S) {};
+  }
+}
+% Receptive field highlight
+\foreach \r in {0,1,2}{
+  \foreach \c in {0,1,2}{
+    \node[AC] at (\c*\S, -\r*\S) {};
+  }
+}
+% Numeric labels
+\foreach \r/\rowvals in {
+  0/{1,2,0,3,1},
+  1/{0,3,1,2,0},
+  2/{2,1,0,1,3},
+  3/{1,0,2,0,1},
+  4/{3,1,1,2,0}
+}{
+  \foreach \c/\val in {0/1,1/2,2/0,3/3,4/1}{} % dummy, use explicit below
+}
+
+% Explicit cell values (row, col, value)
+% Row 0
+\node[font=\small] at (0*\S, 0*\S) {1};
+\node[font=\small] at (1*\S, 0*\S) {2};
+\node[font=\small] at (2*\S, 0*\S) {0};
+\node[font=\small] at (3*\S, 0*\S) {3};
+\node[font=\small] at (4*\S, 0*\S) {1};
+% Row 1
+\node[font=\small] at (0*\S,-1*\S) {0};
+\node[font=\small] at (1*\S,-1*\S) {3};
+\node[font=\small] at (2*\S,-1*\S) {1};
+\node[font=\small] at (3*\S,-1*\S) {2};
+\node[font=\small] at (4*\S,-1*\S) {0};
+% Row 2
+\node[font=\small] at (0*\S,-2*\S) {2};
+\node[font=\small] at (1*\S,-2*\S) {1};
+\node[font=\small] at (2*\S,-2*\S) {0};
+\node[font=\small] at (3*\S,-2*\S) {1};
+\node[font=\small] at (4*\S,-2*\S) {3};
+% Row 3
+\node[font=\small] at (0*\S,-3*\S) {1};
+\node[font=\small] at (1*\S,-3*\S) {0};
+\node[font=\small] at (2*\S,-3*\S) {2};
+\node[font=\small] at (3*\S,-3*\S) {0};
+\node[font=\small] at (4*\S,-3*\S) {1};
+% Row 4
+\node[font=\small] at (0*\S,-4*\S) {3};
+\node[font=\small] at (1*\S,-4*\S) {1};
+\node[font=\small] at (2*\S,-4*\S) {1};
+\node[font=\small] at (3*\S,-4*\S) {2};
+\node[font=\small] at (4*\S,-4*\S) {0};
+
+% Input label — moved higher
+\node[font=\normalsize\bfseries]        at (1.5, 0.90) {Input};
+\node[font=\small, text=dlgray!80!black]  at (1.5, 0.62) {$5 \times 5$};
+
+% ── KERNEL 3×3 with real values ──────────────────────────────────
+% kernel values: [[1,0,-1],[1,0,-1],[1,0,-1]]  (vertical edge detector)
+\def\KX{4.6}
+
+\foreach \r in {0,1,2}{
+  \foreach \c in {0,1,2}{
+    \node[KC] at (\KX+\c*\S, -\r*\S) {};
+  }
+}
+% Kernel values
+\node[font=\small\bfseries] at (\KX+0*\S, 0*\S) { 1};
+\node[font=\small\bfseries] at (\KX+1*\S, 0*\S) { 0};
+\node[font=\small\bfseries] at (\KX+2*\S, 0*\S) {$-$1};
+\node[font=\small\bfseries] at (\KX+0*\S,-1*\S) { 1};
+\node[font=\small\bfseries] at (\KX+1*\S,-1*\S) { 0};
+\node[font=\small\bfseries] at (\KX+2*\S,-1*\S) {$-$1};
+\node[font=\small\bfseries] at (\KX+0*\S,-2*\S) { 1};
+\node[font=\small\bfseries] at (\KX+1*\S,-2*\S) { 0};
+\node[font=\small\bfseries] at (\KX+2*\S,-2*\S) {$-$1};
+
+% Kernel label — moved higher
+\node[font=\normalsize\bfseries]        at (\KX+0.75, 0.90) {Kernel};
+\node[font=\small, text=dlgray!80!black]  at (\KX+0.75, 0.62) {$3 \times 3$};
+
+% Top horizontal
+\draw[kerneledge!55, dashed, thin] (-\H, \H) -- (\KX-\H, \H);
+% Bottom horizontal
+\draw[kerneledge!55, dashed, thin] (-\H,-2*\S-\H) -- (\KX-\H,-2*\S-\H);
+% Left vertical (RF side)
+\draw[kerneledge!55, dashed, thin] (-\H, \H) -- (-\H,-2*\S-\H);
+% Right vertical (kernel side)
+\draw[kerneledge!55, dashed, thin] (\KX-\H, \H) -- (\KX-\H,-2*\S-\H);
+
+\draw[-{Stealth[length=9pt]}, line width=1.8pt, color=kernelfill!85!black]
+    (7.30, -\S) -- (8.05, -\S);
+
+\def\OX{8.2}
+
+\foreach \r in {0,1,2}{
+  \foreach \c in {0,1,2}{
+    \node[OC] at (\OX+\c*\S, -\r*\S) {};
+  }
+}
+% Highlight active output cell c_{1,1}
+\node[OA] at (\OX+0*\S, 0*\S) {};
+
+% Output values
+\node[font=\small] at (\OX+0*\S, 0*\S)  { 2};
+\node[font=\small] at (\OX+1*\S, 0*\S)  { 0};
+\node[font=\small] at (\OX+2*\S, 0*\S)  {$-$3};
+\node[font=\small] at (\OX+0*\S,-1*\S)  { 0};
+\node[font=\small] at (\OX+1*\S,-1*\S)  { 1};
+\node[font=\small] at (\OX+2*\S,-1*\S)  {$-$1};
+\node[font=\small] at (\OX+0*\S,-2*\S)  { 3};
+\node[font=\small] at (\OX+1*\S,-2*\S)  {$-$1};
+\node[font=\small] at (\OX+2*\S,-2*\S)  {$-$1};
+
+% Output label — moved higher
+\node[font=\normalsize\bfseries]        at (\OX+0.75, 0.90) {Output};
+\node[font=\small, text=dlgray!80!black]  at (\OX+0.75, 0.62) {$3 \times 3$};
+
+\end{tikzpicture}
+

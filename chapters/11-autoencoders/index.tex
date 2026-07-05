@@ -1,0 +1,190 @@
+\section{Autoencoders}
+Autoencoders (AEs) are a class of neural networks trained in an unsupervised manner to learn efficient, compressed representations of data. 
+
+\paragraph{The Core Idea}
+Conceptually, autoencoders generalize the idea behind Principal Component Analysis (PCA): both aim to learn a lower-dimensional representation of the input data, known as the \textbf{latent space}.
+
+While PCA is restricted to discovering strictly linear transformations, autoencoders leverage non-linear activation functions, allowing them to model much more complex, non-linear data manifolds. In fact, if an autoencoder uses only linear activations and is trained with a mean squared error loss, it learns to span the same principal subspace as PCA.
+
+This lower-dimensional representation is learned by training the network to map the input data $x$ to a compressed space $z$ via an \textit{encoder}, and then reconstruct the original data as accurately as possible through a second network called the \textit{decoder}.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.6\textwidth}{!}{\input{chapters/11-autoencoders/tikz/autoencoder-architecture.tex}}
+    \caption{Autoencoder architecture: the encoder compresses the input $x$ into a latent code $z$, and the decoder reconstructs $\hat{x}$ from it.}
+    \label{fig:autoencoder-architecture}
+\end{figure}
+
+To train an autoencoder, we minimize a \textbf{reconstruction loss} between the input and the output of the network.
+
+Formally, given an input $x$, the encoder $f_\theta$ maps it to a latent representation $z = f_\theta(x)$, and the decoder $g_\phi$ reconstructs the input as $\hat{x} = g_\phi(z)$.
+
+A common choice is the Mean Squared Error (MSE):
+
+\begin{equation}
+    \mathcal{L}(x,\hat{x}) = \|x-\hat{x}\|^2.
+\end{equation}
+
+Depending on the data type, other reconstruction losses may also be used. For example, binary cross-entropy is often preferred when modeling binary or normalized image data.
+
+\paragraph{Implementation}
+Autoencoders give us a lot of flexibility in terms of architecture and design choices. In fact, while the idea is fixed, 
+the implementation can vary significantly depending on the specific use case and data type.
+
+
+\paragraph{Why AEs?}
+Once trained, the decoder is often discarded and the encoder is used as a feature extractor or for dimensionality reduction. The learned latent representation can then be exploited for a variety of downstream tasks, including visualization, anomaly detection, clustering, and as input features for other machine learning models.
+
+However, standard autoencoders do not explicitly learn a probability distribution over the latent space. As a consequence, although they reconstruct existing samples well, they are not naturally suited for generating new ones.
+
+
+\subsection{Variational Autoencoders}
+
+Building upon the idea of autoencoders, we obtain a more powerful generative model called the \textbf{Variational Autoencoder} (VAE). Unlike standard autoencoders, VAEs learn not only a latent representation of the data but also a probability distribution over that latent space, making it possible to generate entirely new samples.
+
+VAEs belong to the class of \textbf{explicit density estimation} generative models, whose goal is to directly model the probability distribution of the observed data.
+
+\subsubsection{Idea}
+VAEs define a density function $p_\theta(x)$ over the data space, parameterized by a neural network with parameters $\theta$. 
+
+We model the data distribution through
+
+\begin{equation}
+    \label{eq:VAEs}
+    p_\theta(x)
+    =
+    \int p(z)\,p_\theta(x|z)\,dz,
+\end{equation}
+
+where $p(z)$ is a prior distribution over the latent variable $z$, typically chosen as a standard Gaussian.
+
+Our objective is to maximize the likelihood of the observed data with respect to the parameters $\theta$. Unfortunately, this is generally intractable. Since the conditional distribution $p_\theta(x|z)$ is represented by a neural network, the integral in Equation~\ref{eq:VAEs} has no closed-form solution and must integrate over all possible latent values.
+
+A natural idea is to instead work with the posterior distribution over the latent variables. By Bayes' theorem,
+
+\begin{equation}
+    p_\theta(z|x)
+    =
+    \frac{p_\theta(x|z)\,p(z)}
+         {p_\theta(x)}.
+\end{equation}
+
+However, this expression still depends on the marginal likelihood $p_\theta(x)$, which is exactly the intractable quantity we wish to compute.
+
+To overcome this difficulty, we introduce a second distribution,
+
+\[
+q_\phi(z|x),
+\]
+
+parameterized by another neural network. This distribution serves as a tractable approximation of the true posterior $p_\theta(z|x)$.
+
+\paragraph{A tractable solution}
+
+By introducing the approximate posterior $q_\phi(z|x)$ and rearranging the log-likelihood, we obtain the following decomposition:
+
+\begin{equation}
+    \log p_\theta(x) = \underbrace{ \mathbb{E}_{q_\phi(z|x)} \left[ \log p_\theta(x|z) \right] - D_{KL} \left(q_\phi(z|x)\,\|\,p(z)\right)}_{\text{ELBO}}+D_{KL}\left(q_\phi(z|x)\,\|\,p_\theta(z|x)\right).
+\end{equation}
+
+The three terms have the following interpretation:
+
+\begin{itemize}
+    \item The first term is the expected log-likelihood of the data under the approximate posterior. It encourages the decoder to accurately reconstruct the input.
+
+    \item The second term measures how closely the approximate posterior matches the prior distribution over the latent variables.
+
+    \item The third term measures the discrepancy between the approximate and true posterior. Although this quantity is intractable, it is always non-negative.
+\end{itemize}
+
+
+
+\paragraph{Evidence Lower Bound (ELBO)}
+
+To overcome the intractability of the marginal likelihood, VAEs maximize a tractable lower bound on the log-likelihood, known as the \textbf{Evidence Lower Bound} (ELBO):
+
+\begin{equation}
+    \label{eq:ELBO}
+    \mathcal{L}_{\mathrm{ELBO}}
+    =
+    \mathbb{E}_{q_\phi(z|x)}
+    \left[
+        \log p_\theta(x|z)
+    \right]
+    -
+    D_{KL}
+    \left(
+        q_\phi(z|x)
+        \,\|\,p(z)
+    \right).
+\end{equation}
+
+The ELBO consists of two terms:
+
+\begin{itemize}
+    \item The first term is the \textit{reconstruction term}. It measures how well the decoder $p_\theta(x|z)$ can reconstruct the observed data $x$ from a latent representation sampled from the approximate posterior $q_\phi(z|x)$. Maximizing this term encourages accurate reconstructions.
+
+    \item The second term is the \textit{regularization term}. It is the Kullback--Leibler (KL) divergence between the approximate posterior $q_\phi(z|x)$ and the prior distribution $p(z)$. Minimizing this term encourages the latent representations to remain close to the prior, resulting in a smooth and well-structured latent space.
+\end{itemize}
+
+This loss function allows VAEs to learn a meaningful latent space, where similar inputs are mapped to nearby points in the latent space.
+
+\subsubsection{Mapping the ELBO to the VAE Architecture}
+Equation \ref{eq:ELBO} maps directly onto the encoder-decoder pair we set out to build, with each network now standing for one of the two distributions involved.
+
+The term $p_\theta(x \mid z)$ represents the probability of generating $x$ given a latent variable $z$. This is exactly what the \textbf{decoder} computes: given a latent code $z$, it outputs a distribution over reconstructions of $x$.
+
+Symmetrically, the term $q_\phi(z \mid x)$ represents the (approximate) probability of a latent variable $z$ given the observed data $x$. This is exactly what the \textbf{encoder} computes: given an input $x$, it outputs a distribution over latent codes $z$, standing in for the true, intractable posterior $p_\theta(z \mid x)$.
+
+Since we are modeling the probabilistic generation of data, both networks are therefore \textbf{probabilistic}: the encoder does not output a single point $z$, but the parameters of the distribution $q_\phi(z \mid x)$ (a mean $\mu_\phi(x)$ and a standard deviation $\sigma_\phi(x)$), from which $z$ is sampled. The decoder, in turn, does not output a single reconstruction, but the parameters of the distribution $p_\theta(x \mid z)$, from which $\hat{x}$ is sampled. This is illustrated in Figure \ref{fig:vae-architecture}.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.5\textwidth}{!}{\input{chapters/11-autoencoders/tikz/vae-architecture.tex}}
+    \caption{VAE architecture: the encoder computes the approximate posterior $q_\phi(z \mid x)$, from which a latent code $z$ is sampled, and the decoder computes the likelihood $p_\theta(x \mid z)$, from which the reconstruction $\hat{x}$ is obtained. The prior $p(z)$ regularizes the latent space towards a standard Gaussian.}
+    \label{fig:vae-architecture}
+\end{figure}
+
+To keep the sampling of $z$ differentiable during training, VAEs use the \textbf{reparameterization trick}: instead of sampling $z$ directly, we sample noise $\epsilon \sim \mathcal{N}(0, I)$ and compute $z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon$, moving the randomness outside the network so gradients can still flow through $\mu_\phi$ and $\sigma_\phi$.
+
+\subsubsection{Inference Time}
+
+Unlike a standard autoencoder, a VAE encourages the latent representations to follow a known prior distribution, typically a standard Gaussian. 
+As a result, once training is complete, we can generate new data by simply sampling a latent vector
+
+\[
+z \sim p(z)
+\]
+
+and passing it through the decoder. This regularized latent space is what gives VAEs their generative capability.
+
+
+\subsubsection{Conditional VAEs}
+Similarly to how we can condition GANs on additional information, we can also condition VAEs on auxiliary variables. 
+This leads to the \textbf{Conditional Variational Autoencoder} (CVAE), which allows us to generate data conditioned on specific attributes.
+This is achieved by concatenating the conditioning variable $c$ to both the input of the encoder and the latent code fed into the decoder, effectively learning a conditional distribution $p_\theta(x|z,c)$.
+
+\subsection{GAN vs VAE}
+Even though both GANs and VAEs are generative models, they use very different approaches to generate new data, leading to different strengths and weaknesses.
+
+\begin{itemize}
+    \item \textbf{GANs}: provide a mechanism to generate samples, encouraging the model to produce progressively more realistic outputs. 
+    However, they do not provide an explicit density function for the data distribution, making it difficult to evaluate the likelihood of generated samples.
+    
+    \item \textbf{VAEs}: provide an explicit density function for the data distribution. The distribution can then be used both for generating new samples and for evaluating the likelihood of existing samples. 
+    However, VAEs often produce blurrier outputs compared to GANs, as they optimize a lower bound on the log-likelihood rather than directly optimizing for sample quality.
+\end{itemize}
+
+We can more analitically compare the two models by looking at their foundational properties:
+
+\begin{itemize}
+    \item \textbf{Efficient Sampling:} at inference time, both GANs and VAEs can generate new samples efficiently by sampling from their respective latent spaces;
+    \item \textbf{Sample Quality:} GANs are known for producing high-quality, realistic samples, due to the adversarial training process that encourages the generator to produce outputs indistinguishable from real data. 
+    VAEs, on the other hand, often produce blurrier samples due to the regularization imposed by the KL divergence term in their loss function;
+    \item \textbf{Coverage:} VAEs are designed to cover the entire data distribution, as they explicitly model the underlying probability distribution.
+    GANs, however, can suffer from mode collapse, where the generator produces a limited variety of samples, failing to capture the full diversity of the data;
+    \item \textbf{Well-behaved latent space:} GAN were shown to have a well-structured latent space, allowing for arithmetic operations. 
+    For VAEs, the latent space is regularized to follow a known prior distribution, which can also lead to meaningful interpolations between samples.
+    \item \textbf{Likelihood Estimation:} VAEs provide a tractable lower bound on the log-likelihood of the data, allowing for efficient likelihood estimation.
+    GANs, on the other hand, do not provide a direct way to compute the likelihood of generated samples, making it challenging to evaluate their performance in terms of likelihood.
+\end{itemize}

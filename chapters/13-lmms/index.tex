@@ -1,0 +1,257 @@
+\section{Large Multi-Modal Models}
+
+\textbf{Large Multi-Modal Models} (LMMs) are a class of models that can process and generate data across multiple modalities, such as text, images, audio, and video. 
+In particular, we will focus on \textbf{Large Vision-Language Models} (LVLMs), which are models that can understand and generate both visual and textual information, 
+usually by combining a \textbf{vision encoder} (converting images into embeddings) and a \textbf{Large Language Model}, to address various tasks.
+
+\begin{comment}
+    # TODO: add a figure showing the architecture of a LVLM, with a vision encoder and a LLM, and how they interact to process multi-modal data.
+\end{comment}
+
+We will first discuss different approaches to designing and training \textbf{vision encoder} architectures for LVLMs.
+Finally, we will discuss the architectures that allow for the integration of vision and language modalities, and how to train these models to perform various tasks.
+
+\subsection{Encoders}
+Over the years, several architectures have been proposed for vision encoders. We can group them into four main categories: 
+\begin{itemize}
+    \item \textbf{Convolutional Neural Networks (CNNs)}: based on supervised learning, these models are limited by the fact that the labels need to be pre-defined, and they are not able to learn from unlabeled data.
+    \item \textbf{Image-Only (Non-)Contrastive Learning}: based on self-supervised learning, these models learn to generate embeddings for images without the need for labels.
+    This is achieved by training the model to output similar embeddings for different augmentations of the same image.
+    \item \textbf{Masked Image Modeling (MIM)}: given an image, the model is trained to predict the missing parts of the image, which allows it to learn a representation of the image that captures its structure and semantics.
+    \item \textbf{Contrastive Learning Approaches}: architectures like \textbf{CLIP}, that learn to align image and text embeddings in a shared space, allowing for cross-modal retrieval and understanding.
+\end{itemize}
+
+We will discuss each of these approaches in more detail in the following sections.
+
+\subsection{Image-Only (Non-)Contrastive Learning}
+Various self-supervised learning approaches have been proposed to learn image representations without the need for labels.
+
+\subsubsection{SimCLR}
+SimCLR is a contrastive learning approach that learns to generate embeddings for images by training the model to output similar embeddings for different augmentations of the same image, while ensuring that embeddings for different images are dissimilar.
+Given an image, the model first generates two different augmentations of the image. 
+A base encoder is then used to generate embeddings for both augmentations. 
+These embeddings are then passed through a projection head, which is trained to maximize the similarity between the embeddings of the two augmentations, while minimizing the similarity between embeddings of different images.
+
+\begin{comment}
+    #TODO: add a figure showing the architecture of SimCLR, with the base encoder, projection head, and the contrastive loss function.
+\end{comment}
+
+For downstream tasks, the projection head is discarded, and the base encoder is used to generate embeddings for images.
+
+The used loss function is the \textbf{InfoNCE loss}, which is a contrastive loss that encourages the model to output similar embeddings for positive pairs (different augmentations of the same image) and dissimilar embeddings for negative pairs (different images).
+It is defined as follows:
+\begin{equation}
+    \mathcal{L}_{\text{InfoNCE}} = -\log \frac{\exp(\text{sim}(z_i, z_j) / \tau)}{\sum_{k=1}^{N} \exp(\text{sim}(z_i, z_k) / \tau)}
+\end{equation}
+where we are basically maximizing the similarity between the embeddings of the two augmentations of the same image ($z_i$ and $z_j$), while minimizing the similarity between embeddings of different images ($z_i$ and $z_k$), with $\tau$ being a temperature parameter that controls the sharpness of the distribution.
+
+Such approaches have a main limitation: a large batch size is required to have a sufficient number of negative pairs, which can be computationally expensive and memory-intensive.
+
+
+\subsubsection{DINO}
+Recent approaches such as \textbf{DINO} (DIstillation with NO labels) have been proposed to overcome some limitations of contrastive learning methods such as SimCLR. 
+DINO is a self-supervised learning framework based on Vision Transformers (ViTs) that learns meaningful image representations without requiring labeled data or negative sample pairs.
+
+The architecture of DINO consists of two networks: a \textbf{student network} and a \textbf{teacher network}. 
+The student network is trained to generate embeddings from input images, while the teacher network produces target embeddings that the student aims to match. 
+Rather than being updated through backpropagation, the teacher's parameters are updated as an exponential moving average (EMA) of the student network's parameters, 
+providing stable and slowly evolving targets throughout training.
+
+During training, multiple augmented views of the same image are generated. 
+The student network processes both global and local image crops, whereas the teacher network processes only the global crops. 
+Both networks output feature vectors, which are projected through a small multi-layer perceptron (MLP) head to produce logits. 
+These logits are converted into probability distributions using a softmax function.
+
+The student is trained to match the probability distribution produced by the teacher for different views of the same image. 
+This is achieved by minimizing the cross-entropy loss between the teacher's output distribution $P_t$ and the student's output distribution $P_s$:
+
+\[
+\mathcal{L} = - \sum_{i} P_t(i)\log P_s(i),
+\]
+
+where $i$ indexes the output dimensions. Since the teacher's output serves as the target distribution, gradients are computed only with respect to the student network.
+
+The resulting embeddings have been shown to transfer effectively to a wide range of downstream computer vision tasks, 
+including image classification, object detection, and semantic segmentation.
+
+
+\subsection{Masked Image Modelling}
+This family of approaches is based on the idea of predicting missing parts of an image, which allows the model to learn a representation of the image that captures its structure and semantics.
+
+\subsubsection{BEiT}
+\textbf{BERT Pre-Training of Image Transformers} (BEiT) adapts the masked language modeling objective of BERT to computer vision. 
+First, an image is divided into non-overlapping patches. 
+A pretrained image tokenizer converts each patch into a discrete visual token, which serves as the prediction target during pre-training. 
+Meanwhile, the image patches are embedded as in a standard Vision Transformer, and a subset of the patch embeddings is replaced with a learned mask embedding. 
+
+The Vision Transformer processes the resulting sequence together with positional embeddings. 
+During training, the model predicts the discrete visual tokens corresponding to the masked patches by minimizing the cross-entropy loss between the predicted token distributions and the tokenizer-generated targets.
+
+\subsubsection{MAE}
+\textbf{Masked Autoencoders} (MAE) is a self-supervised learning approach that learns to reconstruct missing parts of an image.
+Instead of predicting discrete visual tokens, MAE directly reconstructs the pixel values of the masked patches.
+
+Usually, a large portion of the input image patches (e.g., 75\%) is randomly masked, and the remaining visible patches are processed by an encoder.
+A decoder then takes the encoded visible patches and the mask tokens (which are included after the encoder) to reconstruct the original image.
+
+\subsection{CLIP}
+We have already discussed the \textbf{CLIP} architecture in the previous chapter, which is a contrastive learning approach that learns to align image and text embeddings in a shared space.
+Although it shows impressive performance on various tasks, there are still some remarkable limitations that need to be addressed:
+\begin{itemize}
+    \item \textbf{No direct interaction between modalities:} CLIP simply learns to align the embeddings of images and text.
+    It doesn't allow to go from one modality to another, or to generate new data in a different modality.
+    \item \textbf{Limited task performance:} CLIP can only perform tasks that can be solved by comparing embeddings, such as image classification or retrieval.
+    \item \textbf{No generative capabilities:} CLIP lacks the ability to generate new data, making them unsuitable for tasks that require data generation, such as captioning or image synthesis.
+\end{itemize}
+
+In this section, we will discuss some approaches that address these limitations and allow for more direct interaction between modalities, as well as generative capabilities.
+
+\subsubsection{Data Scaling}
+Various studies have shown that increasing the amount of training data can significantly improve the performance of LVLMs.
+For example, scaling from 400 million to 2 billion image-text pairs has been shown to improve the performance of CLIP on various tasks.
+
+Scale is not the only factor that affects the performance of LVLMs. Also, the quality of the data is important. 
+Smaller, more curated datasets were shown to outperform larger, noisier datasets.
+
+\subsubsection{Model Design}
+Not only the amount and quality of data, but also the design of the model architecture can significantly affect the performance of CLIP.
+In particular, new architectures have been proposed for both the vision encoder and the language model:
+
+\begin{itemize}
+    \item \textbf{Image Side:} the vision encoder can be improved via the use \textbf{masking}. 
+    It has been shown that masking a large portion of the input image and only encoding the remaining visible patches
+    can improve the performance of the vision encoder, reducing also the traing time and computational requirements.
+
+    \item \textbf{Text Side:} along with the original text input, additional information such as the definition of the class or a description of the image can be provided to the language model, 
+    which can improve the performance of the model on various tasks. This was particularly effective with fine-grained datasets, which typically contain many rare classes.
+\end{itemize}
+
+Some efforts have also been made to improve the interaction between modalities, while maintaining the shared embedding space.
+
+For example, the \textbf{ImageBind} architecture allows for the integration of multiple modalities, such as images, text, audio, and video, into a single model.
+To achieve this, a pretrained version of CLIP is used and kept frozen. A new encoder is used for each new modality, 
+and a contrastive loss is used to align the embeddings of the new modalities with the embeddings of the original CLIP model.
+
+\subsubsection{Interpretability}
+One of the main limitations of CLIP is the limited interpretability of its learned embeddings. 
+To address this issue, \textbf{STAIR} introduces a sparse and semantically meaningful representation for both image and text embeddings.
+
+STAIR constructs a concept-based embedding space in which each dimension corresponds to a human-interpretable semantic concept. 
+Instead of representing an image or a text as a dense feature vector, each embedding is expressed as a non-negative set of concept activations, 
+where the value associated with each concept reflects its relevance to the input.
+
+To obtain this representation, STAIR employs a \textbf{token projection head} that maps the original CLIP embeddings into the sparse concept space. The projection head produces a non-negative weight for every concept, yielding an interpretable embedding whose active dimensions indicate the semantic concepts most strongly associated with the image or text.
+
+
+\subsubsection{Objective Function}
+
+\paragraph{FILIP} (Fine-grained Interactive Language-Image Pre-training) introduces a fine-grained supervision mechanism. 
+Instead of representing an image and a text by a single global embedding, FILIP preserves the embeddings of individual image patches 
+and text tokens, enabling interactions at a finer semantic level.
+
+After the image and text encoders produce patch-level and token-level embeddings, FILIP computes a pairwise similarity matrix between every image patch and every text token. 
+Rather than directly comparing global representations as in CLIP, the similarity between an image and a text is obtained through a \emph{cross-modal late interaction} mechanism. 
+Specifically, for each image patch, the maximum similarity over all text tokens is computed, while for each text token, the maximum similarity over all image patches is also calculated. 
+
+The resulting similarities are then aggregated (using max pooling followed by averaging) to obtain the final image-text similarity score.
+
+This objective encourages each image region to align with its most relevant textual token and vice versa,
+leading to more accurate word-patch correspondences.
+
+\paragraph{CoCa} (Contrastive Captioner) takes a different route: instead of only refining the contrastive objective, it adds a \textbf{generative branch} on top of it.
+This allows a single model to be jointly pre-trained with a contrastive loss and a captioning loss, unifying the single-encoder, dual-encoder, and encoder-decoder paradigms into one architecture.
+
+CoCa is composed of three modules:
+\begin{itemize}
+    \item \textbf{Image Encoder:} as in CLIP, it produces a global image embedding as well as patch-level embeddings.
+    \item \textbf{Unimodal Text Decoder:} processes the text tokens using only self-attention (cross-attention to the image is omitted), producing a global text embedding used for the contrastive objective.
+    \item \textbf{Multimodal Text Decoder:} takes the output of the unimodal decoder and applies cross-attention over the image encoder outputs, learning multimodal representations that are used to generate the caption.
+\end{itemize}
+
+\begin{comment}
+    # TODO: add a figure showing the CoCa architecture, with the image encoder, the unimodal text decoder, and the multimodal text decoder connected via cross-attention.
+\end{comment}
+
+The two decoders share the same weights except for the attention mechanism, and are trained jointly with a weighted combination of the two losses:
+\[
+    \mathcal{L} = \lambda_{\text{Con}} \, \mathcal{L}_{\text{Con}} + \lambda_{\text{Cap}} \, \mathcal{L}_{\text{Cap}}
+\]
+where $\mathcal{L}_{\text{Con}}$ is the usual CLIP-style contrastive loss between the image embedding and the unimodal text embedding, while $\mathcal{L}_{\text{Cap}}$ is the captioning loss, which trains the multimodal decoder to autoregressively predict the caption tokens $y$ conditioned on the image $x$:
+\[
+    \mathcal{L}_{\text{Cap}} = - \sum_{t=1}^{T} \log p_\theta(y_t \mid y_{<t}, x)
+\]
+
+Unlike the dual-encoder approach, which only encodes the text as a whole, the captioning objective forces the model to reason at a finer granularity, since it has to predict the caption word by word.
+As a result, CoCa is not limited to visual recognition and retrieval tasks (as CLIP is), but can also be directly used for generative tasks such as image captioning and visual question answering.
+
+\paragraph{SimVLM} is a precursor of CoCa, proposed by the same research group.
+It adopts a standard \textbf{transformer encoder-decoder} architecture, trained with a single generative objective: given an image (and an optional text prefix), the model is trained to generate the remaining text autoregressively, conditioning on the preceding tokens and the visual input.
+
+Although SimVLM was an important step towards generative vision-language models, using a captioning loss alone was not enough to reach the same alignment quality as CLIP's contrastive objective, which is exactly why CoCa was later introduced to combine both objectives.
+
+We can now summarize the three main design paradigms for Vision-Language Models that we have discussed in this section:
+\begin{itemize}
+    \item \textbf{Dual Encoder (CLIP):} cannot generate text, but achieves excellent performance on tasks that can be solved by comparing embeddings, such as classification and retrieval.
+    \item \textbf{Encoder-Decoder (SimVLM):} can generate text, but does not match CLIP's performance on alignment-based tasks.
+    \item \textbf{Fusion Decoder (CoCa):} combines the strengths of both approaches, enabling text generation while retaining strong retrieval and classification performance.
+\end{itemize}
+
+\begin{comment}
+    # TODO: add a figure recapping the three CLIP-based architectures (dual-encoder, encoder-decoder, fusion decoder), plus the "adapted LLM" design used by Flamingo.
+\end{comment}
+
+A fourth paradigm, adopted by \textbf{Flamingo}, blends the dual-encoder approach with an additional, separately pre-trained LLM, in order to further improve generative and few-shot capabilities. We will discuss this approach in the next section.
+
+\subsection{LLMs as a Universal Interface}
+Multimodal systems offer a more flexible way of interacting with a model than plain text, since a user can provide input by typing, speaking, or simply pointing a camera at something.
+To build a general-purpose assistant around this idea, we need LLMs that are able to ingest a \textbf{multimodal prompt}, containing images and/or videos arbitrarily interleaved with text.
+
+The idea is to equip LLMs with the ability to ``see'' the world, by training them on vision-conditioned language generation tasks.
+This allows LLMs to act as a general interface for other modalities, while still leveraging the knowledge acquired during their language-only pre-training.
+
+This capability is usually obtained through two complementary strategies:
+\begin{itemize}
+    \item \textbf{Multimodal In-Context Learning (M-ICL):} a few demonstrations (e.g., image-text pairs) are provided directly as part of the prompt, allowing the model to perform few-shot learning without updating any of its parameters.
+    \item \textbf{Multimodal Instruction-Tuning (M-IT):} the model is fine-tuned on a collection of tasks described through natural language instructions, so that it can generalize to unseen tasks simply by following the instructions given in the prompt.
+\end{itemize}
+
+\subsubsection{Frozen LM Prefix}
+Before discussing Flamingo, it is useful to introduce the concept of \textbf{Frozen LM Prefix}, described in ``Multimodal Few-Shot Learning with Frozen Language Models''.
+
+The model is composed of three components: a vision encoder (NF-ResNet-50), a language embedder, and a language model used for text generation. The last two components are kept \textbf{frozen}, meaning that their weights are never updated. Only the vision encoder is fine-tuned, and its output embeddings are directly used as \textbf{soft prompts} for the language model:
+they are concatenated with the text embeddings and fed to the frozen LLM decoder, which generates the textual output autoregressively.
+
+\begin{comment}
+    # TODO: add a figure showing the Frozen LM Prefix architecture, with the frozen vision encoder, the frozen language embedder, and the frozen LLM decoder receiving the concatenated visual and textual embeddings.
+\end{comment}
+
+In other words, the visual embeddings act as a hint or guidance for the frozen language model on what it should focus on, without ever changing its weights. This is enough to unlock zero-shot visual question answering, as well as few-shot capabilities such as outside-knowledge VQA and few-shot image classification, purely by conditioning on the prompt.
+
+\subsubsection{Flamingo}
+\textbf{Flamingo}, developed by Google DeepMind, builds on the Frozen LM Prefix idea and represents a significant advance over it, achieving strong performance on zero-shot task transfer and in-context few-shot learning.
+It bridges powerful, separately pre-trained vision-only and language-only models through a small set of novel architectural components, trained from scratch, while keeping both pre-trained models frozen.
+
+\begin{comment}
+    # TODO: add a figure showing the overall Flamingo architecture, highlighting the frozen vision encoder, the Perceiver Resampler, the Gated XATTN-DENSE layers interleaved with the frozen LLM blocks.
+\end{comment}
+
+\paragraph{Vision Encoder} Flamingo first trains a CLIP-like dual-encoder model from scratch using contrastive learning: a \textbf{Normalizer-Free ResNet} (NFNet) is used as the image encoder, while BERT (rather than GPT-2) is used as the text encoder. Text and image embeddings are mean-pooled before being projected into the joint embedding space.
+Once this pre-training is complete, only the vision encoder is kept (and frozen) for the rest of the pipeline, while the text encoder is discarded, since a separate LLM will be used for language understanding and generation.
+
+\paragraph{Perceiver Resampler} Since the frozen vision encoder can produce a variable number of spatial and temporal features, depending on the resolution of the input images or the number of frames of the input videos, we need a way to convert them into a fixed number of visual tokens.
+
+The \textbf{Perceiver Resampler} addresses this problem: a small, fixed-size set of learned \emph{latent queries} attends, via cross-attention, to the (variable-length) features produced by the vision encoder, producing a fixed number of output tokens regardless of the size of the visual input. These tokens are the ones later used to condition the language model.
+
+\paragraph{Gated XATTN-DENSE Layers} To let the language model attend to the resampled visual tokens, new \textbf{gated cross-attention dense} (XATTN-DENSE) layers are inserted between the existing, frozen self-attention layers of the LLM.
+The output of a gated XATTN-DENSE layer serves as the key, value, and query for the following frozen language model layer.
+
+Each of these new layers is gated by a $\tanh$ function, initialized to zero. This means that, at the beginning of training, the model behaves exactly like the original frozen LLM, and the influence of the visual tokens is only gradually introduced as training progresses, without disrupting the language capabilities acquired during pre-training.
+
+\paragraph{Training} Flamingo is trained to handle sequences of arbitrarily interleaved visual and textual data. This flexibility allows it to be trained directly on large-scale, heterogeneous multimodal web corpora, mixing web-scraped interleaved image-text data with existing image-text and video-text datasets.
+This heterogeneity is key to endow Flamingo with strong in-context few-shot learning capabilities, since such interleaved data closely resembles the structure of a multimodal few-shot prompt at inference time.
+
+At both training and inference time, text is predicted autoregressively by the language model (Chinchilla), conditioned on the interleaved visual tokens through the gated XATTN-DENSE layers.
+
+\paragraph{Summary} Flamingo shows how strong, independently pre-trained single-modality models can be unified through lightweight, learnable connector modules: a Perceiver-based architecture that produces a fixed number of visual tokens to support both images and videos, and gated cross-attention layers interleaved with the frozen language-only self-attention layers.
+Despite these strengths, Flamingo is still prone to typical failure modes of generative models, such as hallucinating details that are not present in the visual input.
+

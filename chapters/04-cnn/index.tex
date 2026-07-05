@@ -1,0 +1,319 @@
+\section{Convolutional Neural Network}
+Some real world application of AI, such as image recognition, naturally work with an input space that is \textbf{locally structured}.
+
+\textbf{Convolutional Neural Networks} (CNNs) are a type of neural network architecture that is particularly well-suited for 
+processing data with a 2D structure, such as images.
+Similarly to FFNNs, the idea for CNNs has some biological inspiration, as they are loosely based on the structure of the visual cortex in animals.
+Neurons are organized in a hierarchical manner, with each layer processing increasingly complex features of the input image, starting from simple edges and 
+textures in the early layers to more complex shapes and objects in the deeper layers.
+
+If we were to use a standard FFNN for processing images, we would need to flatten the 2D image into a 1D vector, which would result in a loss
+of spatial information and a large number of parameters to learn, making the model prone to overfitting.
+
+CNNs design is based on 2 principles that allow them to effectively process images while keeping the number of parameters manageable:
+\begin{itemize}
+    \item \textbf{Local Connectivity}: each neuron in a CNN is connected only to a small region of the layer before it. If we were to instead
+    consider a FFNN, usually each neuron is connected to all the neurons in the previous layer;
+    \item \textbf{Parameter Sharing}: the same set of weights is shared across different spatial locations in the input image.
+    This allows the model to learn \textbf{shift-invariant filters}, while also significantly \textbf{reducing the number of parameters} to learn.
+\end{itemize}
+
+\subsection{Convolution}
+Convolutional Neural Networks basically replace general matrix multiplications with convolution operations in at least one layer of the network.
+
+\subsubsection{1-D Convolution}
+Even though CNNs are typically used for processing 2D images, it's important to remember that the convolution operation can be applied to any type of data, including 1D sequences (e.g., time series, text)
+\begin{figure}[H]
+    \centering
+    \input{chapters/04-cnn/tikz/1D-convolution.tex}
+    \caption{Example of a 1D convolution operation.}
+    \label{fig:1D-convolution}
+\end{figure}
+Given the example shown in the figure \ref{fig:1D-convolution}, we can express the convolution operation as follows:
+$$ c_1 = w_1 x_1 + w_2 x_2 + w_3 x_3 $$
+$$ c_2 = w_1 x_2 + w_2 x_3 + w_3 x_4 $$
+And so on, where $w_i$ are the weights of the filter and $x_i$ are the input values.
+
+\subsubsection{2-D Convolution}
+In the 2D case, which is the one actually used in CNNs, the input is a 2D image, and the convolution operation is performed by 
+sliding a small \textbf{filter} (also called \textbf{kernel}) across the image and computing the \textbf{dot product} between the filter and the local region of the image.
+Formally, the output of a convolution operation for a given input image $\mat{I}$ and filter $\mat{K}$ is defined as:
+$$ (\mat{I} * \mat{K})(x, y) = \sum_{i} \sum_{j} \mat{I}(x+i, y+j) \cdot \mat{K}(i, j) $$
+where $ * $ denotes the convolution operation.
+
+\begin{figure}[H]
+    \centering
+    \input{chapters/04-cnn/tikz/2D-convolution.tex}
+    \caption{Example of a 2D convolution operation.}
+    \label{fig:2D-convolution}
+\end{figure}
+In the figure \ref{fig:2D-convolution}, we can see an example of a 2D convolution operation, where the input image is a $5 \times 5$ grid of pixel values, and the filter is a $3 \times 3$ kernel with specific values. 
+The output of the convolution operation is a new $3 \times 3$ grid of values, where each value is computed as the dot product between the kernel and the corresponding local region of the input image.
+
+\subsection{Inside a CNN}
+A CNN is typically composed of several stacked layers, each performing a specific operation on the input data. 
+Usually, low-level layers of the network learn to extract simple local features (e.g., edges, textures), while deeper layers learn to combine these features 
+into more complex and abstract representations (e.g., shapes, objects).
+
+Different types of layers can be used in a CNN, each one serving a specific purpose. In the following sections, we will briefly describe the most common types of layers used in CNNs.
+
+\subsubsection{Convolution Layer}
+The \textbf{convolutional layer} is the core building block of a Convolutional Neural Network (CNN). 
+It is responsible for performing the convolution operation to extract spatial features from the input data. 
+Each layer contains a set of learnable filters (or kernels). These filters are spatially small but extend through the full depth of the input volume. 
+The specific region of the input that a filter processes at any given moment is known as the local \textbf{receptive field}.
+
+During the forward pass, the filter is convolved with the input. This process produces a two-dimensional \textbf{feature map} 
+that highlights the spatial presence of specific visual patterns, such as edges or textures.
+
+Rather than relying on hand-engineered features, CNNs automatically learn the optimal filter weights for the task at hand through backpropagation and gradient descent.
+
+The behavior and output volume of a convolutional layer are governed by three primary hyperparameters:
+\begin{itemize}
+    \item \textbf{Kernel Size}: The spatial dimensions of the filter (e.g., $3 \times 3$ or $5 \times 5$). This dictates the size of the receptive field and determines the extent of local information captured at each step.
+    \item \textbf{Stride}: The step size used when sliding the filter across the input. A stride of $1$ means the filter moves one pixel at a time. A stride of $2$ moves the filter by two pixels at a time, which skips positions and effectively downsamples the spatial dimensions of the resulting feature map.
+    \item \textbf{Padding}: Because a standard filter cannot center itself on the outermost edge pixels without extending beyond the input boundary, the convolution operation naturally shrinks the spatial dimensions of the output. To preserve the original spatial dimensions and retain information at the borders, we can apply \textbf{padding} (typically zero-padding), which artificially adds a border of zeros around the perimeter of the input before applying the convolution.
+\end{itemize}
+
+\subsubsection{Non-Linearity Layer}
+After the convolution layer, a non-linearity layer is typically applied to introduce non-linear transformations to the feature maps.
+This is usually done using activation functions such as ReLU (Rectified Linear Unit), similar to what we have seen in FFNNs.
+The non-linearity layer allows the network to learn more complex and non-linear relationships between the input data and the output.
+
+\subsubsection{Pooling Layer} 
+The pooling layer serves to downsample the feature maps generated by the preceding convolutional layer, reducing their spatial dimensions while preserving critical structural information. 
+
+This dimensionality reduction is typically achieved through operations such as \textit{max pooling} or \textit{average pooling}, which extract the maximum or mean value from localized regions of the feature map to construct a more compact output. 
+
+Crucially, pooling operations contribute to the translation invariance inherent in CNNs, rendering the network less sensitive to the precise spatial positioning of features within the original input image.
+
+\subsection{Different Architectures}
+
+This section outlines several seminal Convolutional Neural Network (CNN) architectures, detailing their unique structural designs and foundational contributions to computer vision.
+
+\subsubsection{LeNet (1998)}
+Proposed in 1998, LeNet is one of the earliest CNN architectures, originally designed for handwritten digit recognition.
+
+\begin{figure}[H]
+    \centering
+    \input{chapters/04-cnn/tikz/LeNet.tex}
+    \caption{LeNet architecture.}
+    \label{fig:LeNet}
+\end{figure}
+
+It follows a straightforward structural pattern: two convolutional layers (C1 and C3), each immediately followed by a pooling layer (S2 and S4). The network concludes with two fully connected layers (C5 and F6) that feed into an output layer, producing a probability distribution across the ten possible digit classes (0-9).
+
+\subsubsection{AlexNet (2012)}
+Introduced during the 2012 ImageNet Large Scale Visual Recognition Challenge (ILSVRC), AlexNet significantly advanced the foundational concepts established by LeNet. 
+
+\begin{figure}[H]
+    \centering
+    \input{chapters/04-cnn/tikz/AlexNet.tex}
+    \caption{AlexNet architecture.}
+    \label{fig:AlexNet}
+\end{figure}
+
+While retaining a similar architecture to LeNet, AlexNet dramatically scaled up the network's complexity, featuring five convolutional layers and three fully connected layers. 
+This increased capacity was supported by a massive leap in available training data, utilizing the ImageNet dataset comprised of over one million labeled images across 1,000 categories.
+
+AlexNet represented a watershed moment for deep learning. By decisively outperforming traditional methods on ImageNet, it demonstrated the immense power of deep convolutional networks and catalyzed the research community's shift toward increasingly deep architectures.
+
+Beyond raw performance, AlexNet fundamentally transformed how the field approached feature extraction. Previously, image processing relied heavily on hand-crafted descriptors (such as SIFT or GIST) paired with traditional classifiers like SVMs. 
+AlexNet proved that an end-to-end trained CNN could automatically learn hierarchical, robust feature representations directly from raw pixels. 
+
+Researchers soon discovered that these learned representations were highly transferable, eventually outperforming manual features across diverse applications, 
+including object detection, segmentation, and natural language processing.
+
+
+\subsubsection{Zeiler and Fergus (2013)}
+After the success of AlexNet, a natural question was: how can we understand what the network has learned?
+
+The Zeiler and Fergus architecture, proposed in 2013, introduced a method for visualizing and understanding the features learned by deep convolutional networks.
+This allowed to gain insights into the inner workings of CNNs, allowing for an easier parameter tuning and architecture design.
+This approach involved deconvolutional networks, that allowed to invert the operations of a CNN, visualizing the activations of the different layers and understanding which features were being captured by the network.
+\begin{figure}[H]
+    \centering
+    \input{chapters/04-cnn/tikz/deconvolutionalNN.tex}
+    \caption{Zeiler and Fergus architecture for visualizing learned features.}
+    \label{fig:deconvolutionalNN}
+\end{figure}
+\paragraph{How it works}
+The deconvolutional network is designed to reverse the operations of a CNN, for each layer of the CNN. 
+It is built using the same types of layers as a CNN, but in reverse order, and with the operations inverted.
+Obviously, the convolution operation and the activation functions are easily inverted, but the pooling operation 
+is not invertible, as it removes information from the input feature map.
+
+To address this issue, the authors introduced a method called "unpooling", which is used to approximate the inverse of the pooling operation.
+It basically uses the indices of the maximum values from the pooling operation to place the values back in their original positions, while filling the rest of the positions with zeros.
+This allows the deconvolutional network to reconstruct an approximation of the original input image, based on the activations of the different layers of the CNN.
+
+\paragraph{Other approaches to explainability}
+Other approaches to explainability in CNNs include:
+\begin{itemize}
+    \item \textbf{Image Occlusion}: this method involves occluding different parts of the input image and observing how the output of the network changes, 
+    to understand which parts of the image are most important for the network's predictions;
+    \item \textbf{Class Model Visualization}: more rigorous than the previous one, this method involves finding the input image that maximizes the activation
+    of a specific class in the output layer, to understand which features are most important for that class;
+    \item \textbf{Class Activation Mapping (CAM)}: uses each weight of the output layer to create a saliency map that highlights the regions of the input image 
+    that are most important for the network's predictions. The images are then averaged to create a heatmap that shows the most important regions of the input image for the network's predictions.
+    
+    This approch only works for fully convolutional networks, with no fully connected layers.
+    \item \textbf{Grad-CAM}: An extension of CAM that can be applied to any CNN architecture. It uses the gradients of the output with respect to the feature maps of a specific convolutional 
+    layer to create a heatmap that highlights the important regions of the input image for the network's predictions.
+\end{itemize}
+
+\subsubsection{VGGNet (2014)}
+VGGNet follows the same structural pattern as AlexNet but scales up the depth significantly, utilizing up to 19 layers. 
+While several configurations of VGGNet were proposed with varying numbers of convolutional and fully connected layers, they all suffered from a common limitation: 
+an enormous number of parameters, predominantly concentrated in the fully connected layers. 
+This massive parameter count made the network computationally expensive and highly prone to overfitting. 
+
+Consequently, VGGNet was one of the last major architectures to rely heavily on this traditional sequential pattern. 
+Subsequent architectures introduced novel design paradigms specifically to mitigate this bottleneck.
+
+Notably, VGGNet replaced the larger convolutional filters ($7 \times 7$ or $11 \times 11$) used in earlier models with stacks of smaller $3 \times 3$ filters. 
+This design choice became a staple in later architectures, as stacking smaller filters achieves the same effective receptive field while substantially reducing the number of parameters and allowing for greater network depth.
+
+\subsubsection{GoogLeNet (2014)}
+Introduced in 2014, GoogLeNet debuted the \textbf{Inception Module}, a novel architectural component designed to capture features at multiple scales and levels of abstraction by applying various filter sizes in parallel within the same layer.
+
+The key innovations of GoogLeNet include:
+\begin{itemize}
+    \item \textbf{Parameter Efficiency:} By replacing computationally expensive fully connected layers with \textbf{Global Average Pooling}, 
+    GoogLeNet reduced the parameter count from approximately 60 million in AlexNet to just 6.7 million, despite being significantly deeper.
+    \item \textbf{Depth:} The network consists of 22 layers, making it substantially deeper than its predecessors. 
+    This depth allows it to learn more complex and abstract features from the input data, contributing to its improved performance on the ImageNet dataset.
+    \item \textbf{Dimensionality Reduction:} To keep the computational cost manageable, $1 \times 1$ convolutions are used to reduce the number of input channels 
+    before the expensive $3 \times 3$ and $5 \times 5$ convolutions.
+    \item \textbf{Intermediate Supervision:} To mitigate the \textbf{vanishing gradient problem} caused by the increased depth, GoogLeNet introduced auxiliary 
+    classifiers at intermediate layers. These branches provide additional gradient signals back to the earlier layers during training.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chapters/04-cnn/media/GoogLeNet.png}
+    \caption{GoogLeNet architecture.}
+    \hfill
+\end{figure}
+
+\paragraph{$1 \times 1$ Convolutions}
+Before detailing the Inception Module, it is crucial to understand the $1 \times 1$ convolution, the key mechanism that makes the module computationally feasible.
+
+A $1 \times 1$ convolution is a filter with a spatial extent of a single pixel. Because it spans no spatial neighborhood, it does not aggregate information from adjacent pixels. Instead, at each spatial location, it computes a linear combination \emph{across the input channels}. It effectively functions as a small fully connected layer applied identically across every spatial position, a technique often referred to as \textbf{cross-channel pooling} or \textit{network-in-network}.
+
+Its most critical property lies in manipulating the channel dimension. Because the number of filters dictates the number of output channels, a $1 \times 1$ convolution maps an $H \times W \times C_{in}$ tensor to an $H \times W \times C_{out}$ tensor. The spatial resolution ($H \times W$) remains untouched while the channel depth is adjusted. This makes it an efficient \textbf{bottleneck} layer capable of expanding or shrinking the channel dimension as needed. It serves two primary purposes:
+\begin{itemize}
+    \item \textbf{Dimensionality Reduction:} Placing a $1 \times 1$ convolution before a heavy $3 \times 3$ or $5 \times 5$ convolution reduces the number of channels the larger filter must process, drastically lowering both parameter count and computational operations.
+    \item \textbf{Added Non-linearity:} When followed by a ReLU activation function, it injects an additional non-linear transformation, deepening the representational capacity of the network with virtually no spatial computational cost.
+\end{itemize}
+
+To illustrate these computational savings, consider an input feature map of size $28 \times 28 \times 192$ where we wish to apply a $5 \times 5$ convolution to produce 32 output channels:
+\begin{itemize}
+    \item \textbf{Direct convolution:} The computational cost is $28 \times 28 \times 32 \times 5 \times 5 \times 192$, which equals approximately 120 million multiply-add operations.
+    \item \textbf{With a $1 \times 1$ reduction:} First, we reduce the input from 192 to 16 channels using a $1 \times 1$ convolution, and then apply the $5 \times 5$ convolution to go from 16 to 32 channels. The total cost is the sum of both operations: $(28 \times 28 \times 16 \times 192) + (28 \times 28 \times 32 \times 5 \times 5 \times 16)$, which is approximately 2.4 million + 10 million = 12.4 million multiply-adds.
+\end{itemize}
+This strategy yields roughly a 10x reduction in computation while generating the exact same output shape. This precise technique allows the multi-branch Inception Module to execute several parallel convolutions without an explosion in computational overhead.
+
+\paragraph{Inception Modules}
+The Inception Module is the fundamental building block of GoogLeNet. It is specifically engineered to learn diverse features across multiple scales while keeping the parameter count strictly regulated. Rather than forcing the network to choose a single filter size at a given layer, the module applies $1 \times 1$, $3 \times 3$, and $5 \times 5$ convolutions, alongside a $3 \times 3$ max-pooling operation, all in parallel. The resulting feature maps from these parallel operations are then concatenated along the channel dimension to form the final output of the module.
+
+This parallel design offers two main advantages:
+\begin{itemize}
+    \item \textbf{Multiscale Feature Extraction:} By processing multiple filter sizes simultaneously, the network automatically determines which spatial scale is most relevant for identifying a specific feature, making it exceptionally adept at handling objects of varying sizes within complex datasets like ImageNet.
+    \item \textbf{Feature Redundancy and Generalization:} Processing the same input through diverse parallel paths creates structural redundancy in the learned feature maps. This redundancy pushes the model toward more robust, scale-invariant representations, which enhances generalization and acts as an implicit regularizer during training.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{chapters/04-cnn/media/inceptionModule.png}
+    \caption{Inception Module.}
+\end{figure}
+
+\subsubsection{ResNet (2015)}
+As Convolutional Neural Networks grew increasingly deep, researchers encountered the \textbf{degradation problem}: 
+beyond a certain depth, network accuracy begins to saturate and then degrades rapidly. Crucially, this degradation is not a result of overfitting, 
+as deeper models counterintuitively exhibit higher \textbf{training error} than their shallower counterparts.
+
+\textbf{ResNet} (Residual Network), introduced in 2015, addressed this bottleneck by pioneering the use of \textbf{residual connections} (also known as skip connections). 
+These connections bypass one or more layers, enabling the network to learn an identity mapping, meaning the input is passed through entirely unchanged if the intermediate non-linear layers are deemed unnecessary for the given task.
+
+This simple yet profound architectural innovation provided several critical benefits:
+\begin{itemize}
+    \item \textbf{Implicit Ensemble Learning:} Skip connections create multiple paths for information flow, effectively forming an implicit ensemble of numerous shallower networks embedded within the deeper architecture.
+    \item \textbf{Smoother Loss Landscape:} The residual paths help to smooth out the loss landscape, making it significantly easier for optimization algorithms (like SGD) to navigate toward a global minimum, thereby improving convergence during training.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \input{chapters/04-cnn/tikz/residualBlock.tex}
+    \caption{A residual block: the identity skip connection adds the block's input $\vct{x}$ back to the transformed output $\mathcal{F}(\vct{x})$.}
+    \label{fig:residual-block}
+\end{figure}
+
+\paragraph{Handling Dimension Mismatches}
+Direct identity connections cannot be applied when the input and output dimensions (either spatial or channel-wise) of a residual block differ. 
+To resolve this, the concept of a $1 \times 1$ convolution is utilized along the skip connection. This projection matches the dimensions of the input to the output feature maps while simultaneously introducing a learned linear transformation.
+
+\paragraph{Variants of Residual Blocks} 
+In subsequent years, several modifications to the standard residual block were proposed to further optimize training and computational efficiency:
+\begin{itemize}
+    \item \textbf{Pre-activation Residual Block}: This design alters the traditional sequence of operations by applying batch normalization and activation functions \textit{before} the convolutional layers. This creates a cleaner, unobstructed identity mapping path that is free of non-linear interruptions, resulting in superior gradient flow during backpropagation.
+    \item \textbf{Bottleneck Residual Block}: Designed to make exceedingly deep networks computationally feasible, this block uses a $1 \times 1$ convolution to compress the channel dimension, applies the standard $3 \times 3$ convolution on this reduced space, and then uses a final $1 \times 1$ convolution to expand the channels back to their original depth.
+    \item \textbf{Wide Residual Block}: Rather than strictly scaling depth, this approach focuses on increasing the \textit{width} (the number of channels) of the residual blocks. By utilizing wider convolutions and fewer layers overall, this architecture systematically explores the depth-to-width trade-off, demonstrating that wider, shallower residual networks can often match or exceed the performance of their deeper, thinner counterparts.
+\end{itemize}
+
+Following the profound success of ResNet, numerous modern architectures were developed that build upon the foundational concept of residual learning. The following two architectures are prominent examples of this continuing trend.
+
+\subsubsection{DenseNet (2018)}
+DenseNet are a type of CNN architecture that builds upon the idea of residual connections. 
+Instead of using skip connections that add the input to the output of a layer, DenseNet introduces the \textbf{Dense Block}. 
+
+In a Dense Block, each layer is connected to all the other layers that compose the block. This means that for each layer, the feature maps of
+all the previous layers are concatenated together and used as input for the current layer.
+
+This approach has a few advantages, such as:
+\begin{itemize}
+    \item \textbf{Feature Reuse:} Since feature maps are preserved via concatenation, there is no need to relearn redundant features in subsequent layers.
+    \item \textbf{Parameter Efficiency:} Despite the dense connectivity, DenseNets often require fewer parameters than ResNets for similar performance because they do not need large, wide layers to capture complex information.
+\end{itemize}
+
+\subsubsection{SENet (2019)}
+\textbf{SENet} (Squeeze-and-Excitation Networks) introduces the concept of \textbf{channel attention} to CNN architectures. 
+Rather than assuming all feature map channels contribute equally, SENet adaptively recalibrates channel-wise responses, learning to emphasize informative features and suppress irrelevant ones based on the task at hand.
+
+This dynamic recalibration is achieved through a lightweight module called the SE block, which operates in two distinct steps:
+\begin{itemize}
+    \item \textbf{Squeeze}: Spatial information is aggregated using global average pooling. This compresses the spatial dimensions of the input feature map, producing a $1 \times 1 \times C_{in}$ vector that serves as a global, statistical summary of each channel's activations.
+    
+    \item \textbf{Excitation}: The squeezed vector is passed through a gating mechanism (typically a small multi-layer perceptron) followed by a sigmoid activation function. This step learns the relative importance of each channel, generating a dynamic weight between 0 and 1 for each one. This is conceptually similar to the attention mechanism in Transformers; however, SENet applies weights channel-wise rather than token-wise.
+\end{itemize}
+
+The final output of the SE block is obtained by multiplying the original input feature maps by these learned weights, effectively scaling each channel by its relevance.
+
+\subsubsection{ConvNext (2022)}
+In the later years, the trend of transformer-based architectures has dominated the field of computer vision, with models such as \textbf{Vision Transformer (ViT)} and \textbf{Swin Transformer} 
+achieving state-of-the-art performance on various vision tasks.
+
+\paragraph{Transformers}
+Vision Transformers usually work by splitting the input image into a grid of non-overlapping patches.
+Each patch is then flattened, along with its embedded positional information. The transformer architecturet
+then processes the entire sequence of patches, produing a global latent representation of the image, which
+is then used for downstream tasks such as classification or object detection.
+
+Differently from what we have seen in CNNs, the spatial reletionships between the patches are not explicitly modeled, but rather learned through the self-attention mechanism of the transformer architecture.
+
+\textbf{ConvNext} is a CNN architecture that was proposed in 2022. It showed that with some modifications to the standard CNN architecture, it is possible to achieve performance 
+comparable to transformer-based architectures, while still maintaining the efficiency and simplicity of CNNs.
+
+\subsection{Regularization}
+To prevent overfitting, various regularization techniques were developed specifically for CNNs, such as:
+\begin{itemize}
+    \item \textbf{Cutout}: this method involves randomly masking out a square portion of the input image during training, replacing it with the mean pixel value of the dataset.
+    This approach forces the network to learn more robust features that are not reliant on specific parts of the image;
+    \item \textbf{DropBlock}: an extension of dropout, where instead of randomly dropping individual neurons, contiguous regions of the feature maps are dropped during training,
+    for all channels.
+    \item \textbf{CutMix}: this method involves randomly cutting and pasting patches between training images.
+    Class labels are also updated proportionally to the area of the patches. This encourages the model to learn features from different parts of the images,
+    providing a regularization effect and improving generalization.
+\end{itemize}
+

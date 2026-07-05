@@ -1,0 +1,106 @@
+\section{Questions}
+
+\subsection{FFNN}
+\paragraph{Activation Functions - Pros and Cons}
+
+\paragraph{SGD with Momentum}
+
+\paragraph{Regularization}
+
+\subsection{CNN}
+\paragraph{AlexNet, GoogLeNet, ResNet}
+\begin{itemize}
+    \item \textbf{AlexNet:} Built for the ImageNet competition, started the deep learning revolution in computer vision. 
+    Takes the concept of LeNet and makes it deeper. Uses a series of convolutional and max pooling layers, 
+    followed by fully connected layers for the final classification. 
+    Shown that the feature maps learned by the convolutional layers can be transferred to other tasks.
+    \item \textbf{GoogLeNet:}
+    \begin{itemize}
+        \item Introduced the Inception module, which allows for multi-scale feature extraction by applying multiple convolutional filters of different sizes in parallel.
+        \item Uses global average pooling instead of fully connected layers, reducing the number of parameters and improving generalization.
+        \item Further reduces the number of parameters by using 1x1 convolutions to reduce the depth of the feature maps before applying larger convolutions.
+        \item To avoid the vanishing gradient problem, GoogLeNet uses auxiliary classifiers during training, which provide additional supervision to the intermediate layers.
+    \end{itemize}
+    \item \textbf{ResNet:} Went much deeper than previous architectures by introducing identity bypass connections (produce an ensemble of shallower networks).
+    If one layer will not be needed, it can be skipped. Since the dimensionality needs to be the same, a 1x1 convolution is used to match the channel dimensions.
+
+    Also uses only smaller 3x3 convolutions, which reduces the number of parameters and computational cost.
+\end{itemize}
+
+\paragraph{Inception Module - Why 1x1 Convolutions?}
+Allow for multy-scale feature extraction by applying multiple convolutional filters of different sizes in parallel.
+By doing this, it may also learn redundant features, which makes the model more robust. 
+
+The 1x1 convolutions are used before applying larger convolutions to reduce the depth of the feature maps, 
+reducing also the number of parameters and computational cost.
+
+\subsection{Transformer}
+\paragraph{Global vs Local attention}
+\begin{itemize}
+    \item \textbf{Global Attention:} At every step, the decoder compute the attention weights over all the encoder's hidden states.
+    Computationally expensive for long sequences.
+
+    Given that we are at step $t$ in the decoder, we first compute the alignment over all the encoder's hidden states $h_1, h_2, ..., h_n$ as:
+    \[ e_{t,i} = a(s_{t-1}, h_i) \]
+    where $s_{t-1}$ is the decoder's previous hidden state, and $a$ is a scoring function (e.g., dot product, additive, etc.). 
+    
+    The attention weights are then computed using the softmax (ensure they sum to 1) function:
+    \[ \alpha_{t,i} = softmax(e_{t,i}) = \frac{exp(e_{t,i})}{\sum_{j=1}^{n} exp(e_{t,j})} \]
+    
+    Finally, the context vector $c_t$ is computed as a weighted sum of the encoder's hidden states:
+    \[ c_t = \sum_{i=1}^{n} \alpha_{t,i} h_i \]
+
+    \item \textbf{Local Attention:} Instead of attending to all encoder hidden states, the decoder attends to a fixed-size window of encoder hidden states around a predicted position. 
+    This reduces computational complexity and allows for more focused attention on relevant parts of the input sequence.
+
+    Given that we are at step $t$ in the decoder, we first predict a position $p_t$ in the encoder's hidden states to attend to. 
+    This is typically done using a separate neural network that takes the decoder's previous hidden state $s_{t-1}$ as input and outputs a predicted position $p_t$.
+    \[ p_t = T_x \cdot \sigma(v_p^T tanh(W_p s_{t-1})) \]
+    where $T_x$ is the length of the input sequence, $v_p$ and $W_p$ are learnable parameters, and $\sigma$ is the sigmoid function.
+    This approach allow for backpropagation through the predicted position (the predicted position is differentiable with respect to the model parameters).
+    
+    To enforce the locality constraint, a Gaussian distribution is applied to the attention weights, centered around $p_t$:
+    \[ \alpha_{t,i} = softmax(e_{t,i}) \cdot exp\left(-\frac{(i - p_t)^2}{2\sigma^2}\right) \]
+\end{itemize}
+
+\paragraph{Self-Attention}
+Given the computed embeddings of the input sequence $x_1, x_2, ..., x_n$, self-attention allows each token to attend to all other tokens in the sequence.
+\begin{itemize}
+    \item \textbf{Query (Q):} $q_i = W^Q x_i$, where $W^Q$ is a learnable weight matrix.
+    The query vector represents what the current token is looking for in the other tokens.
+    \item \textbf{Key (K):} $k_i = W^K x_i$, where $W^K$ is a learnable weight matrix.
+    The key vector represents the content of the current token that can be matched against the queries of other tokens.
+    \item \textbf{Value (V):} $v_i = W^V x_i$, where $W^V$ is a learnable weight matrix.
+    The value vector represents the information that will be passed to the next layer if the current token is attended to.
+\end{itemize}
+
+Given the queries, keys, and values vectors, the attention scores for input token $i$ attending to all other tokens $j$ are computed as:
+\[
+e_{ij} = q_i \cdot k_j^T
+\]
+These scores are then rescaled by the square root of the dimension of the key vectors $d_k$ to prevent large dot product values:
+\[
+\hat{e}_{ij} = \frac{e_{ij}}{\sqrt{d_k}}
+\]
+The attention weights are then computed using the softmax function:
+\[
+\alpha_{ij} = softmax(\hat{e}_{ij}) = \frac{exp(\hat{e}_{ij})}{\sum_{j=1}^{n} exp(\hat{e}_{ij})}
+\]
+Finally, the output of the self-attention mechanism for token $i$ is computed as a weighted sum of the value vectors:
+\[
+z_i = \sum_{j=1}^{n} \alpha_{ij} v_j
+\]
+
+Similarly, the self-attention mechanism can be defined in matrix form for the entire input sequence as:
+\[
+\mat{Z} = softmax\left(\frac{\mat{Q} \mat{K}^T}{\sqrt{d_k}}\right) \mat{V}
+\]
+
+\subsection{GAN}
+\begin{enumerate}
+    \item draw the architecture of a GAN.
+    \item Write the loss function of a GAN and explain what is the problem with the original loss function? (min-max game, mode collapse, training instability).
+    How can we fix it? (Switch to max-max or min-min, LSGAN)
+    \item What is Mode Collapse? How can we fix it? (Minibatch discrimination, LSGAN)
+    \item Can you create a GAN with some conditional information? 
+\end{enumerate}

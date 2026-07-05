@@ -1,0 +1,222 @@
+\section{Attention \& Transformers}
+Early sequence processing models relied primarily on recurrent neural network (RNN) encoder-decoder architectures. 
+In these models, the encoder compresses the input sequence into a fixed-size representation, which the decoder then uses to generate the output. 
+However, this fixed bottleneck limits performance. The introduction of attention mechanisms demonstrated that creating a dynamic, context-aware representation of the input sequence significantly improves results. 
+
+Building on the success of attention, researchers sought to eliminate the sequential bottleneck of RNNs entirely. 
+This led to the development of more flexible architectures capable of processing sequences in parallel while still effectively capturing long-range dependencies.
+
+\subsection{Convolutional Sequence Models}
+Convolutional Neural Networks (CNNs) offer a natural alternative for sequence processing. 
+By using convolutional filters, they efficiently capture local dependencies, and stacking these layers allows the model to expand its receptive field to capture longer-range relationships.
+
+CNNs provide two primary advantages over RNNs:
+\begin{itemize}
+    \item \textbf{Parallelization:} Unlike RNNs, which must process tokens sequentially, CNNs process the entire sequence hierarchically. 
+    This enables massive parallelization and significantly faster training times.
+    
+    \item \textbf{Parameter Efficiency:} The parameter-sharing nature of convolutional filters makes CNNs highly efficient, 
+    reducing both the total number of parameters and overall computational cost.
+\end{itemize}
+
+Despite these strengths, traditional CNNs are constrained by a fixed input size. This limitation complicates their application 
+to variable-length sequences, often requiring workarounds that make them less flexible in certain scenarios.
+
+\paragraph{Dilated Convolutions}
+To capture long-range dependencies without inflating the parameter count, CNNs frequently employ \textbf{dilated convolutions}. 
+Unlike standard convolutions, a dilated filter is applied over a broader area by introducing gaps between the sampled input values. 
+The size of these intervals is determined by the \textit{dilation rate}. This technique effectively expands the network's receptive field while preserving both parameter efficiency and computational tractability.
+
+For instance, consider a standard $3 \times 3$ convolutional filter applied to adjacent pixels. This configuration corresponds to a dilation rate of $1$, yielding a $3 \times 3$ receptive field. 
+If the dilation rate is increased to $2$, the filter skips one pixel between each consecutive sample. Consequently, the filter's effective receptive field expands to a $5 \times 5$ area, despite still relying on the same $9$ trainable parameters.
+
+\subsubsection{Temporal Convolutional Networks (TCNs)}
+The \textbf{Temporal Convolutional Network (TCN)} is a prominent architecture that applies dilated convolutions directly to sequence modeling. 
+By addressing the historical limitations of standard CNNs, TCNs demonstrated that convolutional architectures can be highly competitive with RNNs, achieving comparable or superior performance in various sequence tasks.
+
+TCNs achieve this through two core architectural mechanisms:
+\begin{itemize}
+    \item \textbf{Hierarchical Dilated Convolutions:} To capture long-range dependencies, TCNs utilize a stack of convolutional layers where the dilation rate increases with depth. The initial layer processes the input with a small receptive field, while subsequent layers progressively expand this field. This hierarchical approach allows the network to model relationships across extended time spans while maintaining parameter efficiency.
+    \item \textbf{Causal Convolutions:} To ensure strict adherence to temporal ordering, TCNs employ causal convolutions. This guarantees that the network's prediction at time step $t$ is computed using only inputs from time step $t$ and earlier, fundamentally preventing any information leakage from future states.
+\end{itemize}
+
+\subsection{Transformers}
+Instead of using attention as a supplementary mechanism within RNNs or CNNs, the \textbf{Transformer} architecture relies entirely on attention to model dependencies between input and output sequences.
+Transformers are neural network architectures based on the \textit{self-attention} mechanism.
+This architecture has been shown to be more efficient and parallelizable than RNNs and CNNs, leading to faster training and strong performance on a wide range of sequence modeling tasks.
+
+\subsubsection{The Architecture}
+The architecture of the Transformer still follows the encoder-decoder paradigm, but it entirely rethinks the way each component is implemented.
+
+\begin{itemize}
+    \item \textbf{Encoder:} The encoder receives the entire input sequence and processes it in parallel, producing a sequence of contextualized representations of the same length as the input.
+    \item \textbf{Decoder:} The decoder predicts the output sequence one token at a time in an autoregressive manner, using previously generated tokens and the encoder's output as context.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.85\textwidth}{!}{\input{chapters/09-attention-transformers/tikz/transformer-architecture.tex}}
+    \caption{The Transformer architecture. A stack of $N$ encoders maps the input sequence into contextualized representations, which feed the encoder-decoder attention of a stack of $N$ decoders. The decoder generates the output sequence one token at a time.}
+\end{figure}
+
+Let's now go deeper into the details of each component of the Transformer architecture.
+
+\subsubsection{Encoder}
+The encoder transforms the input tokens into a \textbf{contextualized representation}. 
+Each input token is first mapped to a high-dimensional vector through an \textbf{embedding layer}. This layer captures the semantic meaning of each token, transforming it into a numerical representation.
+
+Each token is processed in parallel within the encoder layers. The \textbf{self-attention} mechanism allows the model to capture dependencies between tokens, modeling relationships across the entire sequence.
+
+A \textbf{feed-forward layer} then processes the output of the self-attention mechanism, applying a non-linear transformation to each token's representation independently.
+Since self-attention has already mixed information across tokens, the feed-forward layer refines each token's representation without further token interaction, enabling efficient parallel computation.
+
+\subsubsection{Positional Encoding}
+The first encoder layer receives a sequence of token embeddings, but these embeddings do not inherently contain any information about the order of the tokens.
+To address this, positional information is provided through an additive \textbf{positional encoding} vector, which shares the same dimensionality as the token embeddings. 
+
+With positional encoding, the representation of words is influenced not only by their semantic similarity but also by their relative positions in the sequence.
+
+This is usually implemented using combinations of sine and cosine functions of different frequencies, which allow the model to learn relative positions and generalize to sequences longer than those seen during training.
+
+\subsubsection{Self-Attention}
+The self-attention mechanism is the core of the Transformer architecture.
+It allows the creation of arbitrarily \textbf{long-range dependencies} between tokens in a sequence, regardless of their distance from each other.
+It allows each token in the input sequence to attend to every other token considered relevant for the current token's representation.
+
+\paragraph{How to compute it}
+From their embeddings, the \textbf{self-attention} mechanism creates three vectors for each token:
+\begin{itemize}
+    \item \textbf{Query (\(\vct{q}\)):} What the token is looking for in the other tokens.
+    \item \textbf{Key (\(\vct{k}\)):} What the token has to offer to the other tokens.
+    \item \textbf{Value (\(\vct{v}\)):} The actual information that the token carries, which will be used to compute the final representation.
+\end{itemize}
+
+The core idea is that when the query of a token matches the key of another token (yielding a high attention score), the value of that token will heavily influence the final representation of the querying token.
+
+The \(\mat{Q}\), \(\mat{K}\), and \(\mat{V}\) matrices are computed as linear transformations of the input embeddings \(\mat{X}\), using learned weight matrices:
+
+\[
+    \mat{Q} = \mat{X} \mat{W}_Q, \quad
+    \mat{K} = \mat{X} \mat{W}_K, \quad
+    \mat{V} = \mat{X} \mat{W}_V
+\]
+
+\paragraph{Score Computation}
+Once the \(\mat{Q}\), \(\mat{K}\), and \(\mat{V}\) matrices are computed, the next step is to calculate the attention scores.
+Given a query vector \(\vct{q}_i\) for token \(i\) and key vectors \(\vct{k}_j\) for all tokens \(j\), the attention score \(s_{ij}\) is computed as the dot product of the query and key vectors:
+\[
+s_{ij} = \vct{q}_i \cdot \vct{k}_j
+\]
+This score indicates how much attention token \(i\) should pay to token \(j\).
+
+These scores are then scaled to ensure that the dot products do not grow too large, which can push the softmax function into regions with extremely small gradients, leading to instability during training. 
+This is done by dividing the scores by the square root of the dimension of the key vectors, \(d_k\):
+\[
+\hat{s}_{ij} = \frac{s_{ij}}{\sqrt{d_k}}
+\]
+
+Finally, a softmax function is applied to convert the scores into a valid probability distribution:
+\[
+\alpha_{ij} = \softmax(\hat{s}_{ij}) = \frac{\exp(\hat{s}_{ij})}{\sum_{k} \exp(\hat{s}_{ik})}
+\]
+
+\paragraph{Output Computation}
+The final step in the self-attention mechanism is to compute a weighted sum of the \textbf{value} vectors based on the attention probabilities.
+\begin{equation}
+    \label{eq:weighted_sum_values}
+    \hat{\vct{v}}_i = \sum_{j} \alpha_{ij} \vct{v}_j
+\end{equation}
+
+This output vector \(\hat{\vct{v}}_i\) represents the refined representation of token \(i\) after considering the context provided by all other tokens in the sequence, giving more importance to tokens that are more relevant according to the attention scores.
+
+\paragraph{Putting Everything Together}
+Putting all the steps together, the self-attention computation for the entire sequence can be expressed cleanly in matrix form as:
+\[
+\text{Attention}(\mat{Q}, \mat{K}, \mat{V}) = \softmax\left(\frac{\mat{Q} \mat{K}^T}{\sqrt{d_k}}\right) \mat{V}
+\]
+
+\paragraph{Multi-Head Attention}
+An evolution of the standard self-attention mechanism is \textbf{multi-head attention}, which allows the model to focus on different aspects of the input sequence simultaneously.
+Instead of computing a single set of \(\mat{Q}\), \(\mat{K}\), and \(\mat{V}\) matrices, the model computes multiple sets (or "\textbf{heads}") of these matrices, each with its own learned weight matrices.
+
+This provides the attention layer with multiple representation subspaces, allowing it to capture a richer set of relationships between tokens (e.g., one head might focus on grammatical syntax, while another focuses on semantic relationships).
+
+The final output of the multi-head attention mechanism is obtained by concatenating the outputs of all individual heads and applying a learned linear transformation to combine them back into a single representation.
+
+Although demonstrated to be highly effective, multi-head attention does increase the number of parameters and the computational cost. Furthermore, some heads may end up learning redundant information, which can reduce the overall theoretical efficiency of the model. Currently, we lack a definitive way to enforce diversity among the heads or prune redundant ones \textit{a priori}.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{\input{chapters/09-attention-transformers/tikz/multi-head-attention.tex}}
+    \caption{Multi-head attention. The input $\mat{X}$ is projected by $h$ independent sets of weight matrices $\mat{W}_i^Q, \mat{W}_i^K, \mat{W}_i^V$, producing one attention output $\mat{Z}_i$ per head. The heads are concatenated and projected by $\mat{W}^O$ to obtain the final output $\mat{Z}$.}
+\end{figure}
+
+\subsubsection{Layer Normalization and Residuals}
+Between each sub-layer (e.g., around self-attention and feed-forward networks), the Transformer employs a \textbf{residual connection} followed by \textbf{layer normalization}.
+The residual connection allows the model to bypass transformations and learn identity mappings if necessary, which severely mitigates the vanishing gradient problem in deep networks.
+Layer normalization stabilizes the learning process by normalizing the inputs across the features, ensuring a better gradient flow and faster convergence.
+
+\subsubsection{Decoder-Specific Attention Mechanisms}
+While the decoder shares many architectural similarities with the encoder, it introduces two distinct attention variations to support autoregressive generation:
+
+\paragraph{Masked Self-Attention}
+In the decoder's self-attention layer, a \textbf{masking mechanism} is applied. To preserve the causal, autoregressive nature of sequence generation, the model is prevented from "looking ahead." The mask ensures that the prediction for token $i$ can only depend on known outputs at positions less than $i$, blinding the decoder to future tokens during parallelized training.
+
+\paragraph{Encoder-Decoder Attention}
+Following the masked self-attention layer, the decoder features an \textbf{encoder-decoder attention} mechanism. Here, the \textbf{Queries} come from the previous decoder layer, while the \textbf{Keys} and \textbf{Values} come directly from the output of the encoder. This allows every position in the decoder to attend over all positions in the input sequence, effectively bridging the gap between the source material and the generated output.
+
+\subsection{Language Pretraining}
+Similarly to what we have seen in the CNN section, the Transformer architecture could be trained for tasks in Natural Language Processing (NLP).
+This started a new era in NLP, where large-scale unsupervised pretraining on massive text corpora became the standard approach for building state-of-the-art models.
+These pretrained models could then be fine-tuned on specific downstream tasks, with some supervised data, achieving remarkable performance across a wide range of NLP benchmarks.
+
+Some of the most notable Transformer-based pretrained models include:
+\begin{itemize}
+    \item \textbf{BERT (Bidirectional Encoder Representations from Transformers):} an encoder-only model that captures bidirectional context, excelling in tasks like question answering and sentiment analysis.
+    \item \textbf{GPT (Generative Pre-trained Transformer):} a decoder-only model that generates coherent and contextually relevant text, widely used for text generation and completion tasks.
+\end{itemize}
+
+\subsection{Vision Transformers}
+Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{Vision Transformers (ViTs)}.
+This transformation arrived only after the success of Transformers in NLP, since one of the challenges in applying Transformers to vision tasks was about how to represent images as sequences of tokens.
+
+\subsection{Vision Transformers}
+
+Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{Vision Transformers (ViTs)}.
+Vision Transformers emerged after the success of Transformers in NLP, since one of the main challenges in applying Transformers to computer vision was how to represent images as sequences of tokens.
+
+\paragraph{ViTs}
+
+In Vision Transformers, an image is divided into a grid of non-overlapping patches. These patches are flattened and linearly projected into embedding vectors, which serve as the input tokens of the Transformer.
+Positional embeddings are added to encode the spatial arrangement of the patches, enabling the model to capture their relative positions within the image.
+
+For image classification, a learnable \texttt{[CLS]} token is prepended to the sequence before it is processed by a standard Transformer encoder, which produces contextualized representations for all input tokens.
+It is randomly initialized and trained to aggregate information from the entire sequence, effectively serving as a summary representation of the input image.
+The final representation of the \texttt{[CLS]} token is then passed through an MLP head to produce the classification output.
+
+Results from Vision Transformers have shown that they can achieve competitive performance with convolutional neural networks, especially when trained on larger datasets.
+
+\paragraph{Data-efficient Image Transformer}
+
+The \textbf{Data-efficient Image Transformer (DeiT)} is a variant of the Vision Transformer designed to improve data efficiency during training.
+DeiT introduces a learnable \textbf{distillation token}, which is prepended to the input sequence and trained to match the predictions of a pretrained teacher model, typically a convolutional neural network (CNN).
+This knowledge distillation strategy enables the Vision Transformer to learn more effectively from limited training data, achieving competitive performance without requiring extremely large training datasets.
+
+\paragraph{Swin Transformer}
+Standard ViT architectures had a few limitations, such as:
+\begin{itemize}
+    \item \textbf{Lack of Hierarchical Structure:} ViTs process the entire image as a flat sequence of patches, 
+    which can limit their ability to capture multi-scale features and hierarchical representations.
+    \item \textbf{Quadratic Complexity:} The global self-attention mechanism in ViTs has a quadratic complexity with respect to the number of patches, 
+    making it computationally expensive for high-resolution images.
+    \item \textbf{Classification Only:} ViTs were primarily designed for image classification tasks, 
+    and adapting them to other vision tasks (e.g., object detection, segmentation) required additional modifications.
+\end{itemize}
+
+Swin Transformers address these limitations by introducing a hierarchical architecture that processes images at multiple scales.
+The input image is initially divided into non-overlapping patches, while subsequent stages progressively merge neighboring patches to reduce the spatial resolution and increase the feature dimension.
+Within each stage, self-attention is computed over non-overlapping local windows.
+To enable information exchange across neighboring windows, the window partitioning is shifted between consecutive Transformer blocks, 
+allowing cross-window connections while maintaining computational efficiency.
+
+This hierarchical architecture makes Swin Transformers suitable as a general-purpose backbone for a wide range of vision tasks, including image classification, object detection, and semantic segmentation.
