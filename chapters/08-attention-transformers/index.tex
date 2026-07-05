@@ -177,6 +177,46 @@ Some of the most notable Transformer-based pretrained models include:
 \end{itemize}
 
 \subsection{Vision Transformers}
-\begin{comment}
-    #TODO!
-\end{comment}
+Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{Vision Transformers (ViTs)}.
+This transformation arrived only after the success of Transformers in NLP, since one of the challenges in applying Transformers to vision tasks was about how to represent images as sequences of tokens.
+
+\subsection{Vision Transformers}
+
+Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{Vision Transformers (ViTs)}.
+Vision Transformers emerged after the success of Transformers in NLP, since one of the main challenges in applying Transformers to computer vision was how to represent images as sequences of tokens.
+
+\paragraph{ViTs}
+
+In Vision Transformers, an image is divided into a grid of non-overlapping patches. These patches are flattened and linearly projected into embedding vectors, which serve as the input tokens of the Transformer.
+Positional embeddings are added to encode the spatial arrangement of the patches, enabling the model to capture their relative positions within the image.
+
+For image classification, a learnable \texttt{[CLS]} token is prepended to the sequence before it is processed by a standard Transformer encoder, which produces contextualized representations for all input tokens.
+It is randomly initialized and trained to aggregate information from the entire sequence, effectively serving as a summary representation of the input image.
+The final representation of the \texttt{[CLS]} token is then passed through an MLP head to produce the classification output.
+
+Results from Vision Transformers have shown that they can achieve competitive performance with convolutional neural networks, especially when trained on larger datasets.
+
+\paragraph{Data-efficient Image Transformer}
+
+The \textbf{Data-efficient Image Transformer (DeiT)} is a variant of the Vision Transformer designed to improve data efficiency during training.
+DeiT introduces a learnable \textbf{distillation token}, which is prepended to the input sequence and trained to match the predictions of a pretrained teacher model, typically a convolutional neural network (CNN).
+This knowledge distillation strategy enables the Vision Transformer to learn more effectively from limited training data, achieving competitive performance without requiring extremely large training datasets.
+
+\paragraph{Swin Transformer}
+Standard ViT architectures had a few limitations, such as:
+\begin{itemize}
+    \item \textbf{Lack of Hierarchical Structure:} ViTs process the entire image as a flat sequence of patches, 
+    which can limit their ability to capture multi-scale features and hierarchical representations.
+    \item \textbf{Quadratic Complexity:} The global self-attention mechanism in ViTs has a quadratic complexity with respect to the number of patches, 
+    making it computationally expensive for high-resolution images.
+    \item \textbf{Classification Only:} ViTs were primarily designed for image classification tasks, 
+    and adapting them to other vision tasks (e.g., object detection, segmentation) required additional modifications.
+\end{itemize}
+
+Swin Transformers address these limitations by introducing a hierarchical architecture that processes images at multiple scales.
+The input image is initially divided into non-overlapping patches, while subsequent stages progressively merge neighboring patches to reduce the spatial resolution and increase the feature dimension.
+Within each stage, self-attention is computed over non-overlapping local windows.
+To enable information exchange across neighboring windows, the window partitioning is shifted between consecutive Transformer blocks, 
+allowing cross-window connections while maintaining computational efficiency.
+
+This hierarchical architecture makes Swin Transformers suitable as a general-purpose backbone for a wide range of vision tasks, including image classification, object detection, and semantic segmentation.
