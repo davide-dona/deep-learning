@@ -25,7 +25,7 @@ Convolutional Neural Networks basically replace general matrix multiplications w
 Even though CNNs are typically used for processing 2D images, it's important to remember that the convolution operation can be applied to any type of data, including 1D sequences (e.g., time series, text)
 \begin{figure}[H]
     \centering
-    \input{chapters/04-cnn/tikz/1D-convolution.tex}
+    \input{chapters/06-cnn/tikz/1D-convolution.tex}
     \caption{Example of a 1D convolution operation.}
     \label{fig:1D-convolution}
 \end{figure}
@@ -43,7 +43,7 @@ where $ * $ denotes the convolution operation.
 
 \begin{figure}[H]
     \centering
-    \input{chapters/04-cnn/tikz/2D-convolution.tex}
+    \input{chapters/06-cnn/tikz/2D-convolution.tex}
     \caption{Example of a 2D convolution operation.}
     \label{fig:2D-convolution}
 \end{figure}
@@ -96,7 +96,7 @@ Proposed in 1998, LeNet is one of the earliest CNN architectures, originally des
 
 \begin{figure}[H]
     \centering
-    \input{chapters/04-cnn/tikz/LeNet.tex}
+    \input{chapters/06-cnn/tikz/LeNet.tex}
     \caption{LeNet architecture.}
     \label{fig:LeNet}
 \end{figure}
@@ -108,7 +108,7 @@ Introduced during the 2012 ImageNet Large Scale Visual Recognition Challenge (IL
 
 \begin{figure}[H]
     \centering
-    \input{chapters/04-cnn/tikz/AlexNet.tex}
+    \input{chapters/06-cnn/tikz/AlexNet.tex}
     \caption{AlexNet architecture.}
     \label{fig:AlexNet}
 \end{figure}
@@ -133,7 +133,7 @@ This allowed to gain insights into the inner workings of CNNs, allowing for an e
 This approach involved deconvolutional networks, that allowed to invert the operations of a CNN, visualizing the activations of the different layers and understanding which features were being captured by the network.
 \begin{figure}[H]
     \centering
-    \input{chapters/04-cnn/tikz/deconvolutionalNN.tex}
+    \input{chapters/06-cnn/tikz/deconvolutionalNN.tex}
     \caption{Zeiler and Fergus architecture for visualizing learned features.}
     \label{fig:deconvolutionalNN}
 \end{figure}
@@ -191,7 +191,7 @@ The key innovations of GoogLeNet include:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{chapters/04-cnn/media/GoogLeNet.png}
+    \includegraphics[width=\textwidth]{chapters/06-cnn/media/GoogLeNet.png}
     \caption{GoogLeNet architecture.}
     \hfill
 \end{figure}
@@ -225,7 +225,7 @@ This parallel design offers two main advantages:
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=\textwidth]{chapters/04-cnn/media/inceptionModule.png}
+    \includegraphics[width=\textwidth]{chapters/06-cnn/media/inceptionModule.png}
     \caption{Inception Module.}
 \end{figure}
 
@@ -245,7 +245,7 @@ This simple yet profound architectural innovation provided several critical bene
 
 \begin{figure}[H]
     \centering
-    \input{chapters/04-cnn/tikz/residualBlock.tex}
+    \input{chapters/06-cnn/tikz/residualBlock.tex}
     \caption{A residual block: the identity skip connection adds the block's input $\vct{x}$ back to the transformed output $\mathcal{F}(\vct{x})$.}
     \label{fig:residual-block}
 \end{figure}

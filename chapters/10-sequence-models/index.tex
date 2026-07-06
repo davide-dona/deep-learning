@@ -40,7 +40,7 @@ Show and Tell uses an architecture combining two main components:
 
 \begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{\input{chapters/08-sequence-models/tikz/show-and-tell.tex}}
+    \resizebox{\textwidth}{!}{\input{chapters/10-sequence-models/tikz/show-and-tell.tex}}
     \caption{Show and Tell: a CNN encodes the image into a feature vector that initializes the RNN decoder, which generates the caption word by word.}
 \end{figure}
 At the first time step, the RNN receives as input the \textbf{feature vector} from the encoder and a special start token.
@@ -93,7 +93,7 @@ By aligning local visual features with the exact word being generated at each ti
 
 \begin{figure}[H]
     \centering
-    \input{chapters/08-sequence-models/tikz/show-attend-tell.tex}
+    \input{chapters/10-sequence-models/tikz/show-attend-tell.tex}
     \caption{Show, Attend and Tell: at each step the decoder produces an attention map $\alpha_t$ over the CNN feature map, forming a context vector $\vct{z}_t$ that, together with the previous word, drives the prediction $p(y_t)$.}
 \end{figure}
 
@@ -180,7 +180,7 @@ The dynamic context vector $\vct{c}_t$ is then constructed as the weighted sum o
 
 \begin{figure}[H]
     \centering
-    \input{chapters/08-sequence-models/tikz/rnn-attention.tex}
+    \input{chapters/10-sequence-models/tikz/rnn-attention.tex}
     \caption{RNN with attention: a bidirectional encoder produces hidden states $\vct{h}_j$; alignment weights $\alpha_{t,j}$ combine them into the context vector $\vct{c}_t$ that feeds the decoder state $\vct{s}_t$ generating $y_t$.}
 \end{figure}
 
@@ -200,7 +200,7 @@ The context vector is then computed only from the encoder states inside a fixed-
 
 \begin{figure}[H]
     \centering
-    \input{chapters/08-sequence-models/tikz/local-attention.tex}
+    \input{chapters/10-sequence-models/tikz/local-attention.tex}
     \caption{Local attention with predictive alignment. The decoder state $\vct{s}_t$ predicts the aligned position $p_t$, which centers a fixed window over the encoder states $\vct{h}_i$. The context vector $\vct{c}_t$ is formed from the window only and combined with $\vct{s}_t$ into the attentional hidden state $\tilde{\vct{s}}_t$ used to emit $y_t$.}
 \end{figure}
 
@@ -225,6 +225,6 @@ This allows the model to learn where to look through gradient descent, recoverin
 
 \begin{figure}[H]
     \centering
-    \input{chapters/08-sequence-models/tikz/local-vs-global.tex}
+    \input{chapters/10-sequence-models/tikz/local-vs-global.tex}
     \caption{Local vs global attention. Global attention scores all encoder states $\vct{h}_i$ at every step, whereas local attention restricts the context to a window centered on the predicted position $p_t$.}
 \end{figure}

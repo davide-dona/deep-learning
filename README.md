@@ -17,7 +17,10 @@ A detailed collection of LaTeX-based lecture notes for the Deep Learning course 
 | Section | Description |
 |---|---|
 | Machine Learning Recap | Learning paradigms, generalization, over/underfitting |
-| Feedforward Neural Networks | Perceptron lineage, cost/output/activation functions, architecture, optimization, backpropagation, regularization |
+| Feedforward Neural Networks | Perceptron lineage, cost/output/activation functions, architecture |
+| Optimization | Gradient descent variants, momentum, adaptive learning rates, batch normalization |
+| Backpropagation | Chain rule, single neuron and general case derivations |
+| Regularization | Model capacity, weight decay, dropout, and other overfitting countermeasures |
 | Convolutional Neural Networks | Convolution, classic architectures (LeNet, AlexNet, GoogLeNet) |
 | Expanding CNNs | Beyond classification |
 | Recurrent Neural Networks | Vanilla RNN, LSTM, GRU, sequence configurations |

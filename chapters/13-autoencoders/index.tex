@@ -10,7 +10,7 @@ This lower-dimensional representation is learned by training the network to map 
 
 \begin{figure}[H]
     \centering
-    \resizebox{0.6\textwidth}{!}{\input{chapters/11-autoencoders/tikz/autoencoder-architecture.tex}}
+    \resizebox{0.6\textwidth}{!}{\input{chapters/13-autoencoders/tikz/autoencoder-architecture.tex}}
     \caption{Autoencoder architecture: the encoder compresses the input $x$ into a latent code $z$, and the decoder reconstructs $\hat{x}$ from it.}
     \label{fig:autoencoder-architecture}
 \end{figure}
@@ -140,7 +140,7 @@ Since we are modeling the probabilistic generation of data, both networks are th
 
 \begin{figure}[H]
     \centering
-    \resizebox{0.5\textwidth}{!}{\input{chapters/11-autoencoders/tikz/vae-architecture.tex}}
+    \resizebox{0.5\textwidth}{!}{\input{chapters/13-autoencoders/tikz/vae-architecture.tex}}
     \caption{VAE architecture: the encoder computes the approximate posterior $q_\phi(z \mid x)$, from which a latent code $z$ is sampled, and the decoder computes the likelihood $p_\theta(x \mid z)$, from which the reconstruction $\hat{x}$ is obtained. The prior $p(z)$ regularizes the latent space towards a standard Gaussian.}
     \label{fig:vae-architecture}
 \end{figure}

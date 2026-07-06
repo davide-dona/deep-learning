@@ -1,10 +1,14 @@
 \subsection{Activation Functions}
-Hidden units usually use a different activation function than the output units as it is independent of the type of problem we are trying to solve.
+Unlike output layers, which are strictly dictated by the specific problem being solved, hidden units generally employ task-agnostic activation functions.
 
-What's important to note is that in the choice of activation function it is much more important to consider the derivative 
-of the function rather than the function itself, as it is what will be used during the backpropagation process to update the weights of the network.
+When selecting an activation function, its derivative is often more critical than the function itself. 
+Because backpropagation relies entirely on these gradients to update the network's weights, a well-behaved derivative is essential for efficient learning.
 
-\paragraph{Sigmoid}
+Another highly desirable property is a zero-centered output. 
+Zero-centering ensures that gradients do not constantly share the same sign, 
+which allows for more balanced weight updates and significantly accelerates convergence during training.
+
+\subsubsection{Sigmoid}
 Maps the input to a value between 0 and 1, which can be interpreted as a probability. It is defined as:
 \begin{figure}[H]
     \centering
@@ -13,63 +17,90 @@ Maps the input to a value between 0 and 1, which can be interpreted as a probabi
 The function is smooth anddifferentiable everywhere, which is important for gradient-based optimization methods.
 However, its derivative \textbf{saturate} (approaches 0) across most of its domain, which lead to the problem of vanishing gradients during training.
 
-\paragraph{Hyperbolic Tangent (tanh)}
+As of today, the sigmoid function is rarely used in hidden layers, but it is still widely as building block in some architectures,
+such as in the gates of LSTM and GRU cells, or to compute the predicted position in local attention mechanisms.
+
+\subsubsection{Hyperbolic Tangent (tanh)}
 Similar to sigmoid but maps the input to a value between -1 and 1. It is defined as:
 \begin{figure}[H]
     \centering
     \input{chapters/02-ffnn/tikz/activation_functions/hyperbolic_tangent.tex}
 \end{figure}
-This is better than the sigmoid function as the outputs are zero-centered, which can help with convergence during training,
-but it still suffers from the saturation problem for large positive and negative values.
+This is better than the sigmoid function as the outputs are zero-centered, helping with convergence during training.
+It still suffers from the vanishing gradient problem as for large positive or negative inputs the derivative still approaches 0.
 
-\paragraph{ReLU}
+\subsubsection{ReLU}
 The most commonly used activation function in hidden layers. It is defined as:
 \begin{figure}[H]
     \centering
     \input{chapters/02-ffnn/tikz/activation_functions/relu.tex}
 \end{figure}
+
 Born to solve the saturation problem of sigmoid and tanh, the ReLU function is in fact non-saturating for positive values (derivative is 1) which allows for faster convergence during training.
 It is not differentiable at 0, but in practice this is not a problem as the derivative can be defined as 0 or 1 at that point, with no significant impact on the training process.
 
 However, this function has still a few negative aspects:
 \begin{itemize}
     \item \textbf{Non zero centered output}: similarly to the sigmoid, also the output of the ReLU is non-zero centered;
+    
     \item \textbf{Dying ReLU}: If a neuron's inputs are predominantly negative, it outputs zero and produces a zero gradient. 
     Consequently, its weights cannot be updated during backpropagation, leaving the neuron permanently inactive.
 \end{itemize}
+
 Different solutions have been proposed to solve the dying ReLU problem, such as:
 \begin{itemize}
     \item \textbf{Stochastic Gradient Descent (SGD)}: the randomness introduced by SGD can help to prevent neurons from dying, 
     as it allows for some updates to the weights even for neurons that are currently inactive.
+    
     \item \textbf{Lower Learning Rates}: using too high learning rates can cause the weights to update too aggressively, possibly leading to weights in the highly negative range;
+    
     \item \textbf{Generalized ReLU}: A family of variants of the ReLU function that introduce a non-zero slope for negative inputs, allowing for a small gradient even when the input is negative.
+    
     Formally, the Generalized ReLU can be expressed as:
     \begin{equation*}
-    \grelu(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
+        \grelu(x) = \begin{cases} x & x \geq 0 \\ \alpha x & x < 0 \end{cases}
     \end{equation*}
     where $\alpha$ is a hyperparameter that controls the slope for negative inputs. Different choices of $\alpha$ lead to different variants of the ReLU function, such as:
+    
     \begin{itemize}
         \item \textbf{Leaky ReLU}: a variant of ReLU that allows a small, non-zero gradient for negative values. It is defined as:
         \begin{figure}[H]
             \centering
             \input{chapters/02-ffnn/tikz/activation_functions/leaky_relu.tex}
         \end{figure}
+        
         \item \textbf{Parametric ReLU (PReLU)}: where $\alpha$ is a learnable parameter that is updated during training;
+        
         \item \textbf{Randomized ReLU (RReLU)}: where $\alpha$ is randomly sampled from a uniform distribution during training, and fixed to a value during testing;
+        
         \item \textbf{Exponential Linear Unit (ELU)}: where the function is defined as:
         \begin{equation*}
             \eluop(x) = \begin{cases} x & x \geq 0 \\ \alpha (e^x - 1) & x < 0 \end{cases}
         \end{equation*}
+        
         This has all the benefits of ReLU while avoiding the dying ReLU problem, but requires more computational resources due to the exponential function.
     \end{itemize}
+
 \end{itemize}
-All this proposed solutions have the common property of being monotonic for positive values. Recently,
-non-monotonic activation functions have been proposed, such as:
+All this proposed solutions have the common property of being monotonic for positive values.
+
+\subsubsection{More Recent Activation Functions}
+Recent research has focused on developing activation functions that are non-monotonic, which can potentially lead to better performance in certain scenarios.
+Some of the most notable non-monotonic activation functions include:
 \begin{itemize}
     \item \textbf{Swish}: defined as $f(x) = x \cdot \sigma(x)$, where $\sigma(x)$ is the sigmoid function.
-    The resulting function is non-monotonic and smooth everywhere, which has shown to perform better than ReLU in some cases, but 
+    The resulting function is non-monotonic and smooth everywhere, which has shown to perform better than ReLU in some cases, but
     it is more computationally expensive due to the sigmoid function.
-    \item \textbf{GelU}: defined as $f(x) = x \cdot \Phi(x)$, where $\Phi(x)$ is an approximation of the cumulative 
+    \begin{figure}[H]
+        \centering
+        \input{chapters/02-ffnn/tikz/activation_functions/swish.tex}
+    \end{figure}
+
+    \item \textbf{GelU}: defined as $f(x) = x \cdot \Phi(x)$, where $\Phi(x)$ is an approximation of the cumulative
     distribution function of the standard normal distribution.
     This function integrates the properties of ReLU and regularizations techniques, such as dropout and zoneout.
+    \begin{figure}[H]
+        \centering
+        \input{chapters/02-ffnn/tikz/activation_functions/gelu.tex}
+    \end{figure}
 \end{itemize}

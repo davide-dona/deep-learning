@@ -26,7 +26,7 @@ The primary types include:
     This is the case of document classification, where the input is a sequence of words and the output is a single class label.
     \begin{figure}[H]
         \centering
-        \input{chapters/07-rnn/tikz/Many-to-One.tex}
+        \input{chapters/09-rnn/tikz/Many-to-One.tex}
         \caption{Many-to-One RNN architecture.}
     \end{figure}
 
@@ -34,7 +34,7 @@ The primary types include:
     This is the case of image captioning, where the input is an image and the output is a sequence of words that describe the image.
     \begin{figure}[H]
         \centering
-        \input{chapters/07-rnn/tikz/One-to-Many.tex}
+        \input{chapters/09-rnn/tikz/One-to-Many.tex}
         \caption{One-to-Many RNN architecture.}
     \end{figure}
     \item \textbf{Many-to-Many}: This type of RNN takes a sequence of inputs and produces a sequence of outputs.
@@ -49,13 +49,13 @@ The primary types include:
         \centering
         \begin{minipage}{0.45\textwidth}
             \centering
-            \input{chapters/07-rnn/tikz/Many-to-Many-Synchronized.tex}
+            \input{chapters/09-rnn/tikz/Many-to-Many-Synchronized.tex}
             \caption{Many-to-Many Synchronized RNN architecture.}
         \end{minipage}
         \hfill
         \begin{minipage}{0.45\textwidth}
             \centering
-            \input{chapters/07-rnn/tikz/Many-to-Many-E-D.tex}
+            \input{chapters/09-rnn/tikz/Many-to-Many-E-D.tex}
             \caption{Many-to-Many Encoder-Decoder RNN architecture.}
         \end{minipage}
     \end{figure}
@@ -65,7 +65,7 @@ The primary types include:
 The simplest form of RNN is the \textbf{Vanilla RNN}, which consists of a single hidden layer that is recurrently connected to itself.
 \begin{figure}[H]
     \centering
-    \input{chapters/07-rnn/tikz/Vanilla-RNN.tex}
+    \input{chapters/09-rnn/tikz/Vanilla-RNN.tex}
     \caption{Vanilla RNN architecture.}
 \end{figure}
 
@@ -93,7 +93,7 @@ The RNN can also be unrolled in time, which means that we can represent the RNN 
 \begin{figure}[H]
     \centering
     \scalebox{0.8}{
-        \input{chapters/07-rnn/tikz/Unrolled.tex}
+        \input{chapters/09-rnn/tikz/Unrolled.tex}
     }
     \caption{Unrolled RNN architecture.}
 \end{figure}
@@ -195,7 +195,7 @@ These gates are learned parameters that determine the flow of information.
 \begin{figure}[H]
     \centering
     \resizebox{.8\textwidth}{!}{
-        \input{chapters/07-rnn/tikz/LSTM.tex}
+        \input{chapters/09-rnn/tikz/LSTM.tex}
     }
     \caption{Internal gated architecture of an LSTM cell.}
 \end{figure}
@@ -268,7 +268,7 @@ In a GRU cell, we have only two gates: the \textbf{update gate} ($\vct{z}_t$) an
 \begin{figure}[H]
     \centering
     \resizebox{.8\textwidth}{!}{
-        \input{chapters/07-rnn/tikz/GRU.tex}
+        \input{chapters/09-rnn/tikz/GRU.tex}
     }
     \caption{Internal gated architecture of a GRU cell.}
 \end{figure}

@@ -1,0 +1,31 @@
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \[
+    \swish(x) = x \cdot \sigma(x)
+    \]
+\end{minipage}
+\hfill
+\begin{minipage}{0.45\textwidth}
+    \centering
+    \begin{tikzpicture}[scale=1]
+        \begin{axis}[
+            xlabel=$x$,
+            ylabel=$\swish(x)$,
+            grid=major,
+            axis lines=middle,
+            xmin=-6, xmax=6,
+            ymin=-1, ymax=6,
+            samples=200,
+            width=6cm,
+            height=5cm,
+            legend pos=north west,
+            legend style={font=\tiny, inner sep=1pt}
+        ]
+            \addplot[plotfunc, thick, domain=-6:6] {x/(1+exp(-x))};
+            \addlegendentry{$\swish(x)$}
+            \addplot[plotderiv, dashed, thick, domain=-6:6]
+                {(1/(1+exp(-x))) + x*(1/(1+exp(-x)))*(1-(1/(1+exp(-x))))};
+            \addlegendentry{$\swish'(x)$}
+        \end{axis}
+    \end{tikzpicture}
+\end{minipage}

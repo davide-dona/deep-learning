@@ -1,23 +1,36 @@
 \section{Regularization}
-Regularization is a set of techniques used to prevent overfitting in machine learning models, including FFNNs.
+Regularization techniques are methods used to reduce the generalization error of a model, but not necessarily its training error.
+
+Regularization encompasses a variety of strategies designed to mitigate overfitting in machine learning models. 
+This section explores the most common approaches applied to Feedforward Neural Networks (FFNNs).
+
+While our primary focus here is on FFNNs, it is worth noting that many of these core methods easily generalize to other architectures, 
+such as Convolutional Neural Networks (CNNs), which also rely on their own domain-specific regularization mechanisms.
 
 \subsection{Model Capacity}
 Model capacity refers to the ability of a model to fit a wide variety of functions. We have that:
+
 \begin{itemize}
     \item \textbf{Low capacity models} may underfit the data, as they are not able to capture the underlying structure of the data;
+    
     \item \textbf{High capacity models} may overfit the data, by memorizing properties of the training data that are not generalizable to unseen data.
 \end{itemize}
-We can control the capacity of a model by adjusting the hypotheses space, which is the set of all possible functions that
-the model can represent.
 
+We can control the capacity of a model by adjusting the hypotheses space, which is the set of all possible functions that the model can represent.
 To deal with overfitting, we need to find a good balance between the capacity of the model and its ability to generalize to unseen data.
 
 \subsection{Simple approach}
-In addition to controlling the model capacity, many techniques have been proposed to control overfitting, some of which where already known in the context of machine learning, such as:
+In addition to controlling the model capacity, many techniques have been proposed to control overfitting, 
+some of which where already known in the context of machine learning, such as:
+
 \begin{itemize}
-    \item \textbf{Collecting more data}: acquiring more training data can help to reduce overfitting, as it allows to better represent the underlying distribution of the data.
-    However, this is not always a valiable option, as it might be expensive to acquire more data;
-    \item \textbf{Ensemble methods}: combining the predictions of multiple models can help to reduce overfitting, as it allows to average out the errors of individual models;
+    \item \textbf{Collecting more data}: acquiring more training data can help to reduce overfitting. 
+    It allows to better represent the underlying distribution of the data.
+    However, this is not always a valiable option, as it might be too expensive or time-consuming to collect more data;
+    
+    \item \textbf{Ensemble methods}: combining the predictions of multiple models can help to reduce overfitting.
+    It allows to average out the errors of individual models, leading to better generalization performance.
+    However, this approach is computationally and time-consuming, as it requires training multiple models independently.
 \end{itemize}
 
 \subsection{Regularization Methods}
@@ -28,11 +41,16 @@ Commonly, many regularization methods can be combined to achieve better performa
 In this section, we will discuss some of the most common regularization methods used in the context of FFNNs.
 
 \subsubsection{Parameter Norm Penalties}
-One of the most common regularization techniques is to add a penalty term to the loss function that encourages the model to have smaller weights.
+
+One of the most common regularization techniques is to add a penalty term to the loss function that is propotional to the norm of the model parameters.
+This encourages the model to have smaller weights, which has been shown to reduce overfitting.
+
 The general formulation of this regularization technique can be expressed as follows:
+
 \begin{equation*}
     \loss_{\text{reg}}(\vct{\theta}) = \loss(\vct{\theta}) + \lambda \Omega(\vct{\theta})
 \end{equation*}
+
 where $\loss(\vct{\theta})$ is the original loss function, $\Omega(\vct{\theta})$ is the regularization term, and $\lambda$
 is a hyperparameter that controls the strength of the regularization.
 
@@ -43,6 +61,7 @@ The most common choices for the regularization term $\Omega(\vct{\theta})$ are:
     \begin{equation*}
         \Omega(\vct{\theta}) = \frac{1}{2} \sum_{i} ||\theta_i^2||
     \end{equation*}
+
     \item \textbf{L1 Regularization}: also known as Lasso Regression, it adds a penalty term proportional to the absolute value of the weights.
     Differently from L2 regularization, L1 regularization favors the sparsity of the weights, setting the weights of less important features to zero. 
     The regularization term can be expressed as follows:
@@ -50,28 +69,22 @@ The most common choices for the regularization term $\Omega(\vct{\theta})$ are:
         \Omega(\vct{\theta}) = \sum_{i} ||\theta_i||
     \end{equation*}
 \end{itemize}
-\begin{comment}
-    #TODO: add visualiztion of l1 and l2
-\end{comment}
 
 \subsubsection{Data Augmentation}
-Data augmentation is a technique that involves creating new synthetic training examples by applying transformations to the original training data.
-This is based on the idea that generated images help the model generalize better to diverse data by exposing it to a wider variety of examples during training.
+Data augmentation is a technique used to artificially expand a dataset by applying various transformations to the original samples. 
+By exposing the model to a wider variety of inputs, this approach encourages better generalization.
+This method is particularly effective for visual data, where operations like rotation, scaling, or flipping can be applied without altering the underlying identity of the object (invariance). 
 
-It is important to note that this method is primarily applicable to data types such as images, where transformations can 
-be applied without changing the identity of the object (invariance). 
-For example, in image classification, we can apply transformations like rotation, scaling, and flipping, which do not change the image's class.
+However, transformations must be carefully tailored to the specific task to avoid corrupting the labels. 
+For instance, in the MNIST digit classification dataset, rotating a "6" by 180 degrees transforms it into a "9," inadvertently changing its class.
 
-However, these transformations must be chosen carefully based on the task. For example, in the MNIST digit classification task, we cannot apply a 180 degree rotation to 
-images of the classes "6" and "9," as it would change the class of the image.
-
-Furthermore, data augmentation does not always guarantee better performance. While it introduces new samples, 
-these examples may not add sufficient functional diversity to the training set since they are 
-merely variations of existing data rather than entirely new information.
+Furthermore, data augmentation does not guarantee improved performance. 
+Because the synthetic examples are merely variations of existing data rather than genuinely novel information, 
+they may not always introduce sufficient functional diversity to the model.
 
 \subsubsection{Noise Injection}
-Noise injection is a regularization technique that involves adding random small perturbations to different 
-levels of the network during training.
+Noise injection is a regularization technique that involves adding random noise (variance scaled wrt the model weights) 
+to the inputs, outputs, or weights of the model during training.
 \begin{itemize}
     \item \textbf{Input Noise}: Adding Gaussian noise to each input example during training can achieve effects similar to $L_2$ regularization. 
     Each example can be represented as:
@@ -103,7 +116,9 @@ performance on the validation set starts to degrade.
 This procedure can be summarized as follows:
 \begin{enumerate}
     \item Start the training process with small weights;
+    
     \item Every time the error on the validation set decreases, save a copy of the model parameters;
+    
     \item When the training process is stopped, restore the model parameters to the values that achieved the best performance on the validation set.
 \end{enumerate}
 
@@ -111,7 +126,7 @@ This procedure can be summarized as follows:
 Multi-task learning is a regularization technique that involves training a model on multiple related tasks simultaneously.
 \begin{figure}[H]
     \centering
-    \input{chapters/03-regularization/tikz/multi-task-learning.tex}
+    \input{chapters/05-regularization/tikz/multi-task-learning.tex}
     \caption{Example of a multi-task learning architecture. 
     The model is trained on multiple related tasks simultaneously, sharing some intermediate representations.}
     \label{fig:multi-task-learning}
@@ -127,16 +142,12 @@ By sharing the intermediate representations, the model has 2 advantages:
 \end{itemize}
 
 \subsubsection{Parameter Sharing}
-Parameter tying is a regularization technique that involves sharing parameters across different parts of the model.
+Parameter sharing (or parameter tying) is a regularization strategy that reduces model complexity by forcing different parts of the network to use the same weights. 
+This can be achieved softly, by adding a penalty to the loss function that encourages weight similarity, or explicitly, by tying the parameters together during optimization so they remain identical.
 
-In parameter tying, we can enforce certain parameters to be closer to each other, or even to be exactly the same. 
-This can be done by adding a penalty term to the loss function that encourages the parameters to be similar, or by explicitly tying the parameters together during the optimization process.
-
-In parameter sharing, we can enforce certain parameters to be exactly equal to each other.
-
-This technique can be particularly useful in cases where we have some prior knowledge about the structure of the data.
-In fact, it is at the base of \textbf{Convolutional Neural Networks} (CNNs), where the same set of weights is shared across different spatial locations in the input image, 
-allowing the model to learn translation-invariant features.
+This approach is particularly powerful when prior knowledge about the data structure suggests that certain patterns are universal. 
+The prime example is the \textbf{Convolutional Neural Network} (CNN), which applies a single, shared set of weights (a filter) across all spatial locations of an input. 
+This structural constraint dramatically reduces the parameter count and allows the model to efficiently learn translation-invariant features.
 
 
 \subsubsection{Dropout}
@@ -147,7 +158,7 @@ In deep learning, this approach would be computationally and time-consuming, as 
 multiple models by randomly dropping out a subset of the neurons during training.
 \begin{figure}[H]
     \centering
-    \input{chapters/03-regularization/tikz/dropout.tex}
+    \input{chapters/05-regularization/tikz/dropout.tex}
     \caption{Example of a dropout regularization technique.}
     \label{fig:dropout}
 \end{figure}
@@ -157,6 +168,7 @@ thus improving generalization performance.
 
 Dropout is similar to a \textit{bagging} approach, where we train multiple models on different subsets of the data and average their predictions.
 We can see each trainging iteration as training a different model. At test time, we use the full network, but we scale the weights of the neurons by the dropout probability $p$ to account for the fact that during training, each neuron was only active with probability $p$.
+
 \subsubsection{Implicit Regularization}
 Some techinques, such as Stochastic Gradient Descent (SGD), have been shown to have an implicit regularization effect on the model.
 In particular, its stochastic nature can favor flatter minima of the loss function, which are associated with better generalization performance.

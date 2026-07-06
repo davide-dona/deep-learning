@@ -55,7 +55,7 @@ The architecture of the Transformer still follows the encoder-decoder paradigm, 
 
 \begin{figure}[H]
     \centering
-    \resizebox{0.85\textwidth}{!}{\input{chapters/09-attention-transformers/tikz/transformer-architecture.tex}}
+    \resizebox{0.85\textwidth}{!}{\input{chapters/11-attention-transformers/tikz/transformer-architecture.tex}}
     \caption{The Transformer architecture. A stack of $N$ encoders maps the input sequence into contextualized representations, which feed the encoder-decoder attention of a stack of $N$ decoders. The decoder generates the output sequence one token at a time.}
 \end{figure}
 
@@ -147,7 +147,7 @@ Although demonstrated to be highly effective, multi-head attention does increase
 
 \begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{\input{chapters/09-attention-transformers/tikz/multi-head-attention.tex}}
+    \resizebox{\textwidth}{!}{\input{chapters/11-attention-transformers/tikz/multi-head-attention.tex}}
     \caption{Multi-head attention. The input $\mat{X}$ is projected by $h$ independent sets of weight matrices $\mat{W}_i^Q, \mat{W}_i^K, \mat{W}_i^V$, producing one attention output $\mat{Z}_i$ per head. The heads are concatenated and projected by $\mat{W}^O$ to obtain the final output $\mat{Z}$.}
 \end{figure}
 

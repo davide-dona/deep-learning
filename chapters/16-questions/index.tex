@@ -2,7 +2,40 @@
 
 \subsection{FFNN}
 \paragraph{Activation Functions - Pros and Cons}
+Activation function are problem independent. When deciding which activation function to use, it is important to consider their derivatives and their zero-centeredness. 
+The most common activation functions are:
+\begin{itemize}
+    \item \textbf{Sigmoid:} Maps the inputs into a value between 0 and 1.
+    \[ \sigma(x) = \frac{1}{1 + e^{-x}} ; \sigma(x) \in [0, 1] \]
+    It is not zero-centered, and has zero gradients for large positive and negative inputs, which can lead to vanishing gradients problems.
 
+    Sigmoid still widely used whenever we need to model probabilities or a value between 0 and 1. 
+    Some examples include the gates in LSTM and GRU, and the position computation in local attention.
+
+    \item \textbf{Tanh}: Maps the inputs into a value between -1 and 1.
+    \[ tanh(x) = \frac{e^x - e^{-x}}{e^x + e^{-x}} ; tanh(x) \in [-1, 1] \]
+    It is zero-centered, but still has zero gradients for large positive and negative inputs, which can lead to vanishing gradients problems.
+
+    \item \textbf{ReLU}: Maps negative inputs to 0 and positive inputs to themselves.
+    \[ ReLU(x) = max(0, x) ; ReLU(x) \in [0, \infty) \]
+    The identity function for positive inputs allows to have non-zero gradients for positive inputs, which helps to mitigate the vanishing gradients problem.
+    However, it is not zero-centered and can lead to dead neurons (neurons that never activate) for negative inputs.
+
+    To overcome the dead neurons problem some hints are:
+    \begin{itemize}
+        \item SGD: the stochastic nature of the optimization algorithm may provide enough noise to allow the neuron to escape from the dead state.
+        \item Lower learning rate: having less aggressive updates may allow the neuron to escape from the dead state.
+        \item General ReLU: provide a small slope for negative inputs, allowing the neuron to have non-zero gradients for negative inputs.
+    \end{itemize}
+
+    \item \textbf{Swish:} Smooth and non-monotonic activation function. 
+    Differently from ReLU, it does not have a hard threshold at 0, allowing for small negative values to be propagated through the network.
+    \[ Swish(x) = x \cdot \sigma(x) \]
+    Provides non-zero gradients for negative inputs, which helps to mitigate the vanishing gradients problem.
+
+    \item \textbf{GELU:}
+\end{itemize}
+    
 \paragraph{SGD with Momentum}
 
 \paragraph{Regularization}
