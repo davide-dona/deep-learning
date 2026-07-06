@@ -30,69 +30,97 @@ As discussed previously, the expected outputs of the hidden units are not availa
 
 \subsection{Single Neuron Case}
 Let's first consider a neural network with just one neuron in each layer.
-After performing the forward pass, we can express the output of the network as follows:
+After performing the forward pass, the computation performed by layer $l$ can be expressed as follows:
+
 \begin{equation*}
-    a^{(L)} = \sigma(z^{(L)}) = \sigma(w^{(L)} a^{(L-1)} + b^{(L)})
+    z^{(l)} = w^{(l)} a^{(l-1)} + b^{(l)}
 \end{equation*}
-where $a^{(L)}$ is the output of the last layer, $\sigma$ is a non-linear activation function,
-$w^{(L)}$ and $b^{(L)}$ are respectively the weight and bias of the last layer, and $a^{(L-1)}$ is the output of the previous layer.
+
+followed by the activation function:
+\begin{equation*}
+    a^{(l)} = \sigma(z^{(l)})
+\end{equation*}
+
+where $a^{(l)}$ is the output of layer $l$, $\sigma$ is a non-linear activation function,
+$w^{(l)}$ and $b^{(l)}$ are respectively the weight and bias of layer $l$, and $a^{(l-1)}$ is the output of the previous layer.
+
+\paragraph{Output layer}
+Let's now consider the output layer $L$.
+\[
+    a^{(L)} = \sigma(z^{(L)}) = \sigma(w^{(L)} a^{(L-1)} + b^{(L)})
+\]
 
 Our goal is to understand how a small change in the parameters $w^{(l)}$ will affect the loss function $\loss$.
-When computing this, we need to consider the chain of dependencies between the parameters and the loss function:
-\begin{itemize}
-    \item How a change in $w^{(l)}$ affects the output of the layer $z^{(l)}$;
-    \item How a change in $z^{(l)}$ affects the output of the layer $a^{(l)}$;
-    \item How a change in $a^{(l)}$ affects the loss function $\loss$.
-\end{itemize}
-This is where the chain rule of calculus comes into play, allowing us to compute the gradient of the
-loss function with respect to the parameters by multiplying the gradients along the chain of dependencies.
+Since the loss function depends on the parameter through a sequence of intermidiate variables, we apply the chain rule of calculus:
+\begin{equation*}
+    w^{(l)} \longrightarrow z^{(l)} \longrightarrow a^{(l)} \longrightarrow \loss
+\end{equation*}
 
-Formally, we can express the gradient of the loss function with respect to the parameters $w^{(l)}$ as follows:
+Applying the chain rule, we can express the derivative of the loss function with respect to the parameter $w^{(l)}$ as follows:
 \begin{equation*}
     \frac{\partial \loss}{\partial w^{(l)}} = \frac{\partial z^{(l)}}{\partial w^{(l)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \loss}{\partial a^{(l)}}
 \end{equation*}
-where respectively:
+
+The three terms have a very intuitive interpretation:
 \begin{itemize}
     \item $\frac{\partial z^{(l)}}{\partial w^{(l)}}$ measures how a small change in the weight $w^{(l)}$ affects the output of the layer $z^{(l)}$;
     \item $\frac{\partial a^{(l)}}{\partial z^{(l)}}$ measures how a small change in the output of the layer $z^{(l)}$ affects the output of the activation function $a^{(l)}$;
     \item $\frac{\partial \loss}{\partial a^{(l)}}$ measures how a small change in the output of the activation function $a^{(l)}$ affects the loss function $\loss$.
 \end{itemize}
-The process can be extended to deeper layers. In those cases, we need to consider the chain of dependencies from the parameter we want to update
-to the output of the network, computing the gradients along the way using the chain rule of calculus.
+
+\paragraph{Deeper layers}
+As we move to earlier layers in the network, the chain of dependencies to the loss function grows longer. 
+Consider a weight parameter $w^{(l-1)}$ in layer $l-1$. 
+As illustrated in Figure~\ref{fig:dependency-chain}, its path to the loss $\loss$ is given by:
+\begin{equation*}
+    w^{(l-1)} \longrightarrow z^{(l-1)} \longrightarrow a^{(l-1)} \longrightarrow z^{(l)} \longrightarrow a^{(l)} \longrightarrow \loss
+\end{equation*}
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=\textwidth]{chapters/04-backpropagation/media/dependencies.pdf}
     \caption{Dependency chain for a parameter in a deep network.}
+    \label{fig:dependency-chain}
 \end{figure}
-Taking in consideration the architecture shown in the figure above, we can express the derivative of the loss function with respect to a parameter $w^{(l-1)}$ in a deeper layer as follows:
+
+Applying the chain rule, the derivative of the loss with respect to $w^{(l-1)}$ is:
 \begin{equation*}
-    \frac{\partial \loss}{\partial w^{(l-1)}} = \frac{\partial z^{(l-1)}}{\partial w^{(l-1)}} \cdot \frac{\partial a^{(l-1)}}{\partial z^{(l-1)}} \cdot \underbrace{\frac{\partial z^{(l)}}{\partial a^{(l-1)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \loss}{\partial a^{(l)}}}_{\frac{\partial \loss}{\partial a^{(l-1)}}}
+    \frac{\partial \loss}{\partial w^{(l-1)}} = \frac{\partial z^{(l-1)}}{\partial w^{(l-1)}} \cdot \frac{\partial a^{(l-1)}}{\partial z^{(l-1)}} \cdot \frac{\partial \loss}{\partial a^{(l-1)}}
 \end{equation*}
+
+We can further expand the incoming gradient term, $\frac{\partial \loss}{\partial a^{(l-1)}}$, as follows:
+\begin{equation*}
+    \frac{\partial \loss}{\partial a^{(l-1)}} = \frac{\partial z^{(l)}}{\partial a^{(l-1)}} \cdot \frac{\partial a^{(l)}}{\partial z^{(l)}} \cdot \frac{\partial \loss}{\partial a^{(l)}}
+\end{equation*}
+
+Crucially, the term $\frac{\partial \loss}{\partial a^{(l)}}$ on the right-hand side is not computed from scratch; it was already evaluated one step earlier during the backward pass for layer $l$. 
+Backpropagation exploits this by proceeding backward, from output to input, caching and reusing the gradient produced by the previous step. 
+This recursive reuse eliminates the need to redundantly retrace the ever-lengthening path back to the loss for every single layer, which is exactly what makes the naive perturbation approaches from Section~\ref{introduction-backpropagation} computationally intractable.
+
 \subsection{General Case}
-The general case of backpropagation doesn't differ much from the single neuron case. We simply have to consider all the possible
-way in which a change in a parameter can affect the loss function, and compute the gradients accordingly using the chain rule of calculus.
+Transitioning from a single neuron to a full network primarily involves tracking multiple paths, as a single parameter can now influence the loss function through several downstream connections. 
 
-To take into account the fact that each layer can have multiple neurons, we also need to update the notation. Since each connection in the network has its own weight,
-we represent with $w_{ij}^{(l)}$ the weight connecting the $j$-th neuron in layer $l-1$ to the $i$-th neuron in layer $l$.
-
-The weighted sum for the $i$-th neuron in layer $l$ can be expressed as follows:
+To accommodate multiple neurons per layer, we update our notation: let $w_{ij}^{(l)}$ represent the weight connecting the $j$-th neuron in layer $l-1$ to the $i$-th neuron in layer $l$. The pre-activation (weighted sum) for the $i$-th neuron in layer $l$ is then:
 \begin{equation*}
     z_i^{(l)} = \sum_{j} w_{ij}^{(l)} a_j^{(l-1)} + b_i^{(l)}
 \end{equation*}
-where $a_j^{(l-1)}$ is the output of the $j$-th neuron in the previous layer, and $b_i^{(l)}$ is the bias term for the $i$-th neuron in layer $l$.
 
-When we consider the output layer neurons, the chain of dependencies remains the same as in the single neuron case, as each output neuron is directly connected to the loss function.
+For the output layer, the dependency chain mirrors the single-neuron scenario, as each output neuron connects directly to the loss function:
 \begin{equation*}
     \frac{\partial \loss}{\partial w_{ij}^{(L)}} = \frac{\partial z_i^{(L)}}{\partial w_{ij}^{(L)}} \cdot \frac{\partial a_i^{(L)}}{\partial z_i^{(L)}} \cdot \frac{\partial \loss}{\partial a_i^{(L)}}
 \end{equation*}
 
-For the hidden layer neurons, we instead need to consider all the possible paths from the parameter we want to update to the output layer, and compute the gradients accordingly.
+However, for hidden layers, an activation $a_j^{(l-1)}$ feeds into \textit{every} neuron in the subsequent layer $l$. To evaluate how this activation affects the overall loss, we must sum the gradients across all these divergent paths:
+
 \begin{figure}[H]
     \centering
     \scalebox{0.5}{\input{chapters/04-backpropagation/tikz/back-prop-focus.tex}}
     \caption{Dependency chain for a parameter feeding into $h_2$.}
     \label{fig:backpropagation_output}
 \end{figure}
+
 \begin{equation*}
     \frac{\partial \loss}{\partial a_j^{(l-1)}} = \sum_{i} \frac{\partial z_i^{(l)}}{\partial a_j^{(l-1)}} \cdot \frac{\partial a_i^{(l)}}{\partial z_i^{(l)}} \cdot \frac{\partial \loss}{\partial a_i^{(l)}}
 \end{equation*}
+
+Just as in the single-neuron case, backpropagation handles this elegantly through recursive caching. The term $\frac{\partial \loss}{\partial a_i^{(l)}}$ inside the summation is not recomputed from scratch; it is the exact quantity already obtained while processing layer $l$. Instead of exhaustively tracing every divergent path back to the loss, layer $l-1$ simply aggregates these pre-computed gradients via a single weighted sum.

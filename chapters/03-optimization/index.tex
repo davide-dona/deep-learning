@@ -43,7 +43,7 @@ there are still other issues regarding optimization, that are much more importan
 \subsection{Gradient Descent}
 In the following sections, we will discuss different variants of gradient descent, which is the most commonly used optimization algorithm for training neural networks.
 
-\subsubsection*{Batch Gradient Descent}
+\subsubsection{Batch Gradient Descent}
 \textbf{Batch Gradient Descent} is an optimization algorithm that minimizes a model's loss function by iteratively updating its parameters in the direction of the negative gradient.
 Because the gradient is computed over the entire training dataset, the parameters are updated only once per full data pass.
 
@@ -81,7 +81,7 @@ Here, $\eta$ represents the learning rate, which dictates the step size of the u
 }
 
 
-\subsubsection*{Stochastic Gradient Descent}
+\subsubsection{Stochastic Gradient Descent}
 \textbf{Stochastic Gradient Descent} (SGD) is a highly efficient variant of gradient descent that updates model parameters using a single, randomly selected training example per iteration. By bypassing the full dataset evaluation, SGD enables much faster parameter updates.
 
 The update rule for SGD is defined as follows:
@@ -100,7 +100,7 @@ The update rule for SGD is defined as follows:
 \end{algorithm}
 While evaluating a single sample accelerates each iteration, it introduces high variance into the gradient estimate, leading to a noisy, non-smooth optimization path. However, this stochasticity acts as a natural mechanism for exploration, frequently helping the algorithm escape saddle points and shallow local minima, even if it induces oscillations near the global optimum.
 
-\subsubsection*{Mini Batch}
+\subsubsection{Mini Batch}
 To mitigate the issues of both Batch Gradient Descent and Stochastic Gradient Descent, we can use \textbf{Mini Batch Gradient Descent}.
 
 Instead of using the entire dataset or a single training example, we can use a small batch of training examples to compute the gradient and update the parameters.
@@ -113,18 +113,23 @@ This has many advantages, such as:
     \item \textbf{balance between stability and speed}: mini batches provide a good balance between the stability of Batch Gradient Descent and the speed of Stochastic Gradient Descent.
 \end{itemize}
 
-However, there is still a big issue with gradient-based optimization algorithms, which is the fact that they can be very sensitive to the shape of the loss function.
-In particular, in the presence of a long flat direction of the loss function, the gradient steps can be very small, leading to slow convergence.
-In steep ravines, the gradient steps can be very large, leading to oscillations and divergence.
-To mitigate these issues, the concept of \textbf{momentum} was introduced.
+\subsection{Momentum}
+A major limitation of standard gradient-based optimization is its extreme sensitivity to the loss function's topography. 
+In long, flat regions, gradients are exceptionally small, causing painfully slow convergence. 
+Conversely, in steep ravines, large gradients lead to inefficient oscillations or even divergence. 
+To mitigate these issues and stabilize the updates, the concept of \textbf{momentum} was introduced.
 
-\subsubsection*{SGD with Momentum}
+\subsubsection{SGD with Momentum}
 The idea is to introduce a \textbf{velocity} term $v$ that accumulates the gradients over time, allowing for faster convergence and smoother updates.
-This can be represented by exponentially decaing moving average of the negative gradients, which can be expressed as follows:
+This can be represented by exponentially decaying moving average of the negative gradients, which can be expressed as follows:
+
 \begin{equation*}
     v \leftarrow \alpha v - \eta \nabla_{\vct{\theta}} (\loss(f(\vct{x}^{(i)}; \vct{\theta}), y^{(i)}))
 \end{equation*}
-Where $\alpha$ is the momentum hyperparameter that controls the contribution of the previous velocity to the current update.
+
+Where $\alpha \in [0, 1)$ is the momentum hyperparameter that controls the contribution of the previous velocity to the current update.
+
+If $\alpha = 0$, the update reduces to standard SGD. Otherwise, the update incorporates to the current gradient a fraction of the historical gradients.
 
 The update rule for the parameters can then be expressed as follows:
 \begin{algorithm}[H]
@@ -150,12 +155,15 @@ The update rule for the parameters can then be expressed as follows:
     \caption{Different optimization algorithms.}
 \end{figure}
 
-\subsubsection*{SGD with Nesterov Momentum}
-A sophisticated variant of standard momentum is \textbf{Nesterov Momentum} (or Nesterov Accelerated Gradient), which introduces a look-ahead mechanism to improve convergence dynamics.
+\subsubsection{SGD with Nesterov Momentum}
+While standard momentum accelerates gradient descent, its accumulated velocity can frequently lead to overshooting the minimum, leading to inefficient oscillations, especially in the presence of steep ravines.
 
-Instead of computing the gradient at the current position, it first projects a partial step in the direction of the accumulated velocity and evaluates the gradient at this anticipated future position. This "look-ahead" yields a much more informed parameter update.
+\textbf{Nesterov Momentum} (or Nesterov Accelerated Gradient) mitigates this by introducing a \textbf{look-ahead} mechanism.
+Instead of computing the gradient at the current position, it first takes a partial step using the accumulated velocity, effectively "peeking" ahead.
+It then computes the gradient at this look-ahead position.
 
-While classical momentum accelerates descent, the accumulated velocity can frequently lead to overshooting the minimum, causing inefficient oscillations. Nesterov momentum mitigates this by evaluating the gradient ahead of the current position, effectively applying a preemptive correction that dampens these oscillations before they occur.
+By evaluating the gradient ahead of time, the algorithm applies a preemptive correction that dampens oscillations before they occur, resulting in a more stable and efficient convergence.
+
 \begin{figure}[H]
     \centering
     \scalebox{0.7}{\input{chapters/03-optimization/tikz/momentum-methods.tex}}
@@ -183,17 +191,17 @@ The update rule for Nesterov Momentum can be expressed as follows:
 Ultimately, this anticipatory update enables faster convergence and greater stability compared to standard momentum techniques.
 
 \subsection{Adaptive Learning Rates Methods}
-So far, we have seen optimization algorithms that use a fixed learning rate $\eta$ for all parameters. This means that
-each of the parameters has the same importance during the optimization process, which is not always the case.
+So far, we have seen optimization algorithms that use a fixed global learning rate $\eta$ for all model parameters. 
+This means that each of the parameters has the same importance during the optimization process, which is not always the case.
 
 Adaptive learning rate methods are a family of optimization algorithms that adjust the learning rate for each parameter based on the historical gradients.
 
-\subsubsection*{Adagrad}
-Adagrad (Adaptive Gradient Algorithm) is an optimizer that dynamically adjusts the learning rate for each parameter on the fly.
-It maintains a \textbf{running sum of squared gradients} for every parameter and uses the square root of this accumulator to scale down the base learning rate.
+\subsubsection{Adagrad}
+Adagrad (Adaptive Gradient Algorithm) dynamically adjusts the learning rate for each individual model parameter during training. 
+It maintains a running sum of the squared gradients for every parameter and scales the learning rate by the inverse square root of this accumulated value. 
 
-In practice, this allows the algorithm to automatically shrink the learning rate for frequently occurring features with large gradients.
-Conversely, it preserves larger updates for rare features, ensuring they receive meaningful adjustments throughout training.
+Consequently, the algorithm automatically shrinks the learning rate for frequently updated features, 
+while preserving larger updates for rare features to ensure they receive meaningful adjustments throughout the training process.
 
 The update rule for Adagrad can be expressed as follows:
 \begin{algorithm}[H]
@@ -217,7 +225,7 @@ While Adagrad pioneered the use of adaptive learning rates and sparked a major t
 Because the squared gradients are strictly positive, the accumulator $r$ grows monotonically during training.
 This causes the effective learning rate to decay far too aggressively, often shrinking to a point where the model stops learning completely before reaching convergence.
 
-\subsubsection*{RMSProp}
+\subsubsection{RMSProp}
 The problem of Adagrad can be mitigated in non-convex settings by replacing the accumulated squared gradients with
 an \textbf{exponentially decaying average} of the gradient.
 
@@ -245,7 +253,7 @@ where $\beta$ is a decay factor.
 
 It's important to note that there is also a variant of RMSProp that includes the Nesterov Momentum, which can further improve convergence and performance.
 
-\subsubsection*{Adam}
+\subsubsection{Adam}
 Adam (Adaptive Moment Estimation) is an optimization algorithm that combines the benefits of both momentum and adaptive learning rates.
 To do so, it introduces a \textbf{bias-corrected estimate} for the first moment (mean) and the second moment (uncentered variance) of the gradients.
 These basis-correction terms compensate for the fact that the moments are initialized at zero, which can lead to biased estimates, especially during
@@ -273,14 +281,14 @@ The update rule for Adam can be expressed as follows:
 We can see Adam as a combination of all the techniques we have seen so far, which makes it a very powerful optimization algorithm that is widely used in practice.
 
 \subsection{Batch Normalization}
-Batch Normalization (BN) is a technique originally introduced to address the problem of \textit{internal covariate shift}.
+\textbf{Batch Normalization} (BN) is a technique originally introduced to address the problem of \textit{internal covariate shift}.
 As a neural network trains, the distribution of each layer's inputs changes because the parameters of the preceding layers are constantly updating.
 This shifting distribution can slow down training, as the network must continuously adapt to new input scales and ranges.
 
-Batch Normalization stabilizes the learning process by normalizing the inputs of a layer to have zero mean and unit variance, which allows for much faster convergence.
+Further research has shown that BN stabilizes the learning process by normalizing the inputs of a layer to have zero mean and unit variance, which allows for much faster convergence.
 It is typically implemented as a standalone layer and is usually applied to the pre-activations (before the non-linear activation function), though it can also be applied post-activation.
 
-\subsubsection*{Standard Batch Normalization}
+\subsubsection{Standard Batch Normalization}
 To perform batch normalization, we first compute the mean and variance of a specific feature across a mini-batch.
 Let $H=\{H_1,\ldots,H_m\}$ denote the values of a specific feature for a mini-batch of size $m$. The batch mean $\mu_B$ and batch variance $\sigma_B^2$ are computed as follows:
 \begin{equation*}
@@ -319,7 +327,7 @@ While Batch Normalization was initially proposed to fix internal covariate shift
     \item Acting as a mild form of regularization, sometimes reducing the need for techniques like Dropout.
 \end{itemize}
 
-\subsubsection*{Layer Normalization}
+\subsubsection{Layer Normalization}
 Alternative normalization schemes have been proposed for scenarios where Batch Normalization struggles (e.g., small batch sizes or Recurrent Neural Networks). One prominent alternative is Layer Normalization.
 
 While Batch Normalization computes statistics across the \textit{batch} dimension for a single feature, Layer Normalization computes statistics across the \textit{feature} dimension for a single sample:
