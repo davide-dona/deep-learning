@@ -50,6 +50,13 @@ This is achieved using a symmetric, softmax-based contrastive loss function:
 \end{equation}
 where $\vct{v}_i$ and $\vct{t}_i$ represent the embeddings of the $i$-th image and text pair, and $\simop$ is the cosine similarity function.
 
+The two terms of the sum play a symmetric but distinct role:
+\begin{itemize}
+    \item \textbf{Image} $\to$ \textbf{Text}: for each image embedding $\vct{v}_i$, this term is a softmax over all $N$ text embeddings in the batch. It pulls $\vct{v}_i$ closer to its matching text embedding $\vct{t}_i$, while pushing it away from all the other $N-1$ text embeddings.
+    \item \textbf{Text} $\to$ \textbf{Image}: symmetrically, for each text embedding $\vct{t}_i$, this term is a softmax over all $N$ image embeddings, pulling $\vct{t}_i$ closer to its matching image embedding $\vct{v}_i$, while pushing it away from all the other $N-1$ image embeddings.
+\end{itemize}
+Averaging both directions ensures the embedding space is aligned consistently, regardless of whether an image is used to query a text or vice versa.
+
 \termdef{Temperature}{The hyperparameter $\tau$ modulates the sharpness of the probability distribution. A lower temperature sharpens the distribution, which boosts confidence but increases the risk of overfitting. Conversely, a higher temperature softens the distribution, regularizing the model at the potential cost of peak performance.}
 
 \termdef{Training Phase}{Due to the immense scale of the WebImageText dataset, both the image and text encoders are trained entirely from scratch without relying on pre-trained weights. Only basic data augmentation techniques are applied to the visual inputs during this process.}
@@ -75,6 +82,7 @@ During inference, CLIP can be used for various tasks such as image classificatio
 
 \subsection{Fine Tuning}
 Once the power of CLIP was demonstrated on zero-shot learning tasks, the next step was to explore how to further improve its performance on specific tasks.
+
 A first approach was to fine-tune either the image encoder, the text encoder, or both on a specific dataset.
 This was found to be ineffective, as the model had already learned a powerful shared embedding space, and fine-tuning on a specific dataset often led 
 to overfitting and a decrease in performance on other tasks.
