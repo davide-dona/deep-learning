@@ -79,9 +79,14 @@ The main innovations of Fast R-CNN are:
     \item \textbf{Shared Convolutional Architecture}: Instead of running the CNN separately for each proposal, 
     Fast R-CNN processes the entire image through a convolutional network to produce a global feature map. 
     
-    \item \textbf{RoI Pooling Layer}: To handle the variable sizes of the region proposals, Fast R-CNN introduces a \textbf{Region of Interest} (RoI) \textbf{pooling} layer.
-    This layer takes the feature map generated from the entire image and extracts fixed-size feature vectors for each region proposal.
-    The RoI pooling layer divides the feature map into a grid and applies max pooling to each grid cell, resulting in a fixed-size output regardless of the original proposal size.
+    \item \textbf{RoI Pooling Layer}: To handle the variable sizes of the region proposals, Fast R-CNN introduces a \textbf{Region of Interest} (RoI) \textbf{pooling} layer,
+    which converts each region proposal into a fixed-size feature representation regardless of its original size. It works as follows:
+    \begin{enumerate}
+        \item Each region proposal is mapped onto the convolutional feature map computed for the entire image.
+        \item The mapped region is divided into a fixed-size grid (e.g., $7 \times 7$).
+        \item Max pooling is performed independently within each grid cell, rather than over the region as a whole.
+        \item The pooled values from all cells are concatenated into a fixed-size descriptor (e.g., a $7 \times 7 \times C$ tensor, where $C$ is the number of feature channels), which is then fed to the fully connected layers.
+    \end{enumerate}
     
     \item \textbf{Multi-Task Loss}: Fast R-CNN also introduces a multi-task loss function that combines classification and bounding box regression into a single optimization problem.
     This allows the model to learn both tasks simultaneously, improving the overall performance and efficiency of the training process.
