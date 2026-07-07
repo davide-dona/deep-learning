@@ -118,7 +118,7 @@ The architecture of Faster R-CNN consists of the following components:
 By replacing Selective Search with the RPN, Faster R-CNN achieves an inference time of approximately \textbf{0.2 seconds} per image on a GPU. 
 Furthermore, because the RPN is trained specifically for the task, it typically yields higher-quality proposals than traditional computer vision algorithms, leading to improved mAP.
 
-\paragraph{You Only Look Once (YOLO)}
+\subsubsection{You Only Look Once (YOLO)}
 \textbf{YOLO} (You Only Look Once) is a different approach to object detection. Instead of using a two-stage process like R-CNN and its variants,
 which was very slow and hard to train, YOLO treats object detection as a single regression problem, 
 directly predicting bounding boxes and class probabilities from the input image in one pass through the network.
