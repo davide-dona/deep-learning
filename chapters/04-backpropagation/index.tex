@@ -63,8 +63,8 @@ Applying the chain rule, we can express the derivative of the loss function with
 
 The three terms have a very intuitive interpretation:
 \begin{itemize}
-    \item $\frac{\partial z^{(l)}}{\partial w^{(l)}}$ measures how a small change in the weight $w^{(l)}$ affects the output of the layer $z^{(l)}$;
-    \item $\frac{\partial a^{(l)}}{\partial z^{(l)}}$ measures how a small change in the output of the layer $z^{(l)}$ affects the output of the activation function $a^{(l)}$;
+    \item $\frac{\partial z^{(l)}}{\partial w^{(l)}}$ measures how a small change in the weight $w^{(l)}$ affects the pre-activation $z^{(l)}$;
+    \item $\frac{\partial a^{(l)}}{\partial z^{(l)}}$ measures how a small change in the pre-activation $z^{(l)}$ affects the output of the activation function $a^{(l)}$;
     \item $\frac{\partial \loss}{\partial a^{(l)}}$ measures how a small change in the output of the activation function $a^{(l)}$ affects the loss function $\loss$.
 \end{itemize}
 
@@ -108,6 +108,11 @@ To accommodate multiple neurons per layer, we update our notation: let $w_{ij}^{
 For the output layer, the dependency chain mirrors the single-neuron scenario, as each output neuron connects directly to the loss function:
 \begin{equation*}
     \frac{\partial \loss}{\partial w_{ij}^{(L)}} = \frac{\partial z_i^{(L)}}{\partial w_{ij}^{(L)}} \cdot \frac{\partial a_i^{(L)}}{\partial z_i^{(L)}} \cdot \frac{\partial \loss}{\partial a_i^{(L)}}
+\end{equation*}
+
+For a weight $w_{ij}^{(l-1)}$ in a hidden layer, the same reasoning applies unchanged from the single-neuron case, as each weight still only affects the loss through its corresponding neuron:
+\begin{equation*}
+    \frac{\partial \loss}{\partial w_{ij}^{(l-1)}} = \frac{\partial z_i^{(l-1)}}{\partial w_{ij}^{(l-1)}} \cdot \frac{\partial a_i^{(l-1)}}{\partial z_i^{(l-1)}} \cdot \frac{\partial \loss}{\partial a_i^{(l-1)}}
 \end{equation*}
 
 However, for hidden layers, an activation $a_j^{(l-1)}$ feeds into \textit{every} neuron in the subsequent layer $l$. To evaluate how this activation affects the overall loss, we must sum the gradients across all these divergent paths:
