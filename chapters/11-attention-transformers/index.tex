@@ -49,8 +49,8 @@ This architecture has been shown to be more efficient and parallelizable than RN
 The architecture of the Transformer still follows the encoder-decoder paradigm, but it entirely rethinks the way each component is implemented.
 
 \begin{itemize}
-    \item \textbf{Encoder:} The encoder receives the entire input sequence and processes it in parallel, producing a sequence of contextualized representations of the same length as the input.
-    \item \textbf{Decoder:} The decoder predicts the output sequence one token at a time in an autoregressive manner, using previously generated tokens and the encoder's output as context.
+    \item \textbf{Encoder:} The encoder receives the entire input sequence and processes it in parallel, producing a sequence of contextualized representations, one for each input token.
+    \item \textbf{Decoder:} The decoder predicts the output sequence one token at a time in an autoregressive manner, using previously generated tokens and the output of the final encoder layer as context.
 \end{itemize}
 
 \begin{figure}[H]
@@ -61,14 +61,16 @@ The architecture of the Transformer still follows the encoder-decoder paradigm, 
 
 Let's now go deeper into the details of each component of the Transformer architecture.
 
-\subsubsection{Encoder}
-The encoder transforms the input tokens into a \textbf{contextualized representation}. 
-Each input token is first mapped to a high-dimensional vector through an \textbf{embedding layer}. This layer captures the semantic meaning of each token, transforming it into a numerical representation.
+\subsubsection{Encoder Layer}
+The encoder maps the input tokens into a sequence of \textbf{contextualized representations} by stacking $N$ identical encoder layers, each one refining the representations produced by the previous one. The information flows as follows:
 
-Each token is processed in parallel within the encoder layers. The \textbf{self-attention} mechanism allows the model to capture dependencies between tokens, modeling relationships across the entire sequence.
+\begin{enumerate}
+    \item \textbf{Embedding and Positional Encoding:} The full input sequence is embedded in parallel: each token is first mapped to a high-dimensional vector through an \textbf{embedding layer}, which captures its semantic meaning. Since these embeddings carry no information about the order of the tokens, a \textbf{positional encoding} vector is added to each one to inject this information (discussed in detail below).
+    \item \textbf{Self-Attention:} The \textbf{self-attention} mechanism is applied, allowing each token to capture dependencies with the other tokens in the sequence that are relevant to its own representation.
+    \item \textbf{Feed-Forward:} A \textbf{feed-forward layer} then processes the output of the self-attention mechanism, applying a non-linear transformation to each token's representation independently. Since self-attention has already mixed information across tokens, this layer refines each token's representation without further token interaction, enabling efficient parallel computation.
+\end{enumerate}
 
-A \textbf{feed-forward layer} then processes the output of the self-attention mechanism, applying a non-linear transformation to each token's representation independently.
-Since self-attention has already mixed information across tokens, the feed-forward layer refines each token's representation without further token interaction, enabling efficient parallel computation.
+Steps 2 and 3 are repeated at every one of the $N$ stacked layers, each layer consuming the previous layer's output. The output of the final encoder layer is the encoder's contextualized representation of the input sequence, which is passed as the Keys and Values of the encoder-decoder attention in every decoder layer.
 
 \subsubsection{Positional Encoding}
 The first encoder layer receives a sequence of token embeddings, but these embeddings do not inherently contain any information about the order of the tokens.
@@ -103,21 +105,21 @@ The \(\mat{Q}\), \(\mat{K}\), and \(\mat{V}\) matrices are computed as linear tr
 
 \paragraph{Score Computation}
 Once the \(\mat{Q}\), \(\mat{K}\), and \(\mat{V}\) matrices are computed, the next step is to calculate the attention scores.
-Given a query vector \(\vct{q}_i\) for token \(i\) and key vectors \(\vct{k}_j\) for all tokens \(j\), the attention score \(s_{ij}\) is computed as the dot product of the query and key vectors:
+Given a query vector \(\vct{q}_i\) for token \(i\) and key vectors \(\vct{k}_j\) for all tokens \(j\), the attention score \(e_{ij}\) is computed as the dot product of the query and key vectors:
 \[
-s_{ij} = \vct{q}_i \cdot \vct{k}_j
+e_{ij} = \vct{q}_i \cdot \vct{k}_j
 \]
 This score indicates how much attention token \(i\) should pay to token \(j\).
 
-These scores are then scaled to ensure that the dot products do not grow too large, which can push the softmax function into regions with extremely small gradients, leading to instability during training. 
+These scores are then scaled to ensure that the dot products do not grow too large, which can push the softmax function into regions with extremely small gradients, leading to instability during training.
 This is done by dividing the scores by the square root of the dimension of the key vectors, \(d_k\):
 \[
-\hat{s}_{ij} = \frac{s_{ij}}{\sqrt{d_k}}
+\hat{e}_{ij} = \frac{e_{ij}}{\sqrt{d_k}}
 \]
 
 Finally, a softmax function is applied to convert the scores into a valid probability distribution:
 \[
-\alpha_{ij} = \softmax(\hat{s}_{ij}) = \frac{\exp(\hat{s}_{ij})}{\sum_{k} \exp(\hat{s}_{ik})}
+\alpha_{ij} = \softmax(\hat{e}_{ij}) = \frac{\exp(\hat{e}_{ij})}{\sum_{k} \exp(\hat{e}_{ik})}
 \]
 
 \paragraph{Output Computation}
@@ -147,7 +149,7 @@ Although demonstrated to be highly effective, multi-head attention does increase
 
 \begin{figure}[H]
     \centering
-    \resizebox{\textwidth}{!}{\input{chapters/11-attention-transformers/tikz/multi-head-attention.tex}}
+    \resizebox{0.44\textwidth}{!}{\input{chapters/11-attention-transformers/tikz/multi-head-attention.tex}}
     \caption{Multi-head attention. The input $\mat{X}$ is projected by $h$ independent sets of weight matrices $\mat{W}_i^Q, \mat{W}_i^K, \mat{W}_i^V$, producing one attention output $\mat{Z}_i$ per head. The heads are concatenated and projected by $\mat{W}^O$ to obtain the final output $\mat{Z}$.}
 \end{figure}
 
@@ -163,7 +165,7 @@ While the decoder shares many architectural similarities with the encoder, it in
 In the decoder's self-attention layer, a \textbf{masking mechanism} is applied. To preserve the causal, autoregressive nature of sequence generation, the model is prevented from "looking ahead." The mask ensures that the prediction for token $i$ can only depend on known outputs at positions less than $i$, blinding the decoder to future tokens during parallelized training.
 
 \paragraph{Encoder-Decoder Attention}
-Following the masked self-attention layer, the decoder features an \textbf{encoder-decoder attention} mechanism. Here, the \textbf{Queries} come from the previous decoder layer, while the \textbf{Keys} and \textbf{Values} come directly from the output of the encoder. This allows every position in the decoder to attend over all positions in the input sequence, effectively bridging the gap between the source material and the generated output.
+Following the masked self-attention layer, the decoder features an \textbf{encoder-decoder attention} mechanism. Here, the \textbf{Queries} come from the previous decoder layer, while the \textbf{Keys} and \textbf{Values} come directly from the output of the \textbf{final encoder layer}, shared across every decoder layer. This allows every position in the decoder to attend over all positions in the input sequence, effectively bridging the gap between the source material and the generated output.
 
 \subsection{Language Pretraining}
 Similarly to what we have seen in the CNN section, the Transformer architecture could be trained for tasks in NLP.
@@ -181,7 +183,7 @@ Some of the most notable Transformer-based pretrained models include:
 Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{ViTs}.
 Vision Transformers emerged after the success of Transformers in NLP, since one of the main challenges in applying Transformers to computer vision was how to represent images as sequences of tokens.
 
-\paragraph{ViTs}
+\subsubsection{ViTs}
 
 In Vision Transformers, an image is divided into a grid of non-overlapping patches. These patches are flattened and linearly projected into embedding vectors, which serve as the input tokens of the Transformer.
 Positional embeddings are added to encode the spatial arrangement of the patches, enabling the model to capture their relative positions within the image.
@@ -192,13 +194,13 @@ The final representation of the \texttt{[CLS]} token is then passed through an M
 
 Results from Vision Transformers have shown that they can achieve competitive performance with convolutional neural networks, especially when trained on larger datasets.
 
-\paragraph{Data-efficient Image Transformer}
+\subsubsection{Data-efficient Image Transformer}
 
 The \textbf{Data-efficient Image Transformer (DeiT)} is a variant of the Vision Transformer designed to improve data efficiency during training.
 DeiT introduces a learnable \textbf{distillation token}, which is prepended to the input sequence and trained to match the predictions of a pretrained teacher model, typically a CNN.
 This knowledge distillation strategy enables the Vision Transformer to learn more effectively from limited training data, achieving competitive performance without requiring extremely large training datasets.
 
-\paragraph{Swin Transformer}
+\subsubsection{Swin Transformer}
 Standard ViT architectures had a few limitations, such as:
 \begin{itemize}
     \item \textbf{Lack of Hierarchical Structure:} ViTs process the entire image as a flat sequence of patches, 

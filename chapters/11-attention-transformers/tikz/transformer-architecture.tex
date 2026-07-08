@@ -72,5 +72,6 @@
     \draw[arr] (soft) -- (output);
 
     % ===================== encoder -> decoder =====================
-    \draw[arr] (encbox.east) -- ++(1.0,0) |- (d_eda.west);
+    \draw[arr] (encbox.east) |- (d_eda.west);
+    \node[poslbl] at (3.5,1.85) {Encoder\\Output};
 \end{tikzpicture}
