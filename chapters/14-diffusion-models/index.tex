@@ -1,7 +1,7 @@
 \section{Diffusion Models}
 Another class of explicit density estimation generative models is \textbf{diffusion models}. 
 Although initially proposed in 2015, they have only recently surged in popularity due to their ability to generate exceptionally high-quality samples. 
-Around 2015, Generative Adversarial Networks (GANs) were the state-of-the-art in generative modeling, despite having some serious limitations (as discussed in the previous chapter). 
+Around 2015, GANs were the state-of-the-art in generative modeling, despite having some serious limitations (as discussed in the previous chapter). 
 It was not until 2020 that breakthroughs in architectures and training techniques allowed diffusion models to surpass GANs in sample quality, establishing them as the current state-of-the-art.
 
 Similar to VAEs, diffusion models use neural networks to transform a simple prior distribution (e.g., a standard Gaussian) into a complex data distribution that ideally matches the training data.
@@ -109,7 +109,7 @@ It was later shown that learning the variance $\Sigma_t$ can improve sample qual
 
 \subsubsection{Hierarchical VAEs}
 
-Diffusion models can also be interpreted as a special case of hierarchical variational autoencoders (VAEs). While a standard VAE is formulated with a single latent variable \(z\), a diffusion model introduces a hierarchy of \(T\) latent variables,
+Diffusion models can also be interpreted as a special case of hierarchical VAEs. While a standard VAE is formulated with a single latent variable \(z\), a diffusion model introduces a hierarchy of \(T\) latent variables,
 \[
     x_1, x_2, \ldots, x_T,
 \]
@@ -123,7 +123,7 @@ Under this interpretation, diffusion models exhibit several distinctive characte
     \item \textbf{Shared decoder:} A single neural network is reused at every step of the reverse diffusion process to model the conditional distributions \(p_\theta(x_{t-1}\mid x_t)\), with the timestep \(t\) provided as an additional conditioning input.
 \end{itemize}
 
-This interpretation immediatly suggests using the same training objective as in VAEs, which is the Evidence Lower Bound (ELBO).
+This interpretation immediatly suggests using the same training objective as in VAEs, which is the ELBO.
 
 \subsubsection{Loss}
 Following the VAE framework, we can derive the loss function for diffusion models by maximizing the ELBO. The ELBO can be expressed as:

@@ -1,10 +1,10 @@
 \section{Recurrent Neural Networks}
 Unlike the architectures previously discussed, which only process data represented as fixed-size vectors for both input and output,
-\textbf{Recurrent Neural Networks} (RNNs) are designed to handle sequential data.
+\textbf{RNNs} are designed to handle sequential data.
 
 Standard feed-forward models face significant limitations with real-world data types such as text, audio, and video, which are inherently sequential and vary in length.
 
-\textbf{Recurrent Neural Networks} (RNNs) were the first architectures specifically designed to handle
+\textbf{RNNs} were the first architectures specifically designed to handle
 this kind of data, enabling solutions to a wide range of tasks, such as:
 \begin{itemize}
     \item \textbf{Document classification}: Given a document, classify it into one of several categories (e.g., spam vs. non-spam).
@@ -18,7 +18,7 @@ this kind of data, enabling solutions to a wide range of tasks, such as:
 \end{itemize}
 
 \subsection{RNN Architecture types}
-While classical Feed-Forward Neural Networks (FFNNs) are categorized as \textbf{one-to-one} (or single-to-single)
+While classical FFNNs are categorized as \textbf{one-to-one} (or single-to-single)
 architectures, taking one input and producing one output, RNNs are classified based on how they map input sequences to output sequences.
 The primary types include:
 \begin{itemize}
@@ -153,7 +153,7 @@ When generalizing to a sequence of length $T$, the gradient of the loss with res
     \frac{\partial \loss}{\partial \vct{h}_1} = \frac{\partial \loss}{\partial \vct{h}_T} \cdot \prod_{t=2}^{T} \frac{\partial \vct{h}_t}{\partial \vct{h}_{t-1}}
 \end{equation}
 
-While Backpropagation Through Time (BPTT) allows RNNs to learn from sequential data, this multiplicative chain introduces a critical flaw known as the \textbf{vanishing gradient} problem. The issue can be broken down as follows:
+While BPTT allows RNNs to learn from sequential data, this multiplicative chain introduces a critical flaw known as the \textbf{vanishing gradient} problem. The issue can be broken down as follows:
 
 \begin{itemize}
     \item \textbf{The Mechanism:} Early time steps in a sequence receive gradients through a long chain of multiplications. If the sequence is long, these repeated multiplications cause the gradients to shrink exponentially as they propagate backward.
@@ -176,7 +176,7 @@ thus. It also reduces the computational cost, allowing for more efficient traini
 This approach is particularly effective for tasks where long-term dependencies are less critical, as in fact
 it fails to capture dependencies that span more than $k_2$ time steps, but it can still be useful for many applications where recent context is more relevant.
 
-\subsection{Long Short-Term Memory (LSTM)}
+\subsection{Long Short-Term Memory}
 To address the limitations of Vanilla RNNs, specifically the \textbf{vanishing gradient problem}, \textbf{Long Short-Term Memory} (LSTM)
 networks were introduced. LSTMs utilize a gated architecture designed to maintain a persistent state over long sequences,
 allowing the model to learn when to forget old information and when to update with new inputs.
@@ -259,7 +259,7 @@ Even though the gates introduce non-linearities, the cell state $\vct{C}_t$ itse
 which provides a nearly linear path for gradients to flow during backpropagation.
 This significantly mitigates the vanishing gradient problem inherent in the multiplicative chain of standard RNNs.
 
-\subsection{Gated Recurrent Unit (GRU)}
+\subsection{Gated Recurrent Unit}
 Gated Recurrent Units (GRUs) are a simplified version of LSTMs that tries to reduce the number of parameters and computational complexity while maintaining similar performance.
 GRUs achieve this by combining the forget and input gates into a single "update gate" and merge the cell state and hidden state into a single state.
 This results in a more streamlined architecture that is computationally more efficient while still capturing long-term dependencies effectively.

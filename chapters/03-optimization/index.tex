@@ -82,7 +82,7 @@ Here, $\eta$ represents the learning rate, which dictates the step size of the u
 
 
 \subsubsection{Stochastic Gradient Descent}
-\textbf{Stochastic Gradient Descent} (SGD) is a highly efficient variant of gradient descent that updates model parameters using a single, randomly selected training example per iteration. By bypassing the full dataset evaluation, SGD enables much faster parameter updates.
+\textbf{SGD} is a highly efficient variant of gradient descent that updates model parameters using a single, randomly selected training example per iteration. By bypassing the full dataset evaluation, SGD enables much faster parameter updates.
 
 The update rule for SGD is defined as follows:
 \begin{algorithm}[H]
@@ -359,9 +359,9 @@ To illustrate the differences between the various normalization techniques, cons
 
 The main difference between Batch Normalization, Layer Normalization, and Instance Normalization lies in the dimensions over which the normalization statistics (mean and variance) are computed.
 \begin{itemize}
-    \item \textbf{Batch Normalization (BN):} For each channel, the mean and variance are computed across the entire mini-batch and all spatial locations, i.e., over the dimensions $N \times H \times W$. Consequently, all samples in the mini-batch share the same normalization statistics for a given channel, making the normalization dependent on the other samples in the batch.
+    \item \textbf{BN:} For each channel, the mean and variance are computed across the entire mini-batch and all spatial locations, i.e., over the dimensions $N \times H \times W$. Consequently, all samples in the mini-batch share the same normalization statistics for a given channel, making the normalization dependent on the other samples in the batch.
 
     \item \textbf{Layer Normalization (LN):} For each individual sample, the mean and variance are computed across all of its features, i.e., over the dimensions $C \times H \times W$. As a result, each sample is normalized independently of the other samples in the mini-batch.
 
-    \item \textbf{Instance Normalization (IN):} For each sample and each channel independently, the mean and variance are computed only across the spatial dimensions, i.e., over the dimensions $H \times W$. Therefore, each feature map of each sample is normalized independently, making the normalization independent of both the other samples and the other feature maps.
+    \item \textbf{IN:} For each sample and each channel independently, the mean and variance are computed only across the spatial dimensions, i.e., over the dimensions $H \times W$. Therefore, each feature map of each sample is normalized independently, making the normalization independent of both the other samples and the other feature maps.
 \end{itemize}

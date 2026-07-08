@@ -1,11 +1,11 @@
 \section{Backpropagation}
-The perceptron learning algorithm (see Section~\ref{perceptron-training}) is designed for single-layer perceptrons and therefore cannot be directly applied to Feedforward Neural Networks (FFNNs).
+The perceptron learning algorithm (see Section~\ref{perceptron-training}) is designed for single-layer perceptrons and therefore cannot be directly applied to FFNNs.
 In a multilayer network, only the output layer can be directly compared with the ground truth, while the hidden layers do not have target values from which their errors can be computed.
 
 To train an FFNN, the error observed at the output layer must be propagated backward through the network to determine how each parameter contributes to the overall loss.
 This is achieved by the \textbf{backpropagation} algorithm, which efficiently computes the gradient of the loss function with respect to every trainable parameter by repeatedly applying the chain rule of calculus.
 
-Once these gradients have been computed, they are used by an optimization algorithm, such as \textbf{Stochastic Gradient Descent} (SGD), to update the network parameters and minimize the loss function.
+Once these gradients have been computed, they are used by an optimization algorithm, such as \textbf{SGD}, to update the network parameters and minimize the loss function.
 
 \subsection{Idea behind Backpropagation}
 Before backpropagation, a few ideas were proposed to learn the weights inside a FFNN:

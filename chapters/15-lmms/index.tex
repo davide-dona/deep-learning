@@ -2,7 +2,7 @@
 
 \textbf{Large Multi-Modal Models} (LMMs) are a class of models that can process and generate data across multiple modalities, such as text, images, audio, and video. 
 In particular, we will focus on \textbf{Large Vision-Language Models} (LVLMs), which are models that can understand and generate both visual and textual information, 
-usually by combining a \textbf{vision encoder} (converting images into embeddings) and a \textbf{Large Language Model}, to address various tasks.
+usually by combining a \textbf{vision encoder} (converting images into embeddings) and a \textbf{Large Language Model} (LLM), to address various tasks.
 
 \begin{comment}
     # TODO: add a figure showing the architecture of a LVLM, with a vision encoder and a LLM, and how they interact to process multi-modal data.
@@ -14,7 +14,7 @@ Finally, we will discuss the architectures that allow for the integration of vis
 \subsection{Encoders}
 Over the years, several architectures have been proposed for vision encoders. We can group them into four main categories: 
 \begin{itemize}
-    \item \textbf{Convolutional Neural Networks (CNNs)}: based on supervised learning, these models are limited by the fact that the labels need to be pre-defined, and they are not able to learn from unlabeled data.
+    \item \textbf{CNNs}: based on supervised learning, these models are limited by the fact that the labels need to be pre-defined, and they are not able to learn from unlabeled data.
     \item \textbf{Image-Only (Non-)Contrastive Learning}: based on self-supervised learning, these models learn to generate embeddings for images without the need for labels.
     This is achieved by training the model to output similar embeddings for different augmentations of the same image.
     \item \textbf{Masked Image Modeling (MIM)}: given an image, the model is trained to predict the missing parts of the image, which allows it to learn a representation of the image that captures its structure and semantics.
@@ -50,7 +50,7 @@ Such approaches have a main limitation: a large batch size is required to have a
 
 \subsubsection{DINO}
 Recent approaches such as \textbf{DINO} (DIstillation with NO labels) have been proposed to overcome some limitations of contrastive learning methods such as SimCLR. 
-DINO is a self-supervised learning framework based on Vision Transformers (ViTs) that learns meaningful image representations without requiring labeled data or negative sample pairs.
+DINO is a self-supervised learning framework based on ViTs that learns meaningful image representations without requiring labeled data or negative sample pairs.
 
 The architecture of DINO consists of two networks: a \textbf{student network} and a \textbf{teacher network}. 
 The student network is trained to generate embeddings from input images, while the teacher network produces target embeddings that the student aims to match. 
@@ -59,7 +59,7 @@ providing stable and slowly evolving targets throughout training.
 
 During training, multiple augmented views of the same image are generated. 
 The student network processes both global and local image crops, whereas the teacher network processes only the global crops. 
-Both networks output feature vectors, which are projected through a small multi-layer perceptron (MLP) head to produce logits. 
+Both networks output feature vectors, which are projected through a small MLP head to produce logits.
 These logits are converted into probability distributions using a softmax function.
 
 The student is trained to match the probability distribution produced by the teacher for different views of the same image. 

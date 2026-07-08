@@ -2,10 +2,10 @@
 Regularization techniques are methods used to reduce the generalization error of a model, but not necessarily its training error.
 
 Regularization encompasses a variety of strategies designed to mitigate overfitting in machine learning models. 
-This section explores the most common approaches applied to Feedforward Neural Networks (FFNNs).
+This section explores the most common approaches applied to FFNNs.
 
-While our primary focus here is on FFNNs, it is worth noting that many of these core methods easily generalize to other architectures, 
-such as Convolutional Neural Networks (CNNs), which also rely on their own domain-specific regularization mechanisms.
+While our primary focus here is on FFNNs, it is worth noting that many of these core methods easily generalize to other architectures,
+such as CNNs, which also rely on their own domain-specific regularization mechanisms.
 
 \subsection{Model Capacity}
 Model capacity refers to the ability of a model to fit a wide variety of functions. We have that:
@@ -146,7 +146,7 @@ Parameter sharing (or parameter tying) is a regularization strategy that reduces
 This can be achieved softly, by adding a penalty to the loss function that encourages weight similarity, or explicitly, by tying the parameters together during optimization so they remain identical.
 
 This approach is particularly powerful when prior knowledge about the data structure suggests that certain patterns are universal. 
-The prime example is the \textbf{Convolutional Neural Network} (CNN), which applies a single, shared set of weights (a filter) across all spatial locations of an input. 
+The prime example is the \textbf{CNN}, which applies a single, shared set of weights (a filter) across all spatial locations of an input. 
 This structural constraint dramatically reduces the parameter count and allows the model to efficiently learn translation-invariant features.
 
 
@@ -170,7 +170,7 @@ Dropout is similar to a \textit{bagging} approach, where we train multiple model
 We can see each trainging iteration as training a different model. At test time, we use the full network, but we scale the weights of the neurons by the dropout probability $p$ to account for the fact that during training, each neuron was only active with probability $p$.
 
 \subsubsection{Implicit Regularization}
-Some techinques, such as Stochastic Gradient Descent (SGD), have been shown to have an implicit regularization effect on the model.
+Some techinques, such as SGD, have been shown to have an implicit regularization effect on the model.
 In particular, its stochastic nature can favor flatter minima of the loss function, which are associated with better generalization performance.
 
 Also, using loss functions that are less sensitive to outliers, such as the Huber loss, can have an implicit regularization effect by reducing the influence of outliers on the training process.

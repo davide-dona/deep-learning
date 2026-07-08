@@ -18,14 +18,14 @@ Generative models have a wide range of applications, including image generation,
 Probabilistic Models can be further divided into two main categories:
 \begin{itemize}
     \item \textbf{Explicit Density Models:} These models explicitly define a probability distribution over the data and learn the parameters of this distribution. 
-    The main example is the \textbf{Variational Autoencoder (VAE)}.
+    The main example is the \textbf{VAE}.
     
     \item \textbf{Implicit Density Models:} These models do not explicitly define a probability distribution, but instead learn to generate samples from the data distribution.
-    The main example is the \textbf{Generative Adversarial Network (GAN)}.
+    The main example is the \textbf{GAN}.
 \end{itemize}
 
 \subsection{GAN}
-\textbf{Generative Adversarial Networks} (GANs) are actually a union of two neural networks rather than a single neural network.
+\textbf{GANs} are actually a union of two neural networks rather than a single neural network.
 
 In particular, GANs consist of:
 
@@ -125,7 +125,7 @@ This change had 2 main advantages:
 
 After this work, many other GAN variants have been proposed, each with its own advantages and disadvantages.
 
-\subsubsection{Wasserstein GAN (WGAN)}
+\subsubsection{Wasserstein GAN}
 \textbf{Wasserstein GANs} (WGANs) try to further improve the training stability of LSGANs by using the Wasserstein distance. 
 The original GAN formulation is equivalent to minimizing the Jensen-Shannon divergence between the real and generated data distributions.
 However, the Jensen-Shannon divergence has been shown to be a poor choice for training GANs, as it can lead to vanishing gradients and mode collapse.
@@ -182,7 +182,7 @@ This can be expressed as follows:
 \textbf{StyleGAN} is a GAN architecture proposed by NVIDIA that allows for fine-grained control over the generated images by introducing a style-based generator architecture.
 To enable this, StyleGAN introduces a \textbf{mapping network} that thakes the random noise vector as input and maps it to an intermediate latent space, with better features for controlling the style of the generated images.
 
-The intermediate latent vector $w$ is then passed through a series of \textbf{adaptive instance normalization} (AdaIN) layers, which control the style of the generated image at different levels of detail. 
+The intermediate latent vector $w$ is then passed through a series of \textbf{AdaIN} layers, which control the style of the generated image at different levels of detail.
 This allows for controlling the overall structure of the image, as well as finer details such as textures and colors.
 
 \paragraph{AdaIN}
@@ -209,7 +209,7 @@ Early approaches relied on human evaluators to assess the quality of generated s
 
 Additionally, computing the likelihood of generated samples or directly comparing the real and generated data distributions is intractable, as GANs do not explicitly model the underlying probability distribution of the data.
 
-\subsubsection{Inception Score (IS)}
+\subsubsection{Inception Score}
 The first metric proposed to replace human evaluation was the \textbf{Inception Score} (IS). The core idea is that a good generator should produce highly recognizable objects from a wide variety of classes (meaning the generated sample classes should be uniformly distributed).
 
 To compute the IS, a pre-trained Inception model is used to classify the generated samples. The score evaluates two criteria:
@@ -231,7 +231,7 @@ The Inception Score suffers from two main issues:
     \item \textbf{Mode Collapse:} If the generator produces only a single realistic sample for each class, the IS can still be high. The samples are evenly distributed across classes and easily recognized, but the model entirely lacks intra-class diversity.
 \end{itemize}
 
-\subsubsection{Frechet Inception Distance (FID)}
+\subsubsection{Frechet Inception Distance}
 
 The \textbf{Fréchet Inception Distance} (FID) was proposed to overcome several shortcomings of the Inception Score. 
 Rather than relying solely on the predicted class probabilities, FID compares the distributions of feature representations extracted from real and generated samples.
@@ -256,7 +256,7 @@ A lower FID score indicates that the generated feature distribution is closer to
 Compared to IS, FID directly measures the similarity between generated and real data distributions. 
 Nevertheless, it still has limitations. In particular, FID cannot explicitly detect overfitting, as a generator that simply memorizes the training set would achieve an FID score close to zero.
 
-\subsubsection{Kernel Inception Distance (KID)}
+\subsubsection{Kernel Inception Distance}
 
 Like FID, the \textbf{Kernel Inception Distance} (KID) evaluates the similarity between the feature distributions of real and generated samples extracted from a pre-trained Inception network.
 

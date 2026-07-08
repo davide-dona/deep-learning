@@ -1,5 +1,5 @@
 \section{Expanding CNN Beyond Classification}
-In the previous chapter, we have seen how Convolutional Neural Networks (CNNs) can be used for image classification tasks. 
+In the previous chapter, we have seen how CNNs can be used for image classification tasks.
 
 CNNs can however be applied to a wide range of other tasks beyond classification, such as \textbf{object detection}, 
 \textbf{semantic segmentation}, and \textbf{captioning}, among others.
@@ -20,7 +20,7 @@ This makes also the training process more challenging, as several issues can ari
     because of their large receptive field and the pooling layers that reduce the spatial resolution of the feature maps.
 \end{itemize}
 
-To address these issues, several architectures have been proposed, such as \textbf{R-CNN}, \textbf{Fast R-CNN}, and \textbf{YOLO} (You Only Look Once), among others.
+To address these issues, several architectures have been proposed, such as \textbf{R-CNN}, \textbf{Fast R-CNN}, and \textbf{YOLO}, among others.
 
 \subsubsection{Before CNNs: DPM}
 Before the rise of deep learning and CNNs, one of the most popular approaches for object detection was the \textbf{Deformable Part Model} (DPM).
@@ -105,7 +105,7 @@ The architecture of Faster R-CNN consists of the following components:
 \begin{itemize}
     \item \textbf{Shared Convolutional Network}: Like its predecessor, it processes the entire image once to generate a high-level feature map.
     
-    \item \textbf{Region Proposal Network (RPN)}: A small, fully convolutional network that slides over the feature map. 
+    \item \textbf{RPN}: A small, fully convolutional network that slides over the feature map.
     At each sliding window location, it predicts objectness scores and bounding box offsets for $k$ \textbf{anchor boxes} of varying scales and aspect ratios.
     This implies that, for each position in the feature map, the RPN generates $k$ proposals, which are then filtered using non-maximum suppression (NMS) to remove redundant boxes.
     
@@ -118,7 +118,7 @@ The architecture of Faster R-CNN consists of the following components:
 By replacing Selective Search with the RPN, Faster R-CNN achieves an inference time of approximately \textbf{0.2 seconds} per image on a GPU. 
 Furthermore, because the RPN is trained specifically for the task, it typically yields higher-quality proposals than traditional computer vision algorithms, leading to improved mAP.
 
-\subsubsection{You Only Look Once (YOLO)}
+\subsubsection{You Only Look Once}
 \textbf{YOLO} (You Only Look Once) is a different approach to object detection. Instead of using a two-stage process like R-CNN and its variants,
 which was very slow and hard to train, YOLO treats object detection as a single regression problem, 
 directly predicting bounding boxes and class probabilities from the input image in one pass through the network.

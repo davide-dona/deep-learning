@@ -1,5 +1,5 @@
 \section{Attention \& Transformers}
-Early sequence processing models relied primarily on recurrent neural network (RNN) encoder-decoder architectures. 
+Early sequence processing models relied primarily on RNN encoder-decoder architectures.
 In these models, the encoder compresses the input sequence into a fixed-size representation, which the decoder then uses to generate the output. 
 However, this fixed bottleneck limits performance. The introduction of attention mechanisms demonstrated that creating a dynamic, context-aware representation of the input sequence significantly improves results. 
 
@@ -7,7 +7,7 @@ Building on the success of attention, researchers sought to eliminate the sequen
 This led to the development of more flexible architectures capable of processing sequences in parallel while still effectively capturing long-range dependencies.
 
 \subsection{Convolutional Sequence Models}
-Convolutional Neural Networks (CNNs) offer a natural alternative for sequence processing. 
+CNNs offer a natural alternative for sequence processing.
 By using convolutional filters, they efficiently capture local dependencies, and stacking these layers allows the model to expand its receptive field to capture longer-range relationships.
 
 CNNs provide two primary advantages over RNNs:
@@ -30,8 +30,8 @@ The size of these intervals is determined by the \textit{dilation rate}. This te
 For instance, consider a standard $3 \times 3$ convolutional filter applied to adjacent pixels. This configuration corresponds to a dilation rate of $1$, yielding a $3 \times 3$ receptive field. 
 If the dilation rate is increased to $2$, the filter skips one pixel between each consecutive sample. Consequently, the filter's effective receptive field expands to a $5 \times 5$ area, despite still relying on the same $9$ trainable parameters.
 
-\subsubsection{Temporal Convolutional Networks (TCNs)}
-The \textbf{Temporal Convolutional Network (TCN)} is a prominent architecture that applies dilated convolutions directly to sequence modeling. 
+\subsubsection{Temporal Convolutional Networks}
+The \textbf{Temporal Convolutional Network (TCN)} is a prominent architecture that applies dilated convolutions directly to sequence modeling.
 By addressing the historical limitations of standard CNNs, TCNs demonstrated that convolutional architectures can be highly competitive with RNNs, achieving comparable or superior performance in various sequence tasks.
 
 TCNs achieve this through two core architectural mechanisms:
@@ -166,7 +166,7 @@ In the decoder's self-attention layer, a \textbf{masking mechanism} is applied. 
 Following the masked self-attention layer, the decoder features an \textbf{encoder-decoder attention} mechanism. Here, the \textbf{Queries} come from the previous decoder layer, while the \textbf{Keys} and \textbf{Values} come directly from the output of the encoder. This allows every position in the decoder to attend over all positions in the input sequence, effectively bridging the gap between the source material and the generated output.
 
 \subsection{Language Pretraining}
-Similarly to what we have seen in the CNN section, the Transformer architecture could be trained for tasks in Natural Language Processing (NLP).
+Similarly to what we have seen in the CNN section, the Transformer architecture could be trained for tasks in NLP.
 This started a new era in NLP, where large-scale unsupervised pretraining on massive text corpora became the standard approach for building state-of-the-art models.
 These pretrained models could then be fine-tuned on specific downstream tasks, with some supervised data, achieving remarkable performance across a wide range of NLP benchmarks.
 
@@ -177,12 +177,8 @@ Some of the most notable Transformer-based pretrained models include:
 \end{itemize}
 
 \subsection{Vision Transformers}
-Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{Vision Transformers (ViTs)}.
-This transformation arrived only after the success of Transformers in NLP, since one of the challenges in applying Transformers to vision tasks was about how to represent images as sequences of tokens.
 
-\subsection{Vision Transformers}
-
-Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{Vision Transformers (ViTs)}.
+Transformers have also been successfully applied to computer vision tasks, leading to the development of \textbf{ViTs}.
 Vision Transformers emerged after the success of Transformers in NLP, since one of the main challenges in applying Transformers to computer vision was how to represent images as sequences of tokens.
 
 \paragraph{ViTs}
@@ -199,7 +195,7 @@ Results from Vision Transformers have shown that they can achieve competitive pe
 \paragraph{Data-efficient Image Transformer}
 
 The \textbf{Data-efficient Image Transformer (DeiT)} is a variant of the Vision Transformer designed to improve data efficiency during training.
-DeiT introduces a learnable \textbf{distillation token}, which is prepended to the input sequence and trained to match the predictions of a pretrained teacher model, typically a convolutional neural network (CNN).
+DeiT introduces a learnable \textbf{distillation token}, which is prepended to the input sequence and trained to match the predictions of a pretrained teacher model, typically a CNN.
 This knowledge distillation strategy enables the Vision Transformer to learn more effectively from limited training data, achieving competitive performance without requiring extremely large training datasets.
 
 \paragraph{Swin Transformer}

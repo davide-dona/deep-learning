@@ -19,7 +19,7 @@ To train an autoencoder, we minimize a \textbf{reconstruction loss} between the 
 
 Formally, given an input $x$, the encoder $f_\theta$ maps it to a latent representation $z = f_\theta(x)$, and the decoder $g_\phi$ reconstructs the input as $\hat{x} = g_\phi(z)$.
 
-A common choice is the Mean Squared Error (MSE):
+A common choice is the MSE:
 
 \begin{equation}
     \mathcal{L}(x,\hat{x}) = \|x-\hat{x}\|^2.
@@ -40,7 +40,7 @@ However, standard autoencoders do not explicitly learn a probability distributio
 
 \subsection{Variational Autoencoders}
 
-Building upon the idea of autoencoders, we obtain a more powerful generative model called the \textbf{Variational Autoencoder} (VAE). Unlike standard autoencoders, VAEs learn not only a latent representation of the data but also a probability distribution over that latent space, making it possible to generate entirely new samples.
+Building upon the idea of autoencoders, we obtain a more powerful generative model called the \textbf{VAE}. Unlike standard autoencoders, VAEs learn not only a latent representation of the data but also a probability distribution over that latent space, making it possible to generate entirely new samples.
 
 VAEs belong to the class of \textbf{explicit density estimation} generative models, whose goal is to directly model the probability distribution of the observed data.
 
@@ -99,7 +99,7 @@ The three terms have the following interpretation:
 
 
 
-\paragraph{Evidence Lower Bound (ELBO)}
+\paragraph{Evidence Lower Bound}
 
 To overcome the intractability of the marginal likelihood, VAEs maximize a tractable lower bound on the log-likelihood, known as the \textbf{Evidence Lower Bound} (ELBO):
 
