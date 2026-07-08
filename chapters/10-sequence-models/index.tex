@@ -97,25 +97,39 @@ By aligning local visual features with the exact word being generated at each ti
     \caption{Show, Attend and Tell: at each step the decoder produces an attention map $\alpha_t$ over the CNN feature map, forming a context vector $\vct{z}_t$ that, together with the previous word, drives the prediction $p(y_t)$.}
 \end{figure}
 
-The architecture of \textit{Show, Attend and Tell} consists of three main components:
-\begin{itemize}
-    \item \textbf{Encoder}: Similar to \textit{Show and Tell}, a CNN is used for feature extraction.
-    However, to preserve spatial information, the encoder avoids the fully connected layers that would otherwise collapse the spatial dimensions.
-    Instead, features are extracted directly from the final convolutional layer, producing a set of spatial feature vectors $\{\vct{a}_1, \vct{a}_2, \dots, \vct{a}_L\}$.
-    Here, $L$ represents the number of regions in the image (e.g., $14 \times 14 = 196$), and each $\vct{a}_i$ corresponds to the features of a specific region.
+The architecture of \textit{Show, Attend and Tell} consists of three main components.
 
-    \item \textbf{Attention Mechanism}: At each time step $t$, an attention network $f_{att}$ determines where the model should focus.
-    To do this, it computes a set of attention weights $\alpha_{t,i}$ for each region $i$, conditioned on the decoder's previous hidden state $\vct{h}_{t-1}$ and the encoder's feature vectors $\vct{a}_i$.
+\paragraph{Encoder}
+Similar to \textit{Show and Tell}, a CNN is used for feature extraction.
+However, to preserve spatial information, the encoder avoids the fully connected layers that would otherwise collapse the spatial dimensions.
+Instead, features are extracted directly from the final convolutional layer, producing a set of spatial feature vectors $\{\vct{a}_1, \vct{a}_2, \dots, \vct{a}_L\}$.
+Here, $L$ represents the number of regions in the image (e.g., $14 \times 14 = 196$), and each $\vct{a}_i$ corresponds to the features of a specific region.
 
-    A \textbf{context vector} $\vct{z}_t$ is then computed as a function of the attention weights $\alpha_{t,i}$ and the corresponding feature vectors $\vct{a}_i$.
-    The function could either be a weighted sum or a more complex non-linear transformation.
-    This context vector dynamically captures the specific visual information relevant for generating the current word.
+\paragraph{Attention Mechanism}
+At each time step $t$, an attention network $f_{att}$ determines where the model should focus.
+To do this, it first computes a raw relevance score for every region $i$, conditioned on the decoder's previous hidden state $\vct{h}_{t-1}$ and the corresponding feature vector $\vct{a}_i$:
+\[
+e_{t,i} = f_{att}(\vct{a}_i, \vct{h}_{t-1})
+\]
+where $f_{att}$ is typically a small MLP. These scores are then normalized across all $L$ regions with a softmax, yielding the \textbf{attention weights}:
+\[
+\alpha_{t,i} = \frac{\exp(e_{t,i})}{\sum_{k=1}^{L} \exp(e_{t,k})}
+\]
 
-    \item \textbf{Decoder}: An LSTM generates the caption sequentially.
-    At time step $t$, the decoder receives the dynamic context vector $\vct{z}_t$, the previous hidden state $\vct{h}_{t-1}$, and the previously generated word $y_{t-1}$.
-    The forward pass of the LSTM updates the hidden state and produces a probability distribution over the vocabulary for the next word $y_t$.
-    By conditioning the generation on $\vct{z}_t$, the decoder ensures that each word is grounded in the most relevant visual features of the image.
-\end{itemize}
+A \textbf{context vector} $\vct{z}_t$ is then computed as a function of the attention weights $\alpha_{t,i}$ and the corresponding feature vectors $\vct{a}_i$.
+In the deterministic (soft attention) case, this function is simply a weighted sum:
+\[
+\vct{z}_t = \sum_{i=1}^{L} \alpha_{t,i} \, \vct{a}_i
+\]
+though it could also be a more complex non-linear transformation.
+This context vector dynamically captures the specific visual information relevant for generating the current word.
+
+\paragraph{Decoder}
+An LSTM generates the caption sequentially.
+At time step $t$, the decoder receives the dynamic context vector $\vct{z}_t$, the previous hidden state $\vct{h}_{t-1}$, and the previously generated word $y_{t-1}$.
+The forward pass of the LSTM updates the hidden state and produces a probability distribution over the vocabulary for the next word $y_t$.
+By conditioning the generation on $\vct{z}_t$, the decoder ensures that each word is grounded in the most relevant visual features of the image.
+Since $\vct{h}_t$ is in turn used to compute the attention scores at the next time step, the region of the image the model attends to naturally shifts as the caption is generated.
 
 
 \subsection{Attention Types}

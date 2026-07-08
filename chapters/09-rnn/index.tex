@@ -128,18 +128,20 @@ Let's see a simple example of how BPTT works in a Vanilla RNN:
 
     Where each term $\frac{\partial \loss_t}{\partial \mat{W}_h}$ is computed as:
     \begin{equation}
-        \frac{\partial \loss_t}{\partial \mat{W}_h} = \frac{\partial \loss_t}{\partial y_t} \cdot \frac{\partial y_t}{\partial \vct{h}_t} \cdot \frac{\partial \vct{h}_t}{\partial \mat{W}_h}
+        \frac{\partial \loss_t}{\partial \mat{W}_h} = \frac{\partial \loss_t}{\partial \vct{h}_t} \cdot \frac{\partial \vct{h}_t}{\partial \mat{W}_h}
     \end{equation}
 
-    For example, computing the gradient of the error with respect to $\vct{h}_1$ (how the hidden state at time step 1 contributes to the loss) we have to consider:
-    \begin{itemize}
-        \item How $\vct{h}_1$ contributes to $\vct{h}_2$;
-        \item How $\vct{h}_2$ effects $\vct{h}_3$;
-        \item How $\vct{h}_3$ contributes to the error at time step 3.
-    \end{itemize}
+    Not only that, but the gradient of the loss with respect to the hidden state at time step $t$ is also influenced by the hidden states at subsequent time steps.
+    This implies that when computing $\frac{\partial \loss}{\partial \vct{h}_t}$, we also need to consider the chain of time steps dependencies.
+    Considering for example the hidden state at time step $t=1$, we have:
+    \begin{equation}
+        \vct{h}_1 \rightarrow \vct{h}_2 \rightarrow \vct{h}_3 \rightarrow \loss
+    \end{equation}
+
+
     This gives us:
     \begin{equation}
-        \frac{\partial \loss}{\partial \vct{h}_1} = \frac{\partial \loss}{\partial \vct{h}_3} \cdot \frac{\partial \vct{h}_3}{\partial \vct{h}_2} \cdot \frac{\partial \vct{h}_2}{\partial \vct{h}_1}
+        \frac{\partial \loss}{\partial \vct{h}_1} =  \frac{\partial \vct{h}_2}{\partial \vct{h}_1} \cdot \frac{\partial \vct{h}_3}{\partial \vct{h}_2} \cdot \frac{\partial \loss}{\partial \vct{h}_3}
     \end{equation}
 
 \end{itemize}
@@ -156,7 +158,7 @@ While Backpropagation Through Time (BPTT) allows RNNs to learn from sequential d
 \begin{itemize}
     \item \textbf{The Mechanism:} Early time steps in a sequence receive gradients through a long chain of multiplications. If the sequence is long, these repeated multiplications cause the gradients to shrink exponentially as they propagate backward.
     \item \textbf{The Consequence:} The gradients for early states (like $\vct{h}_1$) become vanishingly small, which effectively prevents the model from updating its weights and learning long-term dependencies in the data.
-    \item \textbf{The Real-World Impact:} This is particularly problematic for tasks that require a deep understanding of long-range context—such as language modeling or machine translation—where the model must capture relationships between words that are far apart in the input sequence.
+    \item \textbf{The Real-World Impact:} This is particularly problematic for tasks that require a deep understanding of long-range context, such as language modeling or machine translation, where the model must capture relationships between words that are far apart in the input sequence.
 \end{itemize}
 
 \subsubsection{A partial solution: Truncated BPTT}
