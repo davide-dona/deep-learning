@@ -165,7 +165,8 @@ While the decoder shares many architectural similarities with the encoder, it in
 In the decoder's self-attention layer, a \textbf{masking mechanism} is applied. To preserve the causal, autoregressive nature of sequence generation, the model is prevented from "looking ahead." The mask ensures that the prediction for token $i$ can only depend on known outputs at positions less than $i$, blinding the decoder to future tokens during parallelized training.
 
 \paragraph{Encoder-Decoder Attention}
-Following the masked self-attention layer, the decoder features an \textbf{encoder-decoder attention} mechanism. Here, the \textbf{Queries} come from the previous decoder layer, while the \textbf{Keys} and \textbf{Values} come directly from the output of the \textbf{final encoder layer}, shared across every decoder layer. This allows every position in the decoder to attend over all positions in the input sequence, effectively bridging the gap between the source material and the generated output.
+Following the masked self-attention layer, the decoder features an \textbf{encoder-decoder attention} mechanism (also known as cross-attention). 
+Here, the \textbf{Queries} come from the previous decoder layer, while the \textbf{Keys} and \textbf{Values} come directly from the output of the \textbf{final encoder layer}, shared across every decoder layer. This allows every position in the decoder to attend over all positions in the input sequence, effectively bridging the gap between the source material and the generated output.
 
 \subsection{Language Pretraining}
 Similarly to what we have seen in the CNN section, the Transformer architecture could be trained for tasks in NLP.

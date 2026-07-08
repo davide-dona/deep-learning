@@ -1,0 +1,48 @@
+\usetikzlibrary{arrows.meta, calc, positioning}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    flow/.style={-{Stealth[length=7pt]}, line width=1pt},
+    lbl/.style={font=\small, align=center},
+    box/.style={draw, thick, rounded corners, align=center, font=\bfseries\small},
+]
+    \def\rowoff{0.9}  % vertical offset of the real/fake data paths from the centerline
+    \def\gapx{3.6}    % horizontal step between stages
+
+    % ----- Generator: only sits on the top (fake-data) path -----
+    \node[box, minimum width=2.6cm, minimum height=1.1cm,
+          fill=dlblue!18, draw=dlblue!70!black, text=dlblue!35!black]
+          (G) at (\gapx,\rowoff) {Generator\\$G_{\theta_G}$};
+
+    % ----- Discriminator: shared by both the real and the fake path -----
+    \node[box, minimum width=2.6cm, minimum height=2.6cm,
+          fill=dlred!10, draw=dlred!70!black, text=dlred!40!black]
+          (D) at (2*\gapx+1.6,0) {Discriminator\\$D_{\theta_D}$};
+
+    % Ports on the discriminator, aligned with the two incoming data paths
+    \coordinate (Din-top)  at ($(D.west)+(0,\rowoff)$);
+    \coordinate (Din-bot)  at ($(D.west)+(0,-\rowoff)$);
+    \coordinate (Dout-top) at ($(D.east)+(0,\rowoff)$);
+    \coordinate (Dout-bot) at ($(D.east)+(0,-\rowoff)$);
+
+    % ----- Inputs -----
+    \coordinate (z) at (0,\rowoff);
+    \coordinate (x) at (0,-\rowoff);
+    \node[lbl] at ($(z)+(0,0.6)$) {$z \sim p_{z}$\\\scriptsize noise};
+    \node[lbl] at ($(x)+(0,-0.6)$) {$x \sim p_{data}$\\\scriptsize real sample};
+
+    % ----- Data flow: noise through the generator into the discriminator -----
+    \draw[flow] (z) -- (G.west);
+    \draw[flow] (G.east) -- node[lbl, above] {$G_{\theta_G}(z)$\\\scriptsize fake sample} (Din-top);
+
+    % ----- Data flow: real sample directly into the discriminator -----
+    \draw[flow] (x) -- (Din-bot);
+
+    % ----- Discriminator outputs -----
+    \draw[flow] (Dout-top) -- ++(2.2,0) coordinate (fakeout);
+    \draw[flow] (Dout-bot) -- ++(2.2,0) coordinate (realout);
+    \node[lbl, right, align=left] at (fakeout)
+        {$D_{\theta_D}(G_{\theta_G}(z))$\\\scriptsize\textcolor{dlred!65!black}{$\rightarrow 0$ (fake)}};
+    \node[lbl, right, align=left] at (realout)
+        {$D_{\theta_D}(x)$\\\scriptsize\textcolor{dlgreen!45!black}{$\rightarrow 1$ (real)}};
+\end{tikzpicture}
