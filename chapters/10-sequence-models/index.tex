@@ -185,7 +185,14 @@ This architecture typically employs a Bi-directional RNN as the encoder.
 The forward and backward hidden states are concatenated to form a single, context-rich representation for each time step of the input sequence: $\vct{h}_i = [\overrightarrow{\vct{h}}_i; \overleftarrow{\vct{h}}_i]$.
 
 During the decoding step $t$, the model calculates an attention weight $\alpha_{t,i}$ for each encoder hidden state $\vct{h}_i$.
-These weights are derived by scoring the alignment between the decoder's hidden state $\vct{s}_t$ and each encoder state $\vct{h}_i$.
+These weights are derived by scoring the alignment between the decoder's previous hidden state $\vct{s}_{t-1}$ and each encoder state $\vct{h}_i$, through an attention network $f_{att}$, the \textbf{alignment model}, which is trained jointly with the rest of the architecture:
+\[
+e_{t,i} = f_{att}(\vct{s}_{t-1}, \vct{h}_i)
+\]
+These scores are then normalized across all $T_x$ encoder states with a softmax, yielding the attention weights:
+\[
+\alpha_{t,i} = \softmax(e_{t,i}) = \frac{\exp(e_{t,i})}{\sum_{k=1}^{T_x} \exp(e_{t,k})}
+\]
 
 The dynamic context vector $\vct{c}_t$ is then constructed as the weighted sum of all encoder hidden states, scaled by their respective attention weights:
 \[
