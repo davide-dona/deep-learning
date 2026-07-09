@@ -45,69 +45,85 @@ Building upon the idea of autoencoders, we obtain a more powerful generative mod
 VAEs belong to the class of \textbf{explicit density estimation} generative models, whose goal is to directly model the probability distribution of the observed data.
 
 \subsubsection{Idea}
-VAEs define a density function $p_\theta(x)$ over the data space, parameterized by a neural network with parameters $\theta$. 
 
-We model the data distribution through
+The key idea behind Variational Autoencoders (VAEs) is that the observed data are assumed to be generated from a lower-dimensional \emph{latent} representation $z$. Rather than modeling the data distribution directly, VAEs first model the latent space and then describe how latent variables generate observations.
+
+Under this assumption, the probability of observing a data point $x$ is obtained by considering all possible latent variables that could have generated it. This gives rise to the marginal likelihood
 
 \begin{equation}
     \label{eq:VAEs}
     p_\theta(x)
     =
-    \int p(z)\,p_\theta(x|z)\,dz,
+    \int p_\theta(x \mid z)\,p(z)\,dz,
 \end{equation}
 
-where $p(z)$ is a prior distribution over the latent variable $z$, typically chosen as a standard Gaussian.
+where $p(z)$ is a prior distribution over the latent variable, typically chosen as a standard Gaussian, and $p_\theta(x \mid z)$ is the conditional distribution learned by the decoder.
 
-Our objective is to maximize the likelihood of the observed data with respect to the parameters $\theta$. Unfortunately, this is generally intractable. Since the conditional distribution $p_\theta(x|z)$ is represented by a neural network, the integral in Equation~\ref{eq:VAEs} has no closed-form solution and must integrate over all possible latent values.
+The objective is to learn the model parameters $\theta$ by maximizing the likelihood of the observed data. However, computing the marginal likelihood in Equation~\ref{eq:VAEs} is generally intractable, as it requires integrating over the entire latent space.
 
-A natural idea is to instead work with the posterior distribution over the latent variables. By Bayes' theorem,
+Rather than attempting to evaluate the marginal likelihood directly, it is natural to ask the inverse question: given an observation $x$, which latent variable $z$ is most likely to have generated it? This is described by the posterior distribution
 
 \begin{equation}
-    p_\theta(z|x)
+    p_\theta(z \mid x)
     =
-    \frac{p_\theta(x|z)\,p(z)}
+    \frac{p_\theta(x \mid z)\,p(z)}
          {p_\theta(x)}.
 \end{equation}
 
-However, this expression still depends on the marginal likelihood $p_\theta(x)$, which is exactly the intractable quantity we wish to compute.
+Unfortunately, computing the posterior is just as difficult as computing the marginal likelihood, since it also depends on the intractable quantity $p_\theta(x)$.
 
-To overcome this difficulty, we introduce a second distribution,
+To overcome this issue, VAEs introduce a second distribution,
 
 \[
-q_\phi(z|x),
+q_\phi(z \mid x),
 \]
 
-parameterized by another neural network. This distribution serves as a tractable approximation of the true posterior $p_\theta(z|x)$.
+parameterized by another neural network, called the \emph{encoder}. This distribution provides a tractable approximation of the true posterior $p_\theta(z \mid x)$.
 
 \paragraph{A tractable solution}
 
-By introducing the approximate posterior $q_\phi(z|x)$ and rearranging the log-likelihood, we obtain the following decomposition:
+Introducing the approximate posterior allows us to derive the following decomposition of the log-likelihood:
 
 \begin{equation}
-    \log p_\theta(x) = \underbrace{ \mathbb{E}_{q_\phi(z|x)} \left[ \log p_\theta(x|z) \right] - D_{KL} \left(q_\phi(z|x)\,\|\,p(z)\right)}_{\text{ELBO}}+D_{KL}\left(q_\phi(z|x)\,\|\,p_\theta(z|x)\right).
+    \log p_\theta(x)
+    =
+    \underbrace{
+    \mathbb{E}_{z}
+    \left[
+        \log p_\theta(x \mid z)
+    \right]
+    -
+    D_{KL}
+    \left(
+        q_\phi(z \mid x)
+        \,\|\,
+        p_{\theta}(z)
+    \right)
+    }_{\text{ELBO}}
+    +
+    D_{KL}
+    \left(
+        q_\phi(z \mid x)
+        \,\|\,
+        p_\theta(z \mid x)
+    \right).
 \end{equation}
 
 The three terms have the following interpretation:
 
 \begin{itemize}
-    \item The first term is the expected log-likelihood of the data under the approximate posterior. It encourages the decoder to accurately reconstruct the input.
+    \item The first term is the \textit{reconstruction term}: the expected log-likelihood of the data under the approximate posterior. It measures how well the decoder $p_\theta(x \mid z)$ can reconstruct the observed data $x$ from a latent representation sampled from $q_\phi(z \mid x)$, and maximizing it encourages accurate reconstructions.
 
-    \item The second term measures how closely the approximate posterior matches the prior distribution over the latent variables.
+    \item The second term is the \textit{regularization term}: the Kullback--Leibler divergence between the approximate posterior $q_\phi(z \mid x)$ and the prior $p(z)$. Minimizing it encourages the latent representations to remain close to the prior, resulting in a smooth and well-structured latent space.
 
-    \item The third term measures the discrepancy between the approximate and true posterior. Although this quantity is intractable, it is always non-negative.
+    \item The third term is the Kullback--Leibler divergence between the approximate and true posterior. Since this divergence is always non-negative, the sum of the first two terms is a lower bound on the log-likelihood, known as the \textbf{Evidence Lower Bound} (ELBO):
 \end{itemize}
-
-
-
-\paragraph{Evidence Lower Bound}
-
-To overcome the intractability of the marginal likelihood, VAEs maximize a tractable lower bound on the log-likelihood, known as the \textbf{Evidence Lower Bound} (ELBO):
 
 \begin{equation}
     \label{eq:ELBO}
     \mathcal{L}_{\mathrm{ELBO}}
     =
-    \mathbb{E}_{q_\phi(z|x)}
+    \mathbb{E}_{z}
     \left[
         \log p_\theta(x|z)
     \right]
@@ -119,15 +135,7 @@ To overcome the intractability of the marginal likelihood, VAEs maximize a tract
     \right).
 \end{equation}
 
-The ELBO consists of two terms:
-
-\begin{itemize}
-    \item The first term is the \textit{reconstruction term}. It measures how well the decoder $p_\theta(x|z)$ can reconstruct the observed data $x$ from a latent representation sampled from the approximate posterior $q_\phi(z|x)$. Maximizing this term encourages accurate reconstructions.
-
-    \item The second term is the \textit{regularization term}. It is the Kullback--Leibler (KL) divergence between the approximate posterior $q_\phi(z|x)$ and the prior distribution $p(z)$. Minimizing this term encourages the latent representations to remain close to the prior, resulting in a smooth and well-structured latent space.
-\end{itemize}
-
-This loss function allows VAEs to learn a meaningful latent space, where similar inputs are mapped to nearby points in the latent space.
+Consequently, instead of maximizing the intractable log-likelihood directly, VAEs maximize the ELBO. This simultaneously increases the data likelihood while encouraging the approximate posterior to match the true posterior, and yields a meaningful latent space in which similar inputs are mapped to nearby points.
 
 \subsubsection{Mapping the ELBO to the VAE Architecture}
 Equation \ref{eq:ELBO} maps directly onto the encoder-decoder pair we set out to build, with each network now standing for one of the two distributions involved.
