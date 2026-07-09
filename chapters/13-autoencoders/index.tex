@@ -44,7 +44,7 @@ Building upon the idea of autoencoders, we obtain a more powerful generative mod
 
 VAEs belong to the class of \textbf{explicit density estimation} generative models, whose goal is to directly model the probability distribution of the observed data.
 
-\subsubsection{Idea}
+\subsubsection{From Data to Latent Variables}
 
 The key idea behind Variational Autoencoders (VAEs) is that the observed data are assumed to be generated from a lower-dimensional \emph{latent} representation $z$. Rather than modeling the data distribution directly, VAEs first model the latent space and then describe how latent variables generate observations.
 
@@ -80,7 +80,7 @@ q_\phi(z \mid x),
 
 parameterized by another neural network, called the \emph{encoder}. This distribution provides a tractable approximation of the true posterior $p_\theta(z \mid x)$.
 
-\paragraph{A tractable solution}
+\subsubsection{The Evidence Lower Bound (ELBO)}
 
 Introducing the approximate posterior allows us to derive the following decomposition of the log-likelihood:
 
@@ -137,7 +137,7 @@ The three terms have the following interpretation:
 
 Consequently, instead of maximizing the intractable log-likelihood directly, VAEs maximize the ELBO. This simultaneously increases the data likelihood while encouraging the approximate posterior to match the true posterior, and yields a meaningful latent space in which similar inputs are mapped to nearby points.
 
-\subsubsection{Mapping the ELBO to the VAE Architecture}
+\subsubsection{VAE Architecture}
 Equation \ref{eq:ELBO} maps directly onto the encoder-decoder pair we set out to build, with each network now standing for one of the two distributions involved.
 
 The term $p_\theta(x \mid z)$ represents the probability of generating $x$ given a latent variable $z$. This is exactly what the \textbf{decoder} computes: given a latent code $z$, it outputs a distribution over reconstructions of $x$.
@@ -153,18 +153,31 @@ Since we are modeling the probabilistic generation of data, both networks are th
     \label{fig:vae-architecture}
 \end{figure}
 
-To keep the sampling of $z$ differentiable during training, VAEs use the \textbf{reparameterization trick}: instead of sampling $z$ directly, we sample noise $\epsilon \sim \mathcal{N}(0, I)$ and compute $z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon$, moving the randomness outside the network so gradients can still flow through $\mu_\phi$ and $\sigma_\phi$.
+\subsubsection{Training Time}
+
+At training time, the full architecture shown in Figure~\ref{fig:vae-architecture} is used end-to-end. The encoder receives a real sample $x$ and predicts the parameters of the approximate posterior distribution $q_\phi(z \mid x)$, namely its mean $\mu_\phi(x)$ and standard deviation $\sigma_\phi(x)$. A latent vector $z$ is then sampled from this distribution and passed to the decoder, which reconstructs the original sample.
+
+Since the sampling operation is not differentiable, gradients cannot be propagated through it directly. VAEs overcome this issue using the \textbf{reparameterization trick}: instead of sampling $z$ directly, we sample noise $\epsilon \sim \mathcal{N}(0, I)$ and compute
+
+\[
+z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon,
+\]
+
+thereby expressing the stochasticity through $\epsilon$ while keeping the dependence on the network parameters differentiable.
+
+The encoder and decoder are trained jointly by maximizing the ELBO (Equation~\ref{eq:ELBO}) using gradient-based optimization. The reconstruction term encourages the decoder to accurately reconstruct the input sample, while the KL divergence regularizes the latent space by encouraging the approximate posterior $q_\phi(z \mid x)$ to remain close to the prior distribution $p(z)$.
 
 \subsubsection{Inference Time}
 
-Unlike a standard autoencoder, a VAE encourages the latent representations to follow a known prior distribution, typically a standard Gaussian. 
-As a result, once training is complete, we can generate new data by simply sampling a latent vector
+Unlike at training time, at inference time there is no observed sample $x$ to feed to the encoder, so the encoder is discarded entirely. 
+This is possible because the regularization term encourages $q_\phi(z \mid x)$ to match the prior distribution $p(z)$ for every $x$ in the dataset. 
+As a result, once training is complete, we can generate new data by simply sampling a latent vector directly from the prior,
 
 \[
-z \sim p(z)
+z \sim p(z),
 \]
 
-and passing it through the decoder. This regularized latent space is what gives VAEs their generative capability.
+and passing it through the decoder alone. This regularized latent space is what gives VAEs their generative capability.
 
 
 \subsubsection{Conditional VAEs}
