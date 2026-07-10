@@ -255,30 +255,35 @@ It's important to note that there is also a variant of RMSProp that includes the
 
 \subsubsection{Adam}
 Adam (Adaptive Moment Estimation) is an optimization algorithm that combines the benefits of both momentum and adaptive learning rates.
-To do so, it introduces a \textbf{bias-corrected estimate} for the first moment (mean) and the second moment (uncentered variance) of the gradients.
-These basis-correction terms compensate for the fact that the moments are initialized at zero, which can lead to biased estimates, especially during
-the initial stages of training.
+To do so, it maintains an exponentially decaying average of the gradients, analogous to the velocity $v$ from Momentum, together with an exponentially decaying average of the squared gradients, analogous to the accumulator $r$ from RMSProp. These are referred to as the \textbf{first moment} (mean) and \textbf{second moment} (uncentered variance) of the gradients, respectively.
+
+Since both moments are initialized at zero, they are biased towards zero, especially during the initial stages of training. To compensate for this, Adam introduces a \textbf{bias-corrected estimate} for each of the two moments.
 
 The update rule for Adam can be expressed as follows:
 \begin{algorithm}[H]
     \caption{Adam}
     \begin{algorithmic}[1]
         \Require{Initial learning rate $\eta$}
-        \Require{Decay rates $\rho_1, \rho_2$}
+        \Require{Decay rates $\beta_1, \beta_2 \in [0, 1)$}
+        \Require{Initial parameters $\vct{\theta}$}
+        \Require{Initial first and second moment estimates $s = 0$, $r = 0$}
+        \Require{Initial timestep $t = 0$}
         \While {stopping criteria not met}
             \State $i \leftarrow$ randomly selected index from $\{1, 2, \ldots, N\}$
             \State $\nabla \leftarrow \nabla_{\vct{\theta}} \loss(f(\vct{x}^{(i)}; \vct{\theta}), y^{(i)})$
             \State $t \leftarrow t + 1$
-            \State $m \leftarrow \rho_1 m + (1 - \rho_1) \nabla$ \Comment{Momentum}
-            \State $v \leftarrow \rho_2 v + (1 - \rho_2) \nabla^2$ \Comment{RMSProp}
-            \State $\hat{m} = \frac{m}{1 - \rho_1^t}$ \Comment{\textbf{first moment} bias correction}
-            \State $\hat{v} = \frac{v}{1 - \rho_2^t}$ \Comment{\textbf{second moment} bias correction}
-            \State $\vct{\theta} \leftarrow \vct{\theta} - \frac{\eta}{\sqrt{\hat{v}} + \delta} \hat{m}$ \Comment{Update parameters}
+            \State $s \leftarrow \beta_1 s + (1 - \beta_1) \nabla$ \Comment{Momentum}
+            \State $r \leftarrow \beta_2 r + (1 - \beta_2) \nabla^2$ \Comment{RMSProp}
+            \State $\hat{s} \leftarrow \dfrac{s}{1 - \beta_1^t}$ \Comment{\textbf{first moment} bias correction}
+            \State $\hat{r} \leftarrow \dfrac{r}{1 - \beta_2^t}$ \Comment{\textbf{second moment} bias correction}
+            \State $\vct{\theta} \leftarrow \vct{\theta} - \dfrac{\eta}{\sqrt{\hat{r}} + \delta} \hat{s}$ \Comment{Update parameters}
         \EndWhile
         \State \textbf{Output:} Learned parameters $\vct{\theta}$
     \end{algorithmic}
 \end{algorithm}
-We can see Adam as a combination of all the techniques we have seen so far, which makes it a very powerful optimization algorithm that is widely used in practice.
+where $\delta$ is the same small smoothing constant used in Adagrad and RMSProp, added to prevent division by zero.
+
+We can see Adam as a combination of all the techniques we have seen so far: $s$ plays the role of the velocity $v$ from Momentum, while $r$ plays the role of the accumulator $r$ from RMSProp. This combination makes Adam a very powerful optimization algorithm that is widely used in practice.
 
 \subsection{Batch Normalization}
 \textbf{Batch Normalization} (BN) is a technique originally introduced to address the problem of \textit{internal covariate shift}.
@@ -330,7 +335,7 @@ While Batch Normalization was initially proposed to fix internal covariate shift
 \subsubsection{Layer Normalization}
 Alternative normalization schemes have been proposed for scenarios where Batch Normalization struggles (e.g., small batch sizes or Recurrent Neural Networks). One prominent alternative is Layer Normalization.
 
-While Batch Normalization computes statistics across the \textit{batch} dimension for a single feature, Layer Normalization computes statistics across the \textit{feature} dimension for a single sample:
+While Batch Normalization computes statistics across the \textit{batch} dimension for a single feature, Layer Normalization computes statistics across the \textit{feature} dimensions for a single sample:
 \begin{equation*}
     \mu_L = \frac{1}{d} \sum_{j=1}^{d} H_j
 \end{equation*}
@@ -344,7 +349,18 @@ It has been shown that Layer Normalization is particularly effective in recurren
 
 
 \paragraph{Instance Normalization}
-Instance Normalization (IN) is a normalization technique specifically designed for convolutional neural networks. Unlike Batch Normalization, which computes normalization statistics across the mini-batch, Instance Normalization computes the mean and variance independently for each sample and each feature map. In particular, the normalization is performed over the spatial dimensions of each feature map, making it independent of both the other samples in the mini-batch and the other feature maps.
+Instance Normalization (IN) is a normalization technique specifically designed for convolutional neural networks. While Batch Normalization computes statistics across the \textit{batch} dimension for a single feature, and Layer Normalization computes statistics across the \textit{feature} dimensions for a single sample, Instance Normalization computes statistics across the \textit{spatial} dimensions of a single feature map, i.e., a single channel, of a single sample.
+
+Let $H_1, \ldots, H_k$ denote the values of a specific feature map for a given sample, where $k$ is the number of spatial locations in that feature map. The instance mean $\mu_I$ and instance variance $\sigma_I^2$ are computed as follows:
+\begin{equation*}
+    \mu_I = \frac{1}{k} \sum_{i=1}^{k} H_i
+\end{equation*}
+\begin{equation*}
+    \sigma_I^2 = \frac{1}{k} \sum_{i=1}^{k} (H_i - \mu_I)^2
+\end{equation*}
+As with BN and LN, the values are then standardized using $\mu_I$ and $\sigma_I^2$, followed by a learned scale and shift.
+
+Because these statistics are computed independently for each sample and each feature map, Instance Normalization is independent of both the other samples in the mini-batch and the other feature maps of the same sample.
 
 By normalizing each feature map separately, Instance Normalization reduces variations in image contrast and illumination while preserving the structural information encoded by the convolutional features. This property has made it particularly effective in image generation and image-to-image translation tasks, such as neural style transfer, where the appearance of an image is modified while its semantic content is preserved.
 

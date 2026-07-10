@@ -1,24 +1,12 @@
 \section{Diffusion Models}
 Another class of explicit density estimation generative models is \textbf{diffusion models}. 
 Although initially proposed in 2015, they have only recently surged in popularity due to their ability to generate exceptionally high-quality samples. 
+
 Around 2015, GANs were the state-of-the-art in generative modeling, despite having some serious limitations (as discussed in the previous chapter). 
 It was not until 2020 that breakthroughs in architectures and training techniques allowed diffusion models to surpass GANs in sample quality, establishing them as the current state-of-the-art.
 
 Similar to VAEs, diffusion models use neural networks to transform a simple prior distribution (e.g., a standard Gaussian) into a complex data distribution that ideally matches the training data.
-
-At a high level, the fundamental goal of this generative framework involves two simple steps:
-\begin{enumerate}
-    \item Sample a latent variable $z \sim \mathcal{N}(0, I)$ from a simple distribution;
-    \item Pass $z$ through a neural network to generate a sample $\hat{x}$.
-\end{enumerate}
-
-While traditional models like GANs might do this in a single pass, diffusion models achieve this transformation iteratively, gradually denoising the latent sample step-by-step. Ultimately, the network is trained to minimize the discrepancy between the generated data and the real data distribution.
-
-Two key questions arise from this overarching framework:
-\begin{itemize}
-    \item How do we define and structure the latent space distribution?
-    \item How do we measure distribution similarity (i.e., what objective function do we use to train the neural network)?
-\end{itemize}
+Unlike traditional models like GANs, which perform this transformation in a single pass, diffusion models achieve it iteratively, gradually denoising a latent sample step-by-step.
 
 \subsection{Idea}
 The core idea behind diffusion models is actually quite simple: 
@@ -163,6 +151,8 @@ Where, at a high level, we are basically picking a random timestep \(t\), a rand
 In the forward process, we generate a noisy sample \(x_t\) by adding the noise \(\epsilon\) to the original data sample \(x_0\) according to the forward diffusion process. 
 Then, we feed this noisy sample \(x_t\) into the neural network to predict the noise \(\epsilon_\theta(x_t, t)\), and we compute the mean squared error between the predicted noise and the true noise \(\epsilon\).
 
+This transforms the original problem of learning a complex data distribution into a simpler regression problem, where the model learns to predict the noise added to the data sample at each timestep.
+
 \subsubsection{Sampling}
 At sampling time, we start from a sample \(x_T\) drawn from the prior distribution (typically a standard Gaussian) and iteratively apply the learned reverse process, which is defined as:
 
@@ -202,4 +192,68 @@ A common approach is to use \textbf{sinusoidal embeddings} (also known as Fourie
 Later, in 2021, researchers proposed using \textbf{transformers} as the backbone architecture for diffusion models, leading to the development of \textbf{DiT} (Diffusion Transformer).
 This approach, although more computationally expensive, shows that transformers can effectively model the denoising process, better than convolutional architectures.
 
-\subsubsection{Consitionla Models}
+\subsubsection{Conditional Models}
+As with conditional GANs and VAEs, the simplest way to condition a diffusion model on additional information \(c\) (e.g., a class label or a text prompt) is to feed \(c\) as an extra input to the denoising network, \(\epsilon_\theta(x_t, t, c)\).
+
+This works, but in practice the network tends to only weakly follow the conditioning signal: since the training objective is a plain regression loss, the model has little incentive to rely heavily on \(c\) if it can already reduce the loss using \(x_t\) alone. \textbf{Guidance} techniques were introduced to fix this, giving us an explicit knob to control how strongly the generated sample adheres to \(c\), at the cost of some diversity.
+
+\paragraph{Background: The Score Function}
+Before introducing guidance, it is useful to recall that diffusion models can equivalently be described in terms of the \textbf{score function} \(\nabla_x \log p(x)\), i.e., the gradient of the log-density with respect to the data.
+It can be shown that the noise-prediction network \(\epsilon_\theta(x_t, t)\) introduced earlier approximates (a rescaling of) the score of the noisy data distribution:
+\[
+    \nabla_{x_t} \log p(x_t) \approx - \frac{\epsilon_\theta(x_t, t)}{\sqrt{1 - \bar\alpha_t}}
+\]
+This equivalence is what lets us reason about conditioning in terms of \(\log\)-probabilities below, and then translate the result back into a correction of the predicted noise \(\epsilon_\theta\).
+
+\paragraph{Classifier Guidance}
+Applying Bayes' theorem to the conditional distribution:
+\[
+    p(x|c) = \frac{p(c|x)p(x)}{p(c)}
+\]
+Taking the log of both sides:
+\[
+    \log p(x|c) = \log p(x) + \log p(c|x) - \log p(c)
+\]
+Since the last term does not depend on \(x\), it vanishes when we take the gradient with respect to \(x\):
+\begin{equation}
+    \label{eq:classifier-guidance}
+    \nabla_x \log p(x|c) = \nabla_x \log p(x) + \gamma \nabla_x \log p(c|x)
+\end{equation}
+where we introduced a \textbf{guidance scale} \(\gamma \geq 0\): \(\gamma = 1\) recovers the exact conditional score, \(\gamma > 1\) amplifies the conditioning signal (trading diversity for fidelity to \(c\)), and \(\gamma = 0\) ignores it entirely.
+
+The first term is exactly the unconditional score already modeled by \(\epsilon_\theta(x_t, t)\), while the second term requires an auxiliary \textbf{classifier} \(p_\phi(c \mid x_t)\), trained to predict the label \(c\) directly from the noisy sample \(x_t\), separately for every timestep \(t\).
+At sampling time, its gradient is used to shift the predicted noise:
+\[
+    \hat\epsilon_\theta(x_t, t) = \epsilon_\theta(x_t, t) - \gamma \sqrt{1 - \bar\alpha_t} \, \nabla_{x_t} \log p_\phi(c \mid x_t)
+\]
+The main drawback of this approach is that it requires training a separate, timestep-dependent classifier on noisy data, which is expensive and cannot reuse an existing classifier trained on clean images.
+
+\paragraph{Classifier-Free Guidance}
+Classifier-free guidance removes the need for this auxiliary classifier entirely.
+Starting again from Equation \ref{eq:classifier-guidance} and using Bayes' theorem to rewrite the classifier term:
+\[
+    \nabla_x \log p(c \mid x) = \nabla_x \log p(x|c) - \nabla_x \log p(x)
+\]
+Substituting back:
+\[
+    \nabla_x \log p(x|c) = \nabla_x \log p(x) + \gamma \big( \nabla_x \log p(x|c) - \nabla_x \log p(x) \big)
+    = (1 - \gamma) \nabla_x \log p(x) + \gamma \nabla_x \log p(x|c)
+\]
+Notice that the right-hand side only involves the conditional and unconditional \emph{scores}, quantities that a single diffusion model can already provide, with no classifier needed: we simply train one network \(\epsilon_\theta(x_t, t, c)\), randomly replacing \(c\) with a null token \(\emptyset\) (e.g., 10-20\% of the time) during training. The same network then acts as a conditional model, \(\epsilon_\theta(x_t, t, c)\), or as an unconditional one, \(\epsilon_\theta(x_t, t, \emptyset)\), simply depending on what is passed as \(c\).
+
+At sampling time, the two predictions are combined linearly:
+\begin{equation}
+    \label{eq:classifier-free-guidance}
+    \hat\epsilon_\theta(x_t, t, c) = (1 - \gamma) \, \epsilon_\theta(x_t, t, \emptyset) + \gamma \, \epsilon_\theta(x_t, t, c)
+\end{equation}
+which is the form used in practice, since it only requires two forward passes of the same network (one conditional, one unconditional) at each denoising step.
+
+\paragraph{Text-to-Image Conditioning: Latent Diffusion}
+Running a diffusion model directly on high-resolution pixels is extremely expensive, since both training and sampling require many forward passes through the denoising network. \textbf{Latent Diffusion Models} (LDMs) address this by moving the whole diffusion process into a much smaller latent space:
+\begin{enumerate}
+    \item First, a variational autoencoder is trained, independently of the diffusion model, to compress images into a lower-dimensional latent representation \(z = E(x)\), with a decoder \(D\) reconstructing images from it, \(\hat x = D(z)\). This is a purely perceptual compression step: it discards imperceptible, high-frequency pixel detail while preserving semantic content.
+    \item The diffusion model is then trained entirely on \(z\) rather than \(x\), which drastically reduces the computational and memory cost of both training and sampling.
+    \item Conditioning information (e.g., text prompts, encoded by a pretrained text encoder such as CLIP) is injected into the denoising network through \textbf{cross-attention} layers interleaved throughout the U-Net: the spatial latent features act as queries, while the text embeddings act as keys and values. This lets the model attend to the relevant words when denoising each region, rather than conditioning on a single, fixed global vector.
+    \item Finally, once a clean latent \(\hat z_0\) has been generated, the decoder \(D\) maps it back to pixel space to obtain the final image.
+\end{enumerate}
+This architecture underlies most modern text-to-image systems (e.g., Stable Diffusion).
