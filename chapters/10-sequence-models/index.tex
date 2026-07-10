@@ -189,6 +189,8 @@ These weights are derived by scoring the alignment between the decoder's previou
 \[
 e_{t,i} = f_{att}(\vct{s}_{t-1}, \vct{h}_i)
 \]
+Note that $\vct{s}_{t-1}$ is used here out of necessity rather than choice: in this architecture the context vector $\vct{c}_t$ is itself fed into the recurrence that produces $\vct{s}_t$, so at the point where the attention scores are computed, $\vct{s}_t$ does not exist yet, only $\vct{s}_{t-1}$ is available. This is in contrast with the local attention architecture presented later, where the decoder state is computed \textit{before} attention and is therefore free to use $\vct{s}_t$ directly.
+
 These scores are then normalized across all $T_x$ encoder states with a softmax, yielding the attention weights:
 \[
 \alpha_{t,i} = \softmax(e_{t,i}) = \frac{\exp(e_{t,i})}{\sum_{k=1}^{T_x} \exp(e_{t,k})}
@@ -219,6 +221,9 @@ The idea is to design a mechanism that behaves similarly to \textit{hard attenti
 The core of the approach is, for each target time step $t$, to predict an \textbf{aligned position} $p_t$ in the source sequence: an estimate of which input region is most relevant for generating the current output word.
 The context vector is then computed only from the encoder states inside a fixed-size window $[p_t - D, p_t + D]$ centered on $p_t$, where $D$ is a hyperparameter.
 
+\paragraph{A two-stage hidden state}
+Unlike the global attention architecture above, here the context vector is \textit{not} an input to the decoder recurrence. Instead, the decoder first computes a preliminary hidden state $\vct{s}_t$ with a standard RNN step, using only $\vct{s}_{t-1}$ and the previous output $y_{t-1}$. Since this $\vct{s}_t$ is already available, it can be used directly as the query for the rest of the mechanism: first to predict the aligned position $p_t$, and then to score the encoder states inside the resulting window, as described next. Only once the context vector has been formed from this window is $\vct{s}_t$ corrected into its final form.
+
 \begin{figure}[H]
     \centering
     \input{chapters/10-sequence-models/tikz/local-attention.tex}
@@ -243,6 +248,13 @@ The Gaussian term damps the contribution of encoder states far from $p_t$ toward
 The natural idea, predicting a position and then directly selecting the encoder state at that index, is \textbf{not differentiable}, since indexing into a discrete position breaks the gradient flow (this is exactly the issue that hard attention faces).
 The Gaussian weighting is what resolves this difficulty: because $p_t$ is a real-valued quantity that appears \textit{inside} the smooth exponential term, the alignment remains differentiable with respect to $p_t$, and therefore with respect to $\mat{W}_p$ and $\vct{v}_p$.
 This allows the model to learn where to look through gradient descent, recovering the focused behavior of hard attention without sacrificing trainability.
+
+\paragraph{Correcting the proposal}
+Once the context vector $\vct{c}_t$ has been formed, it is used to \textit{refine} the preliminary state $\vct{s}_t$: the two are concatenated and passed through a $\tanh$ layer to produce the \textbf{attentional hidden state}
+\[
+\tilde{\vct{s}}_t = \tanh\!\left(\mat{W}_c [\vct{c}_t; \vct{s}_t]\right)
+\]
+which is what is actually used to emit $y_t$. In other words, $\vct{s}_t$ is a first proposal for the decoder state, computed with no knowledge of the source alignment, and $\tilde{\vct{s}}_t$ is the corrected version that incorporates it.
 
 \begin{figure}[H]
     \centering
