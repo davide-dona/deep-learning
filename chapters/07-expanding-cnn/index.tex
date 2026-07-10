@@ -55,6 +55,13 @@ The R-CNN architecture consists of three main steps:
     This was typically done using a Support Vector Machine (SVM) classifier, which was trained on the features extracted from the proposals.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{\input{chapters/07-expanding-cnn/tikz/rcnn-architecture.tex}}
+    \caption{The R-CNN pipeline: Selective Search extracts $\sim$2k region proposals from the input image, each of which is warped to a fixed size and passed independently through a CNN. The resulting features are then classified by per-class SVMs.}
+    \label{fig:rcnn-architecture}
+\end{figure}
+
 This approach was a significant improvement over previous methods, but it still had a few major limitations, such as:
 \begin{itemize}
     \item \textbf{NOT an end-to-end architecture}: The R-CNN architecture is not an end-to-end architecture, as it requires separate training for the region proposal, feature extraction, and classification steps.
@@ -76,7 +83,10 @@ Instead of processing thousands of individual region proposals through a CNN, it
 
 The main innovations of Fast R-CNN are:
 \begin{itemize}
-    \item \textbf{Shared Convolutional Architecture}: Instead of running the CNN separately for each proposal, 
+    \item \textbf{Region Proposals (unchanged)}: Fast R-CNN still relies on Selective Search to generate the $\sim$2k region proposals for each image, exactly as in R-CNN.
+    What changes is how these proposals are processed afterward.
+
+    \item \textbf{Shared Convolutional Architecture}: Instead of running the CNN separately for each proposal,
     Fast R-CNN processes the entire image through a convolutional network to produce a global feature map. 
     
     \item \textbf{RoI Pooling Layer}: To handle the variable sizes of the region proposals, Fast R-CNN introduces a \textbf{Region of Interest} (RoI) \textbf{pooling} layer,
@@ -91,6 +101,13 @@ The main innovations of Fast R-CNN are:
     \item \textbf{Multi-Task Loss}: Fast R-CNN also introduces a multi-task loss function that combines classification and bounding box regression into a single optimization problem.
     This allows the model to learn both tasks simultaneously, improving the overall performance and efficiency of the training process.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{\input{chapters/07-expanding-cnn/tikz/fast-rcnn-architecture.tex}}
+    \caption{The Fast R-CNN architecture: the whole image is passed once through a deep ConvNet to produce a shared feature map. Each region proposal is projected onto this feature map and reshaped by the RoI pooling layer into a fixed-size feature vector, which is then fed to fully connected layers ending in a softmax classifier and a bounding box regressor, jointly optimized with a multi-task loss.}
+    \label{fig:fast-rcnn-architecture}
+\end{figure}
 
 This approach allowed reducing inference time significantly (to around 0.3 seconds per image on a GPU, from the 47 seconds of R-CNN), while also slightly improving the accuracy of the model.
 
@@ -113,6 +130,13 @@ The architecture of Faster R-CNN consists of the following components:
     
     \item \textbf{Classification and Bounding Box Regression}: The final stage consists of fully connected layers that predict the specific object class and perform fine-grained coordinates refinement.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{\input{chapters/07-expanding-cnn/tikz/faster-rcnn-architecture.tex}}
+    \caption{The Faster R-CNN architecture: a shared ConvNet produces a feature map that feeds both the Region Proposal Network, which slides over it to output $k$ anchor-based proposals per position, and the RoI pooling layer, which pools the proposed regions into fixed-size features for the final classifier.}
+    \label{fig:faster-rcnn-architecture}
+\end{figure}
 
 \paragraph{Performance}
 By replacing Selective Search with the RPN, Faster R-CNN achieves an inference time of approximately \textbf{0.2 seconds} per image on a GPU. 
@@ -168,6 +192,13 @@ To achieve this, Mask R-CNN introduces:
     which can quantize the RoI and lead to misalignments between the RoI and the extracted features,
     Mask R-CNN uses a RoIAlign layer that preserves the spatial alignment of the features, allowing for more accurate mask predictions.
     
-    \item \textbf{Mask Branch}: In addition to the classification and bounding box regression branches, Mask R-CNN includes a separate branch that predicts a binary mask for each RoI. 
-    This branch is typically implemented as a small fully connected network that takes the aligned features from the RoIAlign layer and outputs a mask of fixed size for each class.
+    \item \textbf{Mask Branch}: In addition to the classification and bounding box regression branches, Mask R-CNN includes a separate branch that predicts a binary mask for each RoI.
+    This branch is typically implemented as a small \textbf{fully convolutional network} (FCN) that takes the aligned features from the RoIAlign layer and outputs a mask of fixed size for each class, in a pixel-to-pixel manner that preserves the spatial layout of the RoI.
 \end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{\textwidth}{!}{\input{chapters/07-expanding-cnn/tikz/mask-rcnn-architecture.tex}}
+    \caption{The Mask R-CNN architecture: it extends Faster R-CNN by replacing RoI Pooling with RoIAlign, which uses bilinear interpolation instead of quantization to preserve precise spatial alignment, and by adding a third sibling head, the mask branch, that predicts a binary mask for each RoI alongside the classifier and bounding box regressor.}
+    \label{fig:mask-rcnn-architecture}
+\end{figure}

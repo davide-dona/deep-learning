@@ -1,0 +1,105 @@
+\usetikzlibrary{arrows.meta, calc, positioning}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    flow/.style={-{Stealth[length=7pt]}, line width=1pt},
+    lbl/.style={font=\small, align=center},
+    steplbl/.style={font=\small\bfseries, align=center, text=dlblue!35!black},
+    box/.style={draw, thick, rounded corners, align=center, font=\bfseries\small},
+]
+    \def\photo#1#2#3{% #1=center coordinate name, #2=size, #3=fill
+        \begin{scope}
+            \clip (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+            \fill[#3] (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+            \fill[dlyellow!85!white] ($(#1)+(-0.30*#2,0.30*#2)$) circle (0.11*#2);
+            \fill[dlgreen!45!black] ($(#1)+(-0.55*#2,-0.5*#2)$) -- ++(0.55*#2,0.42*#2) -- ++(0.55*#2,-0.42*#2) -- cycle;
+            \fill[dlgreen!25!black] ($(#1)+(-0.05*#2,-0.5*#2)$) -- ++(0.38*#2,0.3*#2) -- ++(0.38*#2,-0.3*#2) -- cycle;
+        \end{scope}
+        \draw[draw=dlgray!80, thick] (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+    }
+
+    \def\S{1.9}
+
+    % ===== Stage 1: shared convolutional backbone =====
+    \coordinate (img) at (0,0);
+    \photo{img}{\S}{dlsky!12}
+    \node[steplbl] at ($(img)+(0,\S/2+0.4)$) {Input Image};
+
+    \node[box, minimum width=1.5cm, minimum height=2.3cm,
+          fill=dlblue!16, draw=dlblue!70!black, text=dlblue!30!black,
+          right=1.2cm of img] (convnet) {Shared\\ConvNet};
+    \draw[flow] (img) ++(\S/2,0) -- (convnet.west);
+
+    % ===== Stage 2: shared feature map =====
+    \coordinate (fmB) at ($(convnet.east)+(1.2,-0.85)$);
+    \coordinate (fmA) at ($(convnet.east)+(2.0,0.85)$);
+    \draw[tensorblock, line width=0.8pt] (fmB) rectangle (fmA);
+    \foreach \x in {0,0.4,0.8} {\draw[tensoredge, thin] ($(fmB)+(\x,0)$) -- ($(fmB)+(\x,1.7)$);}
+    \foreach \y in {0,0.34,...,1.7} {\draw[tensoredge, thin] ($(fmB)+(0,\y)$) -- ($(fmA)+(0,\y-1.7)$);}
+    \draw[flow] (convnet.east) -- ($(fmB)!0.5!(fmA)$ |- convnet.east);
+    \node[steplbl] at ($(fmA)!0.5!(fmB)+(0,1.05)$) {Feature Map};
+
+    % ===== Stage 3: Region Proposal Network branching upward (inherited from Faster R-CNN) =====
+    \coordinate (fmtop) at ($(fmA)!0.5!(fmB)$);
+    \node[box, minimum width=2.3cm, minimum height=1.0cm,
+          fill=dlpurple!18, draw=dlpurple!65!black, text=dlpurple!45!black,
+          above=1.4cm of fmtop] (rpn) {Region Proposal\\Network};
+    \draw[flow, color=dlpurple!65!black] (fmtop) -- (rpn.south);
+
+    % ===== Stage 4: proposals produced by the RPN, projected back on the feature map =====
+    \coordinate (propcenter) at ($(rpn.north)+(0,1.1)$);
+    \draw[tensorblock alt, line width=0.8pt] ($(propcenter)+(-0.85,-0.6)$) rectangle ($(propcenter)+(0.85,0.6)$);
+    \draw[draw=dlorange!90!black, line width=1pt] ($(propcenter)+(-0.55,-0.15)$) rectangle ++(0.6,0.5);
+    \draw[draw=dlred!85!black, line width=1pt] ($(propcenter)+(-0.05,-0.4)$) rectangle ++(0.7,0.4);
+    \draw[draw=dlgreen!55!black, line width=1pt] ($(propcenter)+(0.15,0.05)$) rectangle ++(0.5,0.4);
+    \draw[flow, color=dlpurple!65!black] (rpn.north) -- (propcenter);
+    \node[steplbl] at ($(propcenter)+(0,0.85)$) {Proposals};
+
+    % ===== Stage 5: RoIAlign combines feature map + proposals =====
+    \node[box, minimum width=1.7cm, minimum height=1.6cm,
+          fill=dlorange!14, draw=dlorange!75!black, text=dlorange!35!black,
+          right=3.7cm of fmB, yshift=0.85cm, anchor=south west] (roialign) {RoIAlign};
+    \node[lbl, font=\scriptsize, below=0.15cm of roialign, align=center, text=dlgray!70!black, text width=3.2cm]
+        {bilinear interpolation,\\no quantization};
+
+    \draw[flow, color=dlorange!85!black] (propcenter) -- (propcenter -| roialign.north) -- (roialign.north);
+    \draw[flow] (fmA)+(0,-0.2) -- ++(0.6,0) |- (roialign.west);
+
+    \node[draw, fill=dlorange!25, draw=dlorange!80!black, line width=0.8pt,
+          minimum width=0.6cm, minimum height=0.6cm, right=1.0cm of roialign] (roivec) {};
+    \draw[flow] (roialign.east) -- (roivec.west);
+    \node[lbl, font=\scriptsize, above=0.1cm of roivec, align=center] {aligned\\RoI feature};
+
+    % ===== Stage 6: fully connected layers =====
+    \node[box, minimum width=1.1cm, minimum height=1.5cm,
+          fill=dlblue!10, draw=dlblue!55!black, text=dlblue!30!black,
+          right=0.9cm of roivec] (fc) {FC};
+    \draw[flow] (roivec.east) -- (fc.west);
+
+    % ===== Stage 7: three sibling heads - classifier, bbox regressor, mask branch =====
+    \node[box, minimum width=2.3cm, minimum height=0.85cm,
+          fill=dlgreen!14, draw=dlgreen!55!black, text=dlgreen!25!black,
+          right=1.3cm of fc.east, yshift=0.95cm, anchor=west] (cls) {classifier};
+    \node[box, minimum width=2.3cm, minimum height=0.85cm,
+          fill=dlred!12, draw=dlred!70!black, text=dlred!45!black,
+          right=1.3cm of fc.east, anchor=west] (bbox) {bbox\\regressor};
+    \node[box, minimum width=2.3cm, minimum height=0.85cm,
+          fill=dlpurple!14, draw=dlpurple!65!black, text=dlpurple!45!black,
+          right=1.3cm of fc.east, yshift=-0.95cm, anchor=west] (mask) {mask branch\\(small FCN)};
+
+    \draw[flow] (fc.east) -- ++(0.5,0) |- (cls.west);
+    \draw[flow] (fc.east) -- ++(0.5,0) -- (bbox.west);
+    \draw[flow] (fc.east) -- ++(0.5,0) |- (mask.west);
+
+    \node[lbl, align=left, right=0.45cm of cls, font=\small] {object class};
+    \node[lbl, align=left, right=0.45cm of bbox, font=\small] {refined box\\coordinates};
+
+    % small binary-mask glyph illustrating the mask branch's pixel-to-pixel output
+    \coordinate (maskicon) at ($(mask.east)+(0.85,0)$);
+    \draw[draw=dlgray!70, fill=dlgray!8, line width=0.7pt] ($(maskicon)+(-0.32,-0.32)$) rectangle ++(0.64,0.64);
+    \fill[dlpurple!55!black] ($(maskicon)+(-0.14,-0.22)$) circle (0.14);
+    \fill[dlpurple!55!black] ($(maskicon)+(-0.2,-0.3)$) rectangle ++(0.12,0.28);
+    \draw[flow] (mask.east) -- ($(maskicon)+(-0.32,0)$);
+    \node[lbl, align=left, right=0.3cm of maskicon, font=\small] {binary mask\\(per class)};
+
+\end{tikzpicture}

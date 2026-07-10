@@ -14,7 +14,8 @@
     % ---- CNN + feature map ----
     \node[trapezium, trapezium angle=65, draw, fill=rnnblock, thick,
           minimum width=0.9cm, minimum height=0.6cm, font=\small] (cnn) at (0,-1.25) {CNN};
-    \pic at (0,0) {grid3};
+    \node[coordinate] (fmap) at (0,0) {};
+    \pic at (fmap) {grid3};
     \node[lbl, align=center] at (-1.15,0) {feature\\ map};
     \draw[arr] (cnn.north) -- (0,-0.32);
 
@@ -29,7 +30,8 @@
 
     % ---- attention maps above each cell ----
     \foreach \i/\a in {0/1,1/2,2/3} {
-        \pic at ({2+\i*2},2.0) {grid3};
+        \node[coordinate] (alpha\a) at ({2+\i*2},2.0) {};
+        \pic at (alpha\a) {grid3};
         \node[lbl] at ({2+\i*2},2.6) {$\alpha_{\a}$};
         \draw[arr] (h\i.north) -- ({2+\i*2},1.7);
     }
@@ -48,6 +50,12 @@
     \node[lbl, below=1mm of y0] {\textless START\textgreater};
     \foreach \n in {z1,y0} { \draw[arr] (\n.north) -- (h1.south); }
     \foreach \n in {z2,y1} { \draw[arr] (\n.north) -- (h2.south); }
+
+    % ---- context vector: weighted combination of feature map + attention ----
+    \draw[arr, dlblue] (fmap) to[out=-60,in=160] (z1.west);
+    \draw[arr, dlblue] (alpha1) to[out=-60,in=100] (z1.north);
+    \draw[arr, dlblue] (fmap) to[out=-70,in=180] (z2.west);
+    \draw[arr, dlblue] (alpha2) to[out=-60,in=100] (z2.north);
 
     % ---- feedback: predicted word becomes next input ----
     \draw[->, thick, dlpurple] (py1.south) to[out=-90,in=90] (y1.north);

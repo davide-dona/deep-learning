@@ -1,0 +1,96 @@
+\usetikzlibrary{arrows.meta, calc, positioning}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    flow/.style={-{Stealth[length=7pt]}, line width=1pt},
+    lbl/.style={font=\small, align=center},
+    steplbl/.style={font=\small\bfseries, align=center, text=dlblue!35!black},
+    box/.style={draw, thick, rounded corners, align=center, font=\bfseries\small},
+]
+    \def\photo#1#2#3{% #1=center coordinate name, #2=size, #3=fill
+        \begin{scope}
+            \clip (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+            \fill[#3] (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+            \fill[dlyellow!85!white] ($(#1)+(-0.30*#2,0.30*#2)$) circle (0.11*#2);
+            \fill[dlgreen!45!black] ($(#1)+(-0.55*#2,-0.5*#2)$) -- ++(0.55*#2,0.42*#2) -- ++(0.55*#2,-0.42*#2) -- cycle;
+            \fill[dlgreen!25!black] ($(#1)+(-0.05*#2,-0.5*#2)$) -- ++(0.38*#2,0.3*#2) -- ++(0.38*#2,-0.3*#2) -- cycle;
+        \end{scope}
+        \draw[draw=dlgray!80, thick] (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+    }
+
+    \def\S{2.0}
+
+    % ===== Stage 1: whole image through a single shared ConvNet =====
+    \coordinate (img) at (0,0);
+    \photo{img}{\S}{dlsky!12}
+    \node[steplbl] at ($(img)+(0,\S/2+0.4)$) {Input Image};
+
+    \node[box, minimum width=1.5cm, minimum height=2.5cm,
+          fill=dlblue!16, draw=dlblue!70!black, text=dlblue!30!black,
+          right=1.3cm of img] (convnet) {Deep\\ConvNet};
+    \draw[flow] (img) ++(\S/2,0) -- (convnet.west);
+
+    % ===== Stage 2: convolutional feature map for the whole image =====
+    \coordinate (fmB) at ($(convnet.east)+(1.6,-0.9)$);
+    \coordinate (fmA) at ($(convnet.east)+(2.5,0.9)$);
+    \draw[tensorblock, line width=0.8pt] (fmB) rectangle (fmA);
+    \foreach \x in {0,0.3,0.6,0.9} {\draw[tensoredge, thin] ($(fmB)+(\x,0)$) -- ($(fmB)+(\x,1.8)$);}
+    \foreach \y in {0,0.3,...,1.8} {\draw[tensoredge, thin] ($(fmB)+(0,\y)$) -- ($(fmA)+(0,\y-1.8)$);}
+    \draw[flow] (convnet.east) -- ($(fmB)!0.5!(fmA)$ |- convnet.east);
+    \node[steplbl] at ($(fmA)!0.5!(fmB)+(0,1.05)$) {Feature Map};
+
+    % ---- one RoI, projected from the original proposal onto the feature map ----
+    \coordinate (roiFM) at ($(fmB)+(0.15,0.55)$); % bottom-left corner of the projected RoI
+    \coordinate (roiFMright) at ($(roiFM)+(0.6,0.35)$);
+    \coordinate (roiFMtopmid) at ($(roiFM)+(0.3,0.7)$);
+    \draw[draw=dlorange!90!black, line width=1.1pt] (roiFM) rectangle ++(0.6,0.7);
+    \draw[draw=dlorange!90!black, line width=1pt] ($(img)+(-0.25,-0.5)$) rectangle ++(0.9,0.95);
+
+    % region proposals still come from Selective Search, unchanged from R-CNN
+    \coordinate (imgbottom) at ($(img)+(0,-\S/2)$);
+    \node[lbl, font=\scriptsize, align=center, text=dlorange!75!black,
+          below=0.5cm of imgbottom, text width=3.4cm] (proplabel) {region proposal\\(Selective Search)};
+    \draw[dlorange!80!black, thin] (proplabel.north) -- ($(img)+(0.2,-0.5)$);
+
+    \coordinate (proj1) at ($(img)+(0.65,-0.025)$); % right edge of the proposal on the image
+    \coordinate (proj2) at ($(proj1)+(0.5,0)$);      % step into the image/ConvNet gap
+    \coordinate (proj3) at ($(proj2)+(0,1.70)$);     % rise above both the ConvNet and the feature map
+    \coordinate (proj4) at (roiFMtopmid |- proj3);
+    \draw[dlorange!80!black, dashed, line width=0.7pt] (proj1) -- (proj2) -- (proj3) -- (proj4) -- (roiFMtopmid);
+    \node[font=\scriptsize, text=dlorange!70!black] at ($(proj3)!0.5!(proj4)+(0,0.22)$) {RoI projection};
+
+    % ===== Stage 3: RoI pooling layer =====
+    \node[box, minimum width=1.7cm, minimum height=1.6cm,
+          fill=dlorange!14, draw=dlorange!75!black, text=dlorange!35!black,
+          right=1.9cm of fmB, yshift=0.9cm, anchor=south west] (roipool) {RoI\\Pooling};
+    \draw[flow, color=dlorange!85!black] (roiFMright) -- ++(0.3,0) |- (roipool.west);
+
+    \node[draw, fill=dlorange!25, draw=dlorange!80!black, line width=0.8pt,
+          minimum width=0.6cm, minimum height=0.6cm, right=1.0cm of roipool] (roivec) {};
+    \draw[flow] (roipool.east) -- (roivec.west);
+    \node[lbl, font=\scriptsize, below=0.1cm of roivec, align=center] {fixed-size\\RoI feature};
+
+    % ===== Stage 4: fully connected layers =====
+    \node[box, minimum width=1.1cm, minimum height=1.5cm,
+          fill=dlblue!10, draw=dlblue!55!black, text=dlblue!30!black,
+          right=0.9cm of roivec] (fc) {FC};
+    \draw[flow] (roivec.east) -- (fc.west);
+
+    % ===== Stage 5: two sibling output heads =====
+    \node[box, minimum width=2.3cm, minimum height=0.9cm,
+          fill=dlgreen!14, draw=dlgreen!55!black, text=dlgreen!25!black,
+          right=1.3cm of fc.east, yshift=0.7cm, anchor=west] (cls) {softmax\\classifier};
+    \node[box, minimum width=2.3cm, minimum height=0.9cm,
+          fill=dlred!12, draw=dlred!70!black, text=dlred!45!black,
+          right=1.3cm of fc.east, yshift=-0.7cm, anchor=west] (bbox) {bbox\\regressor};
+
+    \draw[flow] (fc.east) -- ++(0.5,0) |- (cls.west);
+    \draw[flow] (fc.east) -- ++(0.5,0) |- (bbox.west);
+
+    \node[lbl, align=left, right=0.45cm of cls, font=\small] {class\\probabilities};
+    \node[lbl, align=left, right=0.45cm of bbox, font=\small] {refined box\\coordinates};
+
+    \node[lbl] at ($(roipool.north)!0.5!(fc.north)+(0,0.75)$) {\bfseries\small Multi-task loss};
+    \draw[dlgray!50, dashed] ($(cls.north west)+(-0.35,0.35)$) rectangle ($(bbox.south east)+(0.35,-0.35)$);
+
+\end{tikzpicture}

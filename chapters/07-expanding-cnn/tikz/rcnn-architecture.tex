@@ -1,0 +1,78 @@
+\usetikzlibrary{arrows.meta, calc, positioning}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    flow/.style={-{Stealth[length=7pt]}, line width=1pt},
+    lbl/.style={font=\small, align=center},
+    steplbl/.style={font=\small\bfseries, align=center, text=dlblue!35!black},
+    box/.style={draw, thick, rounded corners, align=center, font=\bfseries\small},
+    propedge/.style={draw, line width=1pt, rounded corners=1pt},
+]
+    % ---- helper: a schematic "photo" (landscape icon) clipped to a square ----
+    \def\photo#1#2#3{% #1=center coordinate name, #2=size, #3=fill
+        \begin{scope}
+            \clip (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+            \fill[#3] (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+            \fill[dlyellow!85!white] ($(#1)+(-0.30*#2,0.30*#2)$) circle (0.11*#2);
+            \fill[dlgreen!45!black] ($(#1)+(-0.55*#2,-0.5*#2)$) -- ++(0.55*#2,0.42*#2) -- ++(0.55*#2,-0.42*#2) -- cycle;
+            \fill[dlgreen!25!black] ($(#1)+(-0.05*#2,-0.5*#2)$) -- ++(0.38*#2,0.3*#2) -- ++(0.38*#2,-0.3*#2) -- cycle;
+        \end{scope}
+        \draw[draw=dlgray!80, thick] (#1) ++(-#2/2,-#2/2) rectangle ++(#2,#2);
+    }
+
+    \def\S{2.1}   % photo size
+
+    % ===== Stage 1: input image =====
+    \coordinate (img1) at (0,0);
+    \photo{img1}{\S}{dlsky!12}
+    \node[steplbl] at ($(img1)+(0,\S/2+0.45)$) {Input Image};
+
+    % ===== Stage 2: selective search -> region proposals =====
+    \coordinate (img2) at (4.6,0);
+    \photo{img2}{\S}{dlsky!12}
+    \node[steplbl, align=center] at ($(img2)+(0,\S/2+0.45)$) {Selective Search\\\normalfont\small $\sim$2k region proposals};
+
+    % three candidate proposals of different size/position/color
+    \draw[propedge, color=dlorange!90!black] ($(img2)+(-0.85,0.15)$) rectangle ++(0.95,0.75);
+    \draw[propedge, color=dlred!85!black]    ($(img2)+(-0.15,-0.85)$) rectangle ++(1.05,0.65);
+    \draw[propedge, color=dlgreen!55!black]  ($(img2)+(0.30,0.25)$) rectangle ++(0.65,0.60);
+
+    \draw[flow] (img1) ++(\S/2,0) -- ++(0.9,0);
+
+    % ===== Stage 3: warp each proposal to a fixed size =====
+    \coordinate (warpanchor) at (8.0,0);
+
+    \node[draw, propedge, color=dlorange!90!black, fill=dlorange!10, minimum width=0.85cm, minimum height=0.85cm] (w1) at ($(warpanchor)+(0,0.95)$) {};
+    \node[draw, propedge, color=dlgreen!55!black,  fill=dlgreen!10,  minimum width=0.85cm, minimum height=0.85cm] (w2) at ($(warpanchor)+(0,0)$)    {};
+    \node[draw, propedge, color=dlred!85!black,    fill=dlred!10,    minimum width=0.85cm, minimum height=0.85cm] (w3) at ($(warpanchor)+(0,-0.95)$) {};
+
+    \node[lbl, align=center, below=0.55cm of w3, text width=2.3cm] {\bfseries\small Warp to fixed size\\\normalfont\small (e.g., $224\times224$)};
+
+    \draw[flow, color=dlorange!90!black] ($(img2)+(0.10,0.525)$) -- (w1.west);
+    \draw[flow, color=dlgreen!55!black]  ($(img2)+(0.95,0.55)$)  -- (w2.west);
+    \draw[flow, color=dlred!85!black]    ($(img2)+(0.90,-0.525)$) -- (w3.west);
+
+    % ===== Stage 4: CNN feature extraction (run independently per proposal) =====
+    \node[box, minimum width=1.9cm, minimum height=2.6cm,
+          fill=dlblue!16, draw=dlblue!70!black, text=dlblue!30!black,
+          right=1.4cm of warpanchor, anchor=west] (cnn) {CNN};
+    \node[lbl, below=0.7cm of cnn, font=\scriptsize, align=center, text=dlgray!70!black, text width=2cm] {shared weights\\run per proposal};
+
+    \draw[flow] (w1.east) -- ++(0.5,0) |- ($(cnn.west)+(0,0.55)$);
+    \draw[flow] (w2.east) -- (cnn.west);
+    \draw[flow] (w3.east) -- ++(0.5,0) |- ($(cnn.west)+(0,-0.55)$);
+    \node[lbl] at ($(cnn.north)+(0,0.5)$) {\bfseries Feature Extraction};
+
+    % ===== Stage 5: per-class classification head =====
+    \node[box, minimum width=2.6cm, minimum height=1.0cm,
+          fill=dlgreen!14, draw=dlgreen!55!black, text=dlgreen!25!black,
+          right=1.5cm of cnn.east, anchor=west] (svm) {SVM classifiers};
+
+    \draw[flow] (cnn.east) -- (svm.west);
+
+    \node[lbl, align=left, right=0.5cm of svm, font=\small] (out1)
+        {person? \textcolor{dlgreen!45!black}{yes}\\aeroplane? \textcolor{dlred!60!black}{no}};
+
+    \draw[flow] (svm.east) -- (out1.west);
+
+\end{tikzpicture}
