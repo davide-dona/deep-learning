@@ -221,20 +221,37 @@ of the same size.
 Again, the discriminator takes as input both the input image and the generated output image, and outputs a probability that the output image is real given the input image.
 
 \subsubsection{CycleGAN}
-\textbf{CycleGAN} is a GAN architecture that allows for image-to-image translation without paired training data. The previously discussed Pix2Pix architecture requires paired training data,
-meaning that for each input image, there must be a corresponding output image in the training dataset.
-However, in many cases, paired training data is not available.
+\textbf{CycleGAN} is a Generative Adversarial Network (GAN) architecture designed for image-to-image translation without relying on paired training data. 
+The previously discussed Pix2Pix model requires paired datasets, meaning that for every input image, there must be a strict corresponding output image. 
+However, in many real-world scenarios, such perfectly aligned data is unavailable or prohibitively expensive to collect.
 
-The architecture of CycleGAN consists of two generators and two discriminators. 
-The first generator $F$ learns to map images from the source domain $X$ to the target domain $Y$, generating $\hat{y}$ from $x$.
-The second generator $G$ learns to map images from the target domain $Y$ back to the source domain $X$, generating $\hat{x}$ from $\hat{y}$.
-The discriminators take as input both the generated image and a real image from their respective domains, and output probabilities that the generated images are real given the input images.
+To address this, the CycleGAN architecture employs two generators and two discriminators:
+\begin{itemize}
+    \item The first generator, $G$, learns a mapping from the source domain $X$ to the target domain $Y$, producing generated images $\hat{y} = G(x)$.
+    \item The second generator, $F$, learns the inverse mapping from the target domain $Y$ back to the source domain $X$, producing reconstructed images $\hat{x} = F(\hat{y})$.
+    \item The first discriminator, $D_Y$, is trained to distinguish between real images $y$ from the target domain $Y$ and generated images $\hat{y}$ produced by $G$.
+    \item The second discriminator, $D_X$, is trained to distinguish between real images $x$ from the source domain $X$ and generated images $\hat{x}$ produced by $F$.
+\end{itemize}
 
-To ensure that the generators learn meaningful mappings, CycleGAN introduces a \textbf{cycle consistency loss}, which encourages the generators to produce images that can be mapped back to the original domain.
-This can be expressed as follows:
+To ensure that the generators learn meaningful and structurally consistent mappings rather than random permutations in the target domain, CycleGAN introduces a \textbf{cycle consistency loss}. This loss enforces the intuition that translating an image to the target domain and then translating it back should recover the original image (i.e., $F(G(x)) \approx x$ and $G(F(y)) \approx y$).
+
+Note that the cycle consistency loss alone only enforces that the mapping is invertible, not that the intermediate translated image actually looks like a real sample of the target domain; this is why an adversarial loss from a dedicated discriminator is still needed on each side ($D_Y$ for $G$, $D_X$ for $F$), so that both translations remain realistic rather than merely reconstructible.
+
+Formally, the full objective function for CycleGAN is defined as follows:
 \begin{equation}
-    \mathcal{L}_{cycle}(F, G) = \mathbb{E}_{x \sim p_{data}(x)}[\|G(F(x)) - x\|_1] + \mathbb{E}_{y \sim p_{data}(y)}[\|F(G(y)) - y\|_1]
+\loss(G, F, D_X, D_Y) = \mathcal{L}_{\text{GAN}}(G, D_Y, X, Y) + \mathcal{L}_{\text{GAN}}(F, D_X, Y, X) + \lambda \mathcal{L}_{\text{cyc}}(G, F)
 \end{equation}
+
+Here, the first two terms represent the adversarial losses for the respective generator-discriminator pairs, and the final term is the cycle consistency loss, weighted by a hyperparameter $\lambda$. 
+The cycle consistency loss is typically implemented as an $L_1$ penalty between the original images and their cyclic reconstructions.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.85\textwidth}{!}{\input{chapters/12-GANs/tikz/cyclegan-architecture.tex}}
+    \caption{The CycleGAN architecture. In the forward cycle (top), $G$ translates $x$ into the target domain and $F$ maps it back, yielding the reconstruction $\hat{x}$; $D_Y$ distinguishes between real and translated images in domain $Y$. The backward cycle (bottom) mirrors this process starting from $y$, with $D_X$ operating in domain $X$.}
+    \label{fig:cyclegan-architecture}
+\end{figure}
+
 
 \subsubsection{StyleGAN}
 \textbf{StyleGAN} is a GAN architecture proposed by NVIDIA that allows for fine-grained control over the generated images by introducing a style-based generator architecture.

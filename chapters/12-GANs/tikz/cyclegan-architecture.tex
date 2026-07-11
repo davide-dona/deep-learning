@@ -1,0 +1,66 @@
+\usetikzlibrary{arrows.meta, calc, positioning}
+
+\begin{tikzpicture}[
+    >=Stealth,
+    flow/.style={-{Stealth[length=7pt]}, line width=1pt},
+    lbl/.style={font=\small, align=center},
+    box/.style={draw, thick, rounded corners, align=center, font=\bfseries\small},
+]
+    \def\gapx{2.6}   % horizontal step between stages
+    \def\rowoff{1.6} % vertical offset of each cycle's centerline
+    \def\dgap{1.3}   % vertical offset of the discriminator from its centerline
+
+    % ================= Top cycle: x -> G -> \hat{y} -> F -> \hat{x} =================
+    \coordinate (x) at (0,\rowoff);
+    \node[box, minimum width=1.3cm, minimum height=1cm,
+          fill=dlorange!25, draw=dlorange!70!black, text=dlorange!40!black]
+          (G1) at (\gapx,\rowoff) {$G$};
+    \coordinate (yhat1) at (2*\gapx,\rowoff);
+    \node[box, minimum width=1.3cm, minimum height=1cm,
+          fill=dlblue!18, draw=dlblue!70!black, text=dlblue!35!black]
+          (F1) at (3*\gapx,\rowoff) {$F$};
+    \coordinate (xhat1) at (4*\gapx,\rowoff);
+
+    \node[box, minimum width=1.4cm, minimum height=0.9cm,
+          fill=dlred!10, draw=dlred!70!black, text=dlred!40!black]
+          (DY) at (2*\gapx,\rowoff+\dgap) {$D_Y$};
+
+    \node[lbl] at ($(x)+(0,0.55)$) {$x$};
+    \node[lbl, below] at ($(yhat1)+(0,-0.5)$) {$\hat{y}$};
+    \node[lbl] at ($(xhat1)+(0,0.55)$) {$\hat{x}$};
+    \node[lbl, above] at ($(DY.north)+(0,0.35)$) {$y \sim p_{data}(y)$};
+
+    \draw[flow] (x) -- (G1.west);
+    \draw[flow] (G1.east) -- (yhat1);
+    \draw[flow] (yhat1) -- (F1.west);
+    \draw[flow] (F1.east) -- (xhat1);
+    \draw[flow] (yhat1) -- (DY.south);
+    \draw[flow] ($(DY.north)+(0,0.3)$) -- (DY.north);
+
+    % ================= Bottom cycle: y -> F -> \hat{x} -> G -> \hat{y} =================
+    \coordinate (y) at (0,-\rowoff);
+    \node[box, minimum width=1.3cm, minimum height=1cm,
+          fill=dlblue!18, draw=dlblue!70!black, text=dlblue!35!black]
+          (F2) at (\gapx,-\rowoff) {$F$};
+    \coordinate (xhat2) at (2*\gapx,-\rowoff);
+    \node[box, minimum width=1.3cm, minimum height=1cm,
+          fill=dlorange!25, draw=dlorange!70!black, text=dlorange!40!black]
+          (G2) at (3*\gapx,-\rowoff) {$G$};
+    \coordinate (yhat2) at (4*\gapx,-\rowoff);
+
+    \node[box, minimum width=1.4cm, minimum height=0.9cm,
+          fill=dlred!10, draw=dlred!70!black, text=dlred!40!black]
+          (DX) at (2*\gapx,-\rowoff-\dgap) {$D_X$};
+
+    \node[lbl] at ($(y)+(0,-0.55)$) {$y$};
+    \node[lbl, above] at ($(xhat2)+(0,0.5)$) {$\hat{x}$};
+    \node[lbl] at ($(yhat2)+(0,-0.55)$) {$\hat{y}$};
+    \node[lbl, below] at ($(DX.south)+(0,-0.35)$) {$x \sim p_{data}(x)$};
+
+    \draw[flow] (y) -- (F2.west);
+    \draw[flow] (F2.east) -- (xhat2);
+    \draw[flow] (xhat2) -- (G2.west);
+    \draw[flow] (G2.east) -- (yhat2);
+    \draw[flow] (xhat2) -- (DX.north);
+    \draw[flow] ($(DX.south)+(0,-0.3)$) -- (DX.south);
+\end{tikzpicture}
