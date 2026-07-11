@@ -299,19 +299,23 @@ Before introducing specific evaluation metrics, it is useful to define the key p
 Notably, none of these metrics can assess efficient likelihood estimation, since GANs never compute an explicit likelihood in the first place.
 
 \subsubsection{Inception Score}
-The first metric proposed to replace human evaluation was the \textbf{Inception Score} (IS). The core idea is that a good generator should produce highly recognizable objects from a wide variety of classes (meaning the generated sample classes should be uniformly distributed).
+The first metric proposed to standardize and replace human evaluation was the \textbf{Inception Score} (IS). 
+The core idea is that a good generator should produce \textbf{highly recognizable objects} (high quality) across a \textbf{wide variety of classes} (high diversity).
 
-To compute the IS, a pre-trained Inception model is used to classify the generated samples. The score evaluates two criteria:
-\begin{enumerate}
-    \item The generated images should be easily classifiable, meaning the predicted class distribution $p(y|x)$ has \textbf{low entropy}.
-    \item The generator should output a diverse range of images, meaning the marginal class distribution over all generated samples $p(y)$ has \textbf{high entropy}.
-\end{enumerate}
+To compute the IS, a pre-trained Inception model classifies the generated samples. 
+For a given generated image $x = G(z)$, the network outputs $p(y|x)$, a conditional distribution over the ImageNet classes $y$. 
+If $x$ is crisp and easily recognizable, $p(y|x)$ will be a highly peaked distribution (low entropy), serving as a proxy for sample quality. 
+Conversely, if $x$ is blurry or unrealistic, the distribution will be closer to uniform (high entropy).
 
-Formally, the Inception Score is computed as follows:
+The marginal distribution, $p(y) = \mathbb{E}_{x \sim p_g}[p(y|x)]$, represents the overall class distribution the generator produces across all samples. 
+If the generator suffers from mode collapse, $p(y)$ will be concentrated on a few classes (low entropy, poor coverage). 
+A diverse generator, however, will produce samples evenly spread across classes, resulting in a uniform $p(y)$ (high entropy, good coverage).
+
+Formally, the Inception Score evaluates these two properties using the following equation:
 \begin{equation}
-    IS = \exp(\mathbb{E}_{x \sim p_{g}}[D_{KL}(p(y|x) || p(y))])
+    IS = \exp \left( \mathbb{E}_{x \sim p_{g}} \left[ D_{KL}(p(y|x) \,||\, p(y)) \right] \right)
 \end{equation}
-This formula calculates the \textbf{Kullback-Leibler divergence} between the conditional label distribution $p(y|x)$ and the marginal label distribution $p(y)$. A higher KL divergence results in a higher (better) Inception Score, which occurs when the network is highly confident about individual images but predicts a uniform distribution of classes overall.
+This formula calculates the \textbf{Kullback-Leibler (KL) divergence} between the conditional label distribution $p(y|x)$ and the marginal label distribution $p(y)$. This divergence is maximized precisely when the two distributions are optimally opposed: $p(y|x)$ is a spike on a single class (high quality) while $p(y)$ is uniformly spread across all classes (high diversity). Therefore, a higher KL divergence yields a higher, and thus better, Inception Score.
 
 \paragraph{Issues with the Inception Score}
 The Inception Score suffers from two main issues:
