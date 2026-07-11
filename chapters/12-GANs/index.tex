@@ -196,7 +196,7 @@ The discriminator also takes as input a sample and a label for both real and gen
 
 The objective function for cGANs is similar to the original GAN formulation, but with the addition of the conditioning label:
 \begin{equation}
-    \min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{data}}[\log D(x | y)] + \mathbb{E}_{z \sim p_z}[\log(1 - D(G(z) | y))]
+    \min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{data}}[\log D(x | y)] + \mathbb{E}_{z \sim p_z}[\log(1 - D(G(z | y)))]
 \end{equation}
 
 \begin{figure}[H]
