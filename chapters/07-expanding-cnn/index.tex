@@ -98,6 +98,9 @@ The main innovations of Fast R-CNN are:
         \item The pooled values from all cells are concatenated into a fixed-size descriptor (e.g., a $7 \times 7 \times C$ tensor, where $C$ is the number of feature channels), which is then fed to the fully connected layers.
     \end{enumerate}
     
+    \item \textbf{Classification Head}: The per-class SVMs of R-CNN are replaced with fully connected layers ending in a softmax classifier.
+    Alongside it, a bounding box regressor is added, since the region proposals produced by Selective Search are only approximate and need to be refined to tightly fit the object.
+
     \item \textbf{Multi-Task Loss}: Fast R-CNN also introduces a multi-task loss function that combines classification and bounding box regression into a single optimization problem.
     This allows the model to learn both tasks simultaneously, improving the overall performance and efficiency of the training process.
 \end{itemize}
