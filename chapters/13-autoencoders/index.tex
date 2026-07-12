@@ -80,7 +80,7 @@ q_\phi(z \mid x),
 
 parameterized by another neural network, called the \emph{encoder}. This distribution provides a tractable approximation of the true posterior $p_\theta(z \mid x)$.
 
-\subsubsection{The Evidence Lower Bound (ELBO)}
+\subsubsection{Decomposing the Log-Likelihood}
 
 Introducing the approximate posterior allows us to derive the following decomposition of the log-likelihood:
 
@@ -116,8 +116,12 @@ The three terms have the following interpretation:
 
     \item The second term is the \textit{regularization term}: the Kullback--Leibler divergence between the approximate posterior $q_\phi(z \mid x)$ and the prior $p(z)$. Minimizing it encourages the latent representations to remain close to the prior, resulting in a smooth and well-structured latent space.
 
-    \item The third term is the Kullback--Leibler divergence between the approximate and true posterior. Since this divergence is always non-negative, the sum of the first two terms is a lower bound on the log-likelihood, known as the \textbf{Evidence Lower Bound} (ELBO):
+    \item The third term is the Kullback--Leibler divergence between the approximate posterior $q_\phi(z \mid x)$ and the true posterior $p_\theta(z \mid x)$. This term is itself \textbf{uncomputable}: evaluating it requires knowing the true posterior $p_\theta(z \mid x)$, which, as noted above, depends on the intractable marginal likelihood $p_\theta(x)$, the very quantity we were trying to avoid computing in the first place.
 \end{itemize}
+
+\subsubsection{The Evidence Lower Bound (ELBO)}
+
+Although the third term cannot be evaluated directly, the Kullback--Leibler divergence is by definition always non-negative. It follows that the sum of the first two terms is a lower bound on the log-likelihood, known as the \textbf{Evidence Lower Bound} (ELBO):
 
 \begin{equation}
     \label{eq:ELBO}
@@ -165,7 +169,7 @@ z = \mu_\phi(x) + \sigma_\phi(x) \odot \epsilon,
 
 thereby expressing the stochasticity through $\epsilon$ while keeping the dependence on the network parameters differentiable.
 
-The encoder and decoder are trained jointly by maximizing the ELBO (Equation~\ref{eq:ELBO}) using gradient-based optimization. The reconstruction term encourages the decoder to accurately reconstruct the input sample, while the KL divergence regularizes the latent space by encouraging the approximate posterior $q_\phi(z \mid x)$ to remain close to the prior distribution $p(z)$.
+The encoder and decoder are trained jointly by maximizing the ELBO (Equation~\ref{eq:ELBO}) using gradient-based optimization, balancing the reconstruction and regularization terms described above.
 
 \subsubsection{Inference Time}
 
